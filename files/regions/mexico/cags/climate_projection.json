@@ -1,0 +1,52 @@
+{
+  "id": "hydro_clim_agonomy",
+  "name": "Hydrology, Climate, Agriculture, Economy",
+  "variables": [
+    {
+      "id": "precipitation",
+      "name": "Precipitation",
+      "category": "climate",
+      "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+      "position": {
+        "x": 85.2,
+        "y": 50.4
+      }
+    },
+    {
+      "id": "soil_moisture",
+      "name": "Soil moisture",
+      "category": "hydrology",
+      "standard_name": "soil_moisture",
+      "position": {
+        "x": 255.2,
+        "y": 45.4
+      }
+    },
+    {
+      "id": "yields",
+      "category": "agronomy",
+      "name": "Crop/forest yields",
+      "standard_name": "yields",
+      "position": {
+        "x": 205.2,
+        "y": 220.4
+      }
+    }
+  ],
+  "links": [
+    {
+      "from": "precipitation",
+      "to": "yields",
+      "equation": "x=y^2"
+    },
+    {
+      "from": "soil_moisture",
+      "to": "yields",
+      "equation": "x=y*2"
+    },
+    {
+      "from": "precipitation",
+      "to": "soil_moisture"
+    }
+  ]
+}

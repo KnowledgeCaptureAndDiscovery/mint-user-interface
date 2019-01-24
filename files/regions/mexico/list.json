@@ -1,0 +1,27 @@
+[
+  {
+    "name": "climate_projection",
+    "title": "Climate",
+    "category": "climate",
+    "cags": [
+      {
+        "name": "Storyboard ISI",
+        "json": "files/regions/mexico/cags/storyboard_isi.json",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_run_config": "mint_run.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

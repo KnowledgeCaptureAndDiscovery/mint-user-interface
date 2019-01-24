@@ -1,0 +1,40 @@
+{
+  "historical_weather": {
+    "id": "historical_weather",
+    "name": "Historical weather",
+    "category": "climate",
+    "constraints": {
+      "time": "10 years"
+    }
+  },
+  "land_surface__albedo": {
+    "id": "remote_sensing_data",
+    "name": "Remote Sensing Data",
+    "category": "hydrology"
+  },
+  "elevation": {
+    "id": "elevation_maps",
+    "name": "Elevation Maps",
+    "category": "hydrology"
+  },
+  "soil_quality": {
+    "id": "soil_maps",
+    "name": "Soil Maps",
+    "category": "agronomy"
+  },
+  "market_access": {
+    "id": "market_data",
+    "name": "Market data",
+    "category": "economics"
+  },
+  "crop_prices": {
+    "id": "crop_price_data",
+    "name": "Crop price data",
+    "category": "economics"
+  },
+  "prices": {
+    "id": "commodity_price_data",
+    "name": "Commodity price data",
+    "category": "economics"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "mint_run_config": {
+    "id": "mint_run_config",
+    "label": "Mint Config file",
+    "category": "None",
+    "values": ["mint-run.config"]
+  },
+  "mint_cycles_config": {
+    "id": "mint_cycles_config",
+    "label": "Mint Cycles Config file",
+    "category": "None",
+    "values": ["mint_cycles-baseline.config", "mint_cycles-10_percent_inc.config"]
+  },
+  "soil__residual_porosity": {
+    "id": "pihm_aggr_files",
+    "label": "PIHM aggregated files",
+    "category": "None",
+    "values": ["PIHM-data-find"]
+  },
+  "ldas_inputQuery": {
+    "id": "ldas_inputQuery",
+    "label": "Input Query to fetch data from LDAS",
+    "category": "climate",
+    "values": ["PIHM-data-find"]
+  },
+  "fldas2pihm_r": {
+    "id": "fldas2pihm_r",
+    "label": "FLDAS to PIHM conversion R script",
+    "category": "hydrology",
+    "values": ["FLDAS-to-PIHM.R"]
+  },
+  "crop__nominal_per-yield_price": {
+    "id": "crop_price",
+    "label": "MINT econ data",
+    "category": "economics",
+    "values": ["MINTecondata.csv"]
+  },
+  "crop__price-per-mass": {
+    "id": "econ_price_input",
+    "label": "Crop & Fertilizer price data",
+    "category": "economics",
+    "values": ["prices_no_subsidies.csv", "prices_with_subsidies.csv"]
+  },
+  "fertilizer~nitrogen__usage-cost-per-applied-mass": {
+    "id": "econ_price_input",
+    "label": "Crop & Fertilizer price data",
+    "category": "economics",
+    "values": ["prices_no_subsidies.csv", "prices_with_subsidies.csv"]
+  },
+  "crop_fertilizer~nitrogen__yield_elasticity": {
+    "id": "crop_yield_elasticity",
+    "label": "Crop yield elasticity",
+    "category": "agriculture",
+    "values": ["crop_yield_elasticity.csv"]
+  }
+}

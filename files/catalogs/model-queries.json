@@ -1,0 +1,26 @@
+[
+  {
+    "description": "What are all the models currently described in the catalog ?",
+    "query":"PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT+%3Fmodel+%3Flabel%0AWHERE+%7B%0A++%3Fmodel+a+model%3AModel.%0A++%3Fmodel+rdfs%3Alabel+%3Flabel%0A%7D"
+  },
+  {
+    "description": "What are the variables for PIHM inputs, and their GSN names ?",
+    "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT++DISTINCT+%3Fv+%3Fname+%3Fgsn%0AWHERE+%7B%0A++inst%3APIHM+model%3AhasConfiguration+%3Fc.%0A++%3Fc+model%3AhasInput+%3Fi.%0A++%3Fi+commons%3AhasPresentation+%3Fv.%0A++%3Fv+commons%3AhasShortName+%3Fname.%0A++OPTIONAL%7B%3Fv+commons%3AhasStandardVariable+%3Fgsn%7D%0A%7D"
+  },
+  {
+    "description": "What models use precipitation, specifically: atmosphere_water__precipitation_volume_flux ?",
+    "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT++DISTINCT+%3Fmodel%0AWHERE+%7B%0A++%3Fmodel+model%3AhasConfiguration+%3Fc.%0A++%3Fc+model%3AhasInput+%3Fi.%0A++%3Fi+commons%3AhasPresentation+%3Fv.%0A++%3Fv+commons%3AhasStandardVariable+%22atmosphere_water__precipitation_volume_flux%22%0A%7D"
+  },
+  {
+    "description": "What are the input and output variables of a given model (PIHM) ?",
+    "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT+%3Fmodel_config%0A(GROUP_CONCAT(DISTINCT+%3Finput;SEPARATOR=',+')+AS+%3Finput_variables)%0A(GROUP_CONCAT(DISTINCT+%3Foutput;SEPARATOR=',+')+AS+%3Foutput_variables)%0AWHERE+%7B%0A++inst%3APIHM+model%3AhasConfiguration+%3Fmodel_config+.%0A++%3Fmodel_config+model%3AhasInput+%3Finput+.%0A++%3Fmodel_config+model%3AhasOutput+%3Foutput%0A%7D%0AGROUP+BY(%3Fmodel_config)"
+  },
+  {
+    "description": "Are there any models/software preparation steps that produce outputs compatible with the inputs of a given model (PIHM) ?",
+    "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0APREFIX+ontosoft%3A+%3Chttp%3A%2F%2Fontosoft.org%2Fsoftware%23%3E%0ASELECT++DISTINCT+%3Fmodel_config+%3Finput+%3Fmodel_software+%3Fgsn%0AWHERE+%7B%0A++%7B%0A++++SELECT+DISTINCT+%3Fquery_model+%3Fmodel_config+%3Finput+%3Fgsn%0A++++WHERE+%7B%0A++++++BIND(inst%3APIHM+AS+%3Fquery_model)+.%0A++++++%3Fquery_model+model%3AhasConfiguration+%3Fmodel_config+.%0A++++++%3Fmodel_config+model%3AhasInput+%3Finput+.%0A++++++%3Finput+commons%3AhasPresentation+%3Finputvariable.%0A++++++%3Finputvariable+commons%3AhasStandardVariable+%3Fgsn%0A++++%7D%0A++%7D+.%0A++%7B%0A++++%3Fmodel_software+ontosoft%3AhasOutput+%3Foutput+.%0A++++%3Foutput+commons%3AhasPresentation+%3Foutputvariable+.%0A++++%3Foutputvariable+commons%3AhasStandardVariable+%3Fgsn%0A++%7D%0A++UNION%0A++%7B%0A++++%3Fmodel_software+model%3AhasOutput+%3Foutput+.%0A++++%3Foutput+commons%3AhasPresentation+%3Foutputvariable+.%0A++++%3Foutputvariable+commons%3AhasStandardVariable+%3Fgsn+.%0A++++%3Fincoming_model+model%3AhasConfiguration+%3Fincoming_model_config+.%0A++++FILTER+(%3Fincoming_model+!%3D+%3Fquery_model)%0A++%7D%0A%7D"
+  },
+  {
+    "description": "What is the unit convention used by the variables of a model (PIHM) ?",
+    "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0APREFIX+ontosoft%3A+%3Chttp%3A%2F%2Fontosoft.org%2Fsoftware%23%3E%0ASELECT++DISTINCT+%3Fgsn+%3Funit%0AWHERE+%7B%0A++inst%3APIHM+model%3AhasConfiguration+%3Fmodel_config+.%0A++%3Fmodel_config+model%3AhasInput+%3Finput+.%0A++%3Finput+commons%3AhasPresentation+%3Finputvariable.%0A++%3Finputvariable+commons%3AhasStandardVariable+%3Fgsn+.%0A++%3Finputvariable+commons%3AusesUnit+%3Funit%0A%7D"
+  }
+]

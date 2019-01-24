@@ -1,0 +1,2055 @@
+[
+  {
+    "@id": "http://ontosoft.org/software#Software",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/commons#VariablePresentation",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#CYCLES",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_cfg_simple2"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_cfg_simple"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "agronomy"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_SMC_L1",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "soil_water__volume_fraction"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Soil moisture content in layer 1"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "SMC_L1"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil_top_water__volume_fraction"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m3/m4"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_forage_yield",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Forage yield or removed residue biomass at harvest."
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "FORAGE YIELD"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "crop_biomass_residue__harvested_forage_yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "Mg/ha"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_pp",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Precipitation in mm"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "PP"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_water__time_integral_of_precipitation_volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_precipitation",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Precipitation"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "PRECIPITATION"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_water__time_integral_of_precipitation_volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_snow_sub",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Sublimation from snow cover"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "SNOW SUB"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_surface_snow__volume-per-area_sublimation_rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm/day"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Cycles_soil_evap",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Evaporation from the soil surface."
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "SOIL EVAP"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil_surface_water__volume-per-area_evaporation_rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm/day"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_cfg_fk"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_cfg_simple2"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_cfg_simple"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "agronomy"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_cwam",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Tops dry weight at maturity"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "CWAM"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "crop_tops__maturity_dry_mass-per-area_yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "kg/ha"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_hwam",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Harvest yield at harvest maturity (dry wt)"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "HWAM"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "crop__maturity_dry_harvested_mass-per-area_yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "kg/ha"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_rain",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Rainfall (including moisture in snow) in one day"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "RAIN"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_water__one-day_time_integral_of_precipitation_leq-volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm/day"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_salb",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Soil albedo- dry soil"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "SALB"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_soil~dry_surface__albedo"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_sh20",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Initial water concentration by layer"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "SH2O"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil_column_water__initial_volume_fraction"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "cm3/cm3"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_tav",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Temperature average for whole year"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "TAV"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "air__yearly_average_of_temperature"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "C"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_tmax",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Temperature of air- maximum"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "TMAX"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_air__daily_maximum_of_temperature"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "C"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#DSSAT_tmin",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Temperature of air- minimum"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "TMIN"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_air__daily_minimum_of_temperature"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "C"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ECON_crop_production",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "crop__production"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Crop production"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "production"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_crop__volume-per-area_yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mkg"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ECON_landuse",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "land__usage"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Land-use prediction by parcel"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "landuse"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land__usage_prediction"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "kha"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ECON_price",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "crop__price"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Crop price"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "cropPrice"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "crop__nominal_per-yield_price"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ECON_yield",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "crop__yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "yieldN"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "crop_biomass_residue__harvested_forage_yield"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "kg/ha"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ELQS",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [
+      {
+        "@id": "https://w3id.org/mint/instance#economic_land_quality_cfg_simple"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "economics"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Economic model for land quality"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#KLS",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [
+      {
+        "@id": "https://w3id.org/mint/instance#kimetrica_land_use_cfg_simple"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "economics"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Kimetrica land use model"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#LDAS_RAIN",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Rainfall flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "rainfall"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "rainfall__mass_flux"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#LDAS_SM",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Soil moisture content in layer 1"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "soil moisture"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil_moisture__vertical_integral_of_mass-per-volume_concentration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_cfg_simple"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "hydrology"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_EVAP",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "evaporation from ground surface"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "evaporation from ground surface"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_surface_water__evaporation_rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m/d"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_INF_RATE",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "infiltration rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "infiltration rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_surface_water__infiltration_rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m/d"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_PRCP",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Value of Precipitation"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "PRCP"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_water__precipitation_volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m/day"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_RH",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Value of relative humidity"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "RH"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_air_water~vapor__relative_saturation"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "percentage/100"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_THETAR",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Residual water content"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "ThetaR"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil__residual_porosity"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m3/m3"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_TRMP",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Value of Temperature"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "TRMP"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_bottom_air__temperature"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "C"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#PIHM_WINF",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Value of wind speed"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "WINF"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_bottom_wind__speed"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "m/day"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#TOPOFLOW",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#Model"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasConfiguration": [],
+    "https://w3id.org/mint/modelCatalog#hasModelCategory": [
+      {
+        "@value": "hydrology"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "TopoFlow"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Topo_albedo",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "surface albedo in [0-1]"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "albedo"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "land_surface__albedo"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Topo_p",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "atmosphere_water__precipitation_volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Precipitation rate"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "P"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "atmosphere_water__precipitation_leq-volume_flux"
+      }
+    ],
+    "https://w3id.org/mint/commons#usesUnit": [
+      {
+        "@value": "mm/h"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#Topo_qs",
+    "@type": [
+      "https://w3id.org/mint/commons#VariablePresentation"
+    ],
+    "https://w3id.org/mint/commons#hasCanonicalName": [
+      {
+        "@value": "soil_water__volume_fraction"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasDescription": [
+      {
+        "@value": "Saturated soil water content"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasShortName": [
+      {
+        "@value": "qs"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasStandardVariable": [
+      {
+        "@value": "soil_water__saturated_volume_fraction"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles2crop",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_aggregatedOutput"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#econ_yield_input"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Scripts designed to convert cycles outputs into a format acceptable by the economic model"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_aggregatedOutput",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#CYCLES_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#Cycles_forage_yield"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#Cycles_soil_evap"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles aggregated outputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_weather"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_reinit"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles simple configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_cfg_simple2",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_config",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#CYCLES_Config",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "txt"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles configuration for running Gel-Aliab scenario"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_reinit",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#REINIT",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "reinit"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#Cycles_SMC_L1"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles Reinit file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#cycles_weather",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#CYCLES_Weather",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "weather"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#Cycles_pp"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Cycles weather file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_aggr_files",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#DSSAT_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_tmin"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_rain"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_sh20"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_tav"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_salb"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_tmax"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT aggregated inputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_aggregatedOutput",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#DSSAT_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_cwam"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_hwam"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT aggregated outputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_cfg_fk",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_weather"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_reinit"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSTA with fake configuration to emulate Cycles"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_aggr_files"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT simple configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_cfg_simple2",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_aggr_files"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_warning"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_summary"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_cli"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_sol"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_inp"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#dssat_inh"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT simple configuration with explicit outputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_cli",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#Climate",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "cli"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT climate file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_inh",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#INH",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "inh"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT inh file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_inp",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#INP",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "inp"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT INP file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_sol",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#Soil",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "sol"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT soil file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_summary",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#Summary",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "out"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_cwam"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#DSSAT_hwam"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT Summary file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#dssat_warning",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#Warning",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "out"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "DSSAT Warning file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#econ_crop_production",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#ECON_Landuse",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "csv"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#ECON_crop_production"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#ECON_landuse"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Landuse results"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#econ_landuse_result",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#econ_price_input",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#ECON_Price",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "csv"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#ECON_price"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Prices of products in the local economy"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#econ_yield_input",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#ECON_Yield",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "csv"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#ECON_yield"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Yield information for the economy model"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#economic_land_quality_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#econ_price_input"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#econ_yield_input"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#econ_landuse_result"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#econ_crop_production"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Economic model for land quality with simple configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#fldas2pihm_r",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#FLDAS2PIHM",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "FLDAS to PIHM file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#kimetrica_land_use_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Kimetrica land use simple configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldas2cycles",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#ldas_weather_data"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_config"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#mint_config"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_weather"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Script designed to transform LDAS data into a format acceptable by Cycles"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldas2pihm",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#fldas2pihm_r"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#ldas_weather_data"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#mint_config"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_forc"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Script designed to transform LDAS data into a format acceptable by PIHM"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldas2pihm2",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#fldas2pihm_r"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#ldas_weather_data"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#mint_config"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_forc2"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Script designed to transform LDAS data into a format acceptable by PIHM (extended variables exposed)"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldasDataDownload",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#mint_config"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#ldas_inputQuery"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#ldas_weather_data"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Script designed to retrieve and download data from LDAS"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldas_inputQuery",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#LDAS_Query",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "LDAS Query to retireve data"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#ldas_weather_data",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#LDAS_Weather",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "targ.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#LDAS_SM"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#LDAS_RAIN"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "LDAS weather data aggregated file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#mint_config",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#MINT_Config",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "txt"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Configuration file for running Gel-Aliab scenario"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm2cycles",
+    "@type": [
+      "http://ontosoft.org/software#Software"
+    ],
+    "http://ontosoft.org/software#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_config"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggregatedOutput"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#mint_config"
+      }
+    ],
+    "http://ontosoft.org/software#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#cycles_reinit"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Script designed to transform PIHM results into Cycles"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_aggr_files",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#PIHM_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_THETAR"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM aggregated inputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_aggregatedOutput",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#PIHM_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_EVAP"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_INF_RATE"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM aggregated outputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_forc"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM simple configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_cfg_simple2",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_forc2"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM simple configuration with additional input variables"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_forc",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#FORCE",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "forc"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_PRCP"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM .forc file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#pihm_forc2",
+    "@type": [
+      "http://ontosoft.org/software#FileIO",
+      "https://w3id.org/wings/export/MINT#FORCE",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "forc"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_RH"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_WINF"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_TRMP"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#PIHM_PRCP"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "PIHM .forc file with additional exposed variables"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#topo_aggr_files",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#TOPO_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "TopoFlow aggregated inputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#topo_aggregatedOutput",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#TOPO_Aggregation",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "tar.gz"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#Topo_albedo"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#Topo_qs"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "TopoFlow aggregated outputs"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#topo_rain",
+    "@type": [
+      "https://w3id.org/wings/export/MINT#TOPO_Rain",
+      "https://w3id.org/mint/modelCatalog#DatasetSpecification"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasFormat": [
+      {
+        "@value": "txt"
+      }
+    ],
+    "https://w3id.org/mint/commons#hasPresentation": [
+      {
+        "@id": "https://w3id.org/mint/instance#Topo_p"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "Rain rate txt file"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#topoflow_cfg_fk",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_forc"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#pihm_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "TopoFlow with fake configuration to emulate PIHM"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/instance#topoflow_cfg_simple",
+    "@type": [
+      "https://w3id.org/mint/modelCatalog#ModelConfiguration"
+    ],
+    "https://w3id.org/mint/modelCatalog#hasInput": [
+      {
+        "@id": "https://w3id.org/mint/instance#topo_aggr_files"
+      },
+      {
+        "@id": "https://w3id.org/mint/instance#topo_rain"
+      }
+    ],
+    "https://w3id.org/mint/modelCatalog#hasOutput": [
+      {
+        "@id": "https://w3id.org/mint/instance#topo_aggregatedOutput"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "TopoFlow with basic configuration"
+      }
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/modelCatalog#DatasetSpecification",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/modelCatalog#Model",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/mint/modelCatalog#ModelConfiguration",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#CYCLES_Aggregation",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#CYCLES_Config",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#CYCLES_Weather",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#Climate",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#DSSAT_Aggregation",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#ECON_Landuse",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#ECON_Price",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#ECON_Yield",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#FLDAS2PIHM",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#FORCE",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#INH",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#INP",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#LDAS_Query",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#LDAS_Weather",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#MINT_Config",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#PIHM_Aggregation",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#REINIT",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#Soil",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#Summary",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#TOPO_Aggregation",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#TOPO_Rain",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  },
+  {
+    "@id": "https://w3id.org/wings/export/MINT#Warning",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ]
+  }
+]

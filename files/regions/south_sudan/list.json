@@ -1,0 +1,118 @@
+[{
+    "name": "land_use",
+    "title": "Land use",
+    "category": "climate",
+    "cags": [
+      {
+        "id": "storyboard_isi",
+        "name": "Storyboard MINT",
+        "json": "files/regions/south_sudan/cags/storyboard_isi.json",
+        "sub_region": "Gel-Aliab",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_run_config": "mint_run.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
+            }
+          },
+          {
+            "id": "plus_5_percent_rain",
+            "name": "+5% Rain",
+            "description": "Increased rain by 5%",
+            "data": {
+              "mint_run_config": "mint_run_5_percent_inc.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
+            }
+          },
+          {
+            "id": "minus_5_percent_rain",
+            "name": "-5% Rain",
+            "description": "Reduced rain by 5%",
+            "data": {
+              "mint_run_config": "mint_run_5_percent_dec.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "food_insecurity",
+    "title": "Food Insecurity",
+    "category": "food_security",
+    "cags": [
+      {
+        "id": "delphi_cag",
+        "name": "Storyboard Delphi",
+        "json": "files/regions/south_sudan/cags/delphi_cag.json",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_delphi.txt"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "population",
+    "title": "Population",
+    "category": "social",
+    "cags": [
+      {
+        "id": "kimetrica_cag",
+        "name": "Storyboard Kimetrica",
+        "json": "files/regions/south_sudan/cags/kimetrica_cag.json",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_kimetrica.txt"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "household_expenditures",
+    "title": "Household Expenditures",
+    "category": "economy",
+    "cags": [
+      {
+        "id": "expenditures_cag",
+        "name": "Storyboard Household Expenditures",
+        "json": "files/regions/south_sudan/cags/expenditures_cag.json",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_expenditures.txt"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

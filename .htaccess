@@ -1,0 +1,12 @@
+<FilesMatch "\.(jpg|jpeg|png|gif|swf|js)$">
+    Header set Cache-Control "max-age=604800, public"
+</FilesMatch>
+
+<ifModule mod_rewrite.c>
+  Options +FollowSymLinks
+  IndexIgnore */*
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule (.*) index.html
+</ifModule>

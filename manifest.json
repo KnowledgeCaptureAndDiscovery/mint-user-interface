@@ -1,0 +1,7 @@
+{
+  "name": "mint",
+  "short_name": "mint",
+  "description": "Model Integration",
+  "start_url": "/",
+  "display": "standalone"
+}

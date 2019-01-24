@@ -1,0 +1,40 @@
+{
+  "npm": true,
+  "entrypoint": "index.html",
+  "shell": "src/mint-app.js",
+  "fragments": [
+    "src/mint-govern.js",
+    "src/mint-results.js",
+    "src/mint-run-workflow.js",
+    "src/mint-data.js",
+    "src/lazy-resources.js"
+  ],
+  "sources": [
+   "src/**",
+   "js/**/*",
+   "files/**/*",
+   "images/**"
+  ],
+  "extraDependencies": [
+    ".htaccess",
+    "node_modules/@webcomponents/webcomponentsjs/**",
+    "manifest.json"
+  ],
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  },
+  "builds": [{
+    "name": "default",
+    "preset": "es6-bundled",
+	"addServiceWorkfer": false,
+    "css": { "minify": true },
+    "js": { 
+       "minify": { "exclude": ["js/lib/*"] }
+    },
+    "html": { 
+       "minify": { "exclude": ["index.html"] }
+    }
+  }]
+}

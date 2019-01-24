@@ -1,0 +1,107 @@
+{
+   "result":"success",
+   "resources": [
+      {
+         "dataset_id":"9e3722ce-fa44-48e9-bc5b-a8315a0f82e3",
+         "dataset_name":"NASA Weather Data",
+         "resource_id":"34f04c0b-e84b-4b7c-a7d9-261ad65d7d33",
+         "resource_name":"lat0783long2734nasa.weather",
+         "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/NasaWeatherData_lat0783long2734.weather"
+      },
+      {
+        "dataset_id":"6565656-e84b-4b7c-a7d9-261ad65d7d33",
+        "dataset_name":"Crop Prices 2017",
+        "resource_id":"53232323-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Crop_Prices_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Crop_Prices_No_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"423423423-e84b-4b7c-a7d9-261ad65d7d33",
+        "dataset_name":"Prices No Subsidy 2017",
+        "resource_id":"9984363-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_No_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_No_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"8989343-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Prices 5 percent Subsidy 2017",
+        "resource_id":"38743634-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_25_Percent_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_25_Percent_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"1243434-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Prices 10 percent Subsidy 2017",
+        "resource_id":"23554455-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_50_Percent_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_50_Percent_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"22356556-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Crop Elasticity file",
+        "resource_id":"92726166-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Crop_Elasticity_Pongo_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Crop_Elasticity_Pongo_2017.csv"
+      },
+      {
+        "dataset_id":"6890273343-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-mint_run_config",
+        "dataset_name": "Mint Config file",
+        "resource_name": "mint-run.config"
+      },
+      {
+        "dataset_id":"75749923-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-mint_cycles_config",
+        "dataset_name": "Mint Cycles Config file",
+        "resource_name": "mint_cycles-baseline.config"
+      },
+      {
+        "dataset_id":"092234383-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-mint_cycles_10_percent_inc_config",
+        "dataset_name": "Mint Cycles 10 Percent Increase Config file",
+        "resource_name": "mint_cycles-10_percent_inc.config"
+      },
+      {
+        "dataset_id":"87464732-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-pihm_aggr_files",
+        "dataset_name": "PIHM aggregated files",
+        "resource_name": "PIHM-data-find"
+      },
+      {
+        "dataset_id":"56774322-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-ldas_inputQuery",
+        "dataset_name": "Input Query to fetch data from LDAS",
+        "resource_name": "PIHM-data-find"
+      },
+      {
+        "dataset_id":"fvuiu34534-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-fldas2pihm_r",
+        "dataset_name": "FLDAS to PIHM conversion R script",
+        "resource_name": "FLDAS-to-PIHM.R"
+      },
+      {
+        "dataset_id":"lkj345lkj34-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-crop_price",
+        "dataset_name": "MINT econ data",
+        "resource_name": "MINTecondata.csv"
+      },
+      {
+        "dataset_id":"o3o34834-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-econ_price_input",
+        "dataset_name": "Crop & Fertilizer price data",
+        "resource_name": "prices_no_subsidies.csv"
+      },
+      {
+        "dataset_id":"656464545-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-econ_price_input_with_subsidies",
+        "dataset_name": "Crop & Fertilizer price data",
+        "resource_name": "prices_with_subsidies.csv"
+      },
+      {
+        "dataset_id":"435453434-fa44-48e9-bc5b-a8315a0f82e3",
+        "resource_id": "234234234-crop_yield_elasticity",
+        "dataset_name": "Crop yield elasticity",
+        "resource_name": "crop_yield_elasticity.csv"
+      }
+    ]
+}
