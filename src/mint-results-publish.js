@@ -10,20 +10,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 import '@polymer/app-route/app-route.js';
 import '@polymer/paper-button/paper-button.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-item/paper-item.js';
+import '@polymer/iron-icon/iron-icon.js';
 
 import '@vaadin/vaadin-combo-box/theme/material/vaadin-combo-box.js';
+import '@vaadin/vaadin-date-picker/theme/material/vaadin-date-picker.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 import './mint-icons.js';
+import './mint-csv-input.js';
 import './mint-image.js';
 import './mint-common-styles.js';
 
@@ -37,25 +40,35 @@ class MintResultsPublish extends PolymerElement {
         margin: 32px 0;
       }
       fieldset {
-        border:1px solid #aaa;
-        background-color: #fafafa;
-        margin-right: 7px;
-        margin-top: 7px;
-        /*border-radius: 5px;*/
+        border:1px solid #ccc;
+        background-color: white;
+        border-radius: 2px;
         /*width: calc(50% - 32px);*/
         padding-top: 0px;
         padding-bottom: 15px;
       }
-      fieldset.withButton {
-        margin-top: 0px;
-      }
       legend {
         font-weight: bold;
+      }
+      a.action {
+        cursor:pointer;
+        margin-bottom: -16px;
+      }
+      a.action iron-icon {
+        width: 18px;
+        height: 18px;
+      }
+      a.actionbig {
+        cursor:pointer;
+      }
+      a.actionbig iron-icon {
+        width: 24px;
+        height: 24px;
       }
       div.grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-gap: 5px;
+        grid-gap: 10px;
         grid-auto-rows: minmax(100px, auto);
       }
       div.formatrow {
@@ -76,18 +89,23 @@ class MintResultsPublish extends PolymerElement {
       div.row paper-input {
         /*width: calc(50% - 10px);*/
       }
-      div.row paper-icon-button {
-        width: 50px;
-        margin-bottom: -20px;
-      }
+
       paper-dropdown-menu {
         margin-left: 4px;
         width: calc(100% - 8px);
       }
-      paper-input, paper-textarea {
+      paper-input, vaadin-combo-box {
         margin-left: 4px;
         width: calc(100% - 8px);
       }
+      vaadin-date-picker {
+        width: calc(100% - 8px);
+        margin-left: 4px;
+        --vaadin-date-picker-text-field: {
+          font-size: inherit;
+        }
+      }
+
       div.row paper-input.unitsinput {
         width: 140px;
       }
@@ -103,13 +121,15 @@ class MintResultsPublish extends PolymerElement {
       data="{{routeData}}" tail="{{subroute}}"></app-route>
 
     <app-route route="[[subroute]]"
-      pattern=":runid/:compid/:varid/:dsid"
+      pattern="/:runid/:compid/:varid/:dsid"
       data="{{subrouteData}}"></app-route>
 
     <iron-ajax auto last-response="{{viz_type}}"
       url="[[config.visualization.server]]/viz_type"></iron-ajax>
 
     <div class="grid">
+
+      <!-- Standard required information -->
       <fieldset id="required">
         <legend>Required Information</legend>
         <paper-input label="Name" value="{{dataset_def.name}}"></paper-input>
@@ -117,52 +137,74 @@ class MintResultsPublish extends PolymerElement {
         <paper-input label="URL" value="{{resource_def.data_url}}"></paper-input>
         <div class="formatrow">
           <paper-input label="Format" value="{{resource_def.resource_type}}"></paper-input>
-          <paper-checkbox value="{{resource_def.is_zip}}">Is Zip ?</paper-input>
+          <paper-checkbox checked="{{resource_def.is_zip}}">Is Zip ?</paper-input>
         </div>
       </fieldset>
+
+      <!-- Spatial Information -->
+      <fieldset>
+        <legend>Spatial Information</legend>
+        <vaadin-combo-box items="[[regionBoundingBoxes]]"
+          label="Autofill Spatial information"
+          value="{{spatial}}"></vaadin-combo-box>
+        <div class="row">
+          <paper-input type="number" label="X Min" value="{{spatial.xmin}}"></paper-input>
+          <paper-input type="number" label="Y Min" value="{{spatial.ymin}}"></paper-input>
+        </div>
+        <div class="row">
+          <paper-input type="number" label="X Max" value="{{spatial.xmax}}"></paper-input>
+          <paper-input type="number" label="Y Max" value="{{spatial.ymax}}"></paper-input>
+        </div>
+      </fieldset>
+
+      <!-- Temporal Information -->
+      <fieldset id="temporal_fieldset">
+        <legend>Temporal Information</legend>
+        <vaadin-date-picker label="Start Time" value="{{temporal.start_time}}"></vaadin-date-picker>
+        <vaadin-date-picker label="End Time" value="{{temporal.end_time}}"></vaadin-date-picker>
+      </fieldset>
+
+      <!-- Custom Metadata -->
       <fieldset id="custom" class="withButton">
-        <legend>Custom Metadata<paper-icon-button on-tap="_addMetadata" icon="add"></paper-icon-button></legend>
+        <legend>
+          Custom Metadata
+          <a class="actionbig" on-click="_addMetadata"><iron-icon icon="add" /></a>
+        </legend>
         <div id="rowtemplate" class="row">
           <paper-input label="Key"></paper-input>
           <paper-input label="Value"></paper-input>
-          <paper-icon-button icon="cancel" on-tap="_removeRow"></paper-icon-button>
+          <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
         </div>
       </fieldset>
-      <fieldset>
-        <legend>Spatial Information</legend>
-        <div class="row">
-          <paper-input label="X Min" value="{{spatial.xmin}}"></paper-input>
-          <paper-input label="Y Min" value="{{spatial.ymin}}"></paper-input>
-        </div>
-        <div class="row">
-          <paper-input label="X Max" value="{{spatial.xmax}}"></paper-input>
-          <paper-input label="Y Max" value="{{spatial.ymax}}"></paper-input>
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Temporal Information</legend>
-        <paper-input label="Start Time" value="{{temporal.start_time}}"></paper-input>
-        <paper-input label="End Time" value="{{temporal.end_time}}"></paper-input>
-      </fieldset>
+
+      <!-- Dataset Variables -->
       <fieldset id="variables" class="withButton">
-        <legend>Dataset Variables<paper-icon-button on-tap="_addVariable" icon="add"></paper-icon-button></legend>
+        <legend>
+          Dataset Variables
+          <a class="actionbig" on-click="_addVariable"><iron-icon icon="add" /></a>
+        </legend>
+        <mint-csv-input data="{{csvVariables}}" label="Load from CSV"></mint-csv-input>
         <div id="vartemplate" class="row" style="display:none">
           <vaadin-combo-box items="[[standardVariables]]" label="Standard Name"
-            item-label-path="name" item-value-path="id" allow-custom-value="true"></vaadin-combo-box>
+            item-label-path="name" item-value-path="name"
+            allow-custom-value="true"></vaadin-combo-box>
           <paper-input label="Variable Name"></paper-input>
           <paper-input class="unitsinput" label="Units"></paper-input>
-          <paper-icon-button icon="cancel" on-tap="_removeRow"></paper-icon-button>
+          <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
         </div>
         <template is="dom-repeat" items="[[variables]]">
           <div class="row">
             <vaadin-combo-box items="[[standardVariables]]" label="Standard Name"
-              item-label-path="name" item-value-path="id"></vaadin-combo-box>
-            <paper-input label="Variable Name"></paper-input>
-            <paper-input class="unitsinput" label="Units"></paper-input>
-            <paper-icon-button icon="cancel" on-tap="_removeRow"></paper-icon-button>
+              item-label-path="name" item-value-path="name" value="[[item.standard_name]]"
+              allow-custom-value="true"></vaadin-combo-box>
+            <paper-input label="Variable Name" value="[[item.name]]"></paper-input>
+            <paper-input class="unitsinput" label="Units" value="[[item.units]]"></paper-input>
+            <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
           </div>
         </template>
       </fieldset>
+
+      <!-- Visualization -->
       <fieldset>
         <legend>Visualization</legend>
         <paper-dropdown-menu no-animations="" label="Visualization Type">
@@ -196,7 +238,8 @@ class MintResultsPublish extends PolymerElement {
         </template>
       </fieldset>
     </div>
-    <paper-button on-tap="_publishDataset">Publish</paper-button>
+
+    <paper-button class="important" on-tap="_publishDataset">Publish</paper-button>
 `;
   }
 
@@ -210,7 +253,6 @@ class MintResultsPublish extends PolymerElement {
       dsid: String,
       dsurl: String,
       metadata: Array,
-      variables: Array,
       viz_type: Object,
 
       spatial: {
@@ -242,7 +284,17 @@ class MintResultsPublish extends PolymerElement {
       },
       vocabulary: Object,
 
+      variables: Array,
       standardVariables: Array,
+      csvVariables: {
+        type: Array,
+        observer: '_setVariablesFromCSV'
+      },
+
+      regionBoundingBoxes: {
+        type: Array,
+        computed: '_setBoundingBoxesForRegion(vocabulary)'
+      },
 
       tplhtml: String,
       varhtml: String,
@@ -251,6 +303,11 @@ class MintResultsPublish extends PolymerElement {
       subroute: Object,
       routeData: Object,
       subrouteData: Object,
+
+      britishLocale: {
+        type: Boolean,
+        computed: '_isBritishLocale()'
+      }
     };
   }
 
@@ -269,14 +326,32 @@ class MintResultsPublish extends PolymerElement {
 
   ready() {
     super.ready();
-    this.tplhtml = this.$.rowtemplate.innerHTML;
-    this.varhtml = this.$.vartemplate.innerHTML;
+
+    afterNextRender(this, () => {
+      this.tplhtml = this.$.rowtemplate.innerHTML;
+      this.varhtml = this.$.vartemplate.innerHTML;
+
+      var datePickers = this.$.temporal_fieldset.querySelectorAll("vaadin-date-picker");
+      for(var i=0; i<datePickers.length; i++) {
+        var dp = datePickers[i];
+        dp.set("i18n.formatDate", (function(a) { return this._formatDate(a); }).bind(this));
+        dp.set("i18n.parseDate", (function(a) { return this._parseDate(a); }).bind(this));
+      }
+    });
   }
 
   _fetchMetadata(config, userid, vocabulary, dom, runid, cid, vid, dsid) {
     if(config && userid && vocabulary && dom && runid && cid && vid && dsid) {
-      this.variables = this._getDataVariables(vocabulary, cid, vid);
-      //console.log(this.variables);
+      var variables = [];
+      var vars = this._getDataVariables(vocabulary, cid, vid);
+      for(var i=0; i<vars.length; i++) {
+        variables.push({
+          standard_name: vars[i].standard_name,
+          name: vars[i].name,
+          units: vars[i].units
+        });
+      }
+      this.set("variables", variables);
     }
   }
 
@@ -292,12 +367,6 @@ class MintResultsPublish extends PolymerElement {
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
         if(json.result == "success") {
-          /*
-          var varmap = {};
-          for(var i=0; i<json.standard_variables.length; i++) {
-            var v = json.standard_variables[i];
-            varmap[v.name] = v;
-          }*/
           me.set("standardVariables", json.standard_variables);
         }
       },
@@ -306,6 +375,80 @@ class MintResultsPublish extends PolymerElement {
       }
     }, data);
   }
+
+  _setBoundingBoxesForRegion(vocabulary) {
+    var regions = vocabulary.regions;
+    var bboxregions = [];
+    while(regions.length) {
+      var region = regions.pop();
+      if(region.bbox) {
+        bboxregions.push({
+          label: region.label,
+          value: {
+            xmin: region.bbox[0],
+            ymin: region.bbox[1],
+            xmax: region.bbox[2],
+            ymax: region.bbox[3]
+          }
+        });
+      }
+      if(region.subRegions)
+        regions = regions.concat(region.subRegions);
+    }
+    return bboxregions;
+  }
+
+  _setVariablesFromCSV(csvarray) {
+    var indices = {};
+    for(var i=0; i<csvarray.headers.length; i++) {
+      var key = csvarray.headers[i].toLowerCase().replace(/\s+/,'');
+      indices[key] = i;
+    }
+    var variables = [];
+    for(var i=0; i<csvarray.content.length; i++) {
+      var row = csvarray.content[i];
+      variables.push({
+        standard_name: row[indices.gsnname],
+        name: row[indices.shortname],
+        units: row[indices.units]
+      });
+    }
+    this.set("variables", variables);
+  }
+
+  _formatDate(d) {
+    if(d) {
+      var date = new Date();
+      date.setFullYear(d.year);
+      date.setMonth(d.month);
+      date.setDate(d.day);
+      return date.toLocaleDateString();
+    }
+  }
+
+  _isBritishLocale() {
+    var date = new Date();
+    date.setMonth(0);
+    date.setDate(30);
+    var dateString = date.toLocaleDateString();
+    var parts = dateString.split("/");
+    if(parts[0] == "30") {
+      return true;
+    }
+    if(parts[1] == "30")
+      return false;
+  }
+
+  _parseDate(dateString) {
+    var parts = dateString.split("/");
+    var d = {
+      day: this.britishLocale ? parts[0] : parts[1],
+      month: parseInt(this.britishLocale ? parts[1] : parts[0]) - 1,
+      year: parts[2]
+    };
+    return d;
+  }
+
 
   _getVizKeyMetadata(viztype) {
     var metadata = [];
@@ -353,15 +496,15 @@ class MintResultsPublish extends PolymerElement {
   }
 
   _removeRow(e) {
-    e.target.parentNode.remove();
+    e.target.parentNode.parentNode.remove();
   }
 
   _addMetadata() {
     var div = document.createElement("div");
     div.className = "row";
     div.innerHTML = this.tplhtml;
-    var btn = div.querySelector("paper-icon-button");
-    btn.addEventListener("tap", this._removeRow);
+    var btn = div.querySelector("a");
+    btn.addEventListener("click", this._removeRow);
     this.$.custom.appendChild(div);
   }
 
@@ -369,11 +512,12 @@ class MintResultsPublish extends PolymerElement {
     var div = document.createElement("div");
     div.className = "row";
     div.innerHTML = this.varhtml;
+    this.$.variables.appendChild(div);
+
     var combo = div.querySelector("vaadin-combo-box");
     combo.items = this.standardVariables;
-    var btn = div.querySelector("paper-icon-button");
-    btn.addEventListener("tap", this._removeRow);
-    this.$.variables.appendChild(div);
+    var btn = div.querySelector("a");
+    btn.addEventListener("click", this._removeRow);
   }
 
   _getDataVariables(vocabulary, cid, vid) {
@@ -385,7 +529,11 @@ class MintResultsPublish extends PolymerElement {
           var io = m.outputs[j];
           if(io.localName == vid) {
             for(var k=0; k<io.variables.length; k++) {
-              variables.push(io.variables[k].standard_name);
+              variables.push({
+                standard_name: io.variables[k].standard_name,
+                name: io.variables[k].localName,
+                units: io.variables[k].units
+              });
             }
           }
         }
@@ -393,7 +541,11 @@ class MintResultsPublish extends PolymerElement {
           var io = m.inputs[j];
           if(io.localName == vid) {
             for(var k=0; k<io.variables.length; k++) {
-              variables.push(io.variables[k].standard_name);
+              variables.push({
+                standard_name: io.variables[k].standard_name,
+                name: io.variables[k].localName,
+                units: io.variables[k].units
+              });
             }
           }
         }
@@ -402,57 +554,332 @@ class MintResultsPublish extends PolymerElement {
     return variables;
   }
 
-  _publishDataset() {
-    // TODO: Do validation
-
-    var provenance_id = "28793fa8-9f2f-49b5-b052-7b65af9a44a0";
-    var dataset_id = "fa795c84-5bbb-40f6-a124-b0c133e06c3e";
-    var resource_id = "9a795c84-5bbb-40f6-a124-b0c133e06c2e";
-
-    console.log(this.standardVariables);
-
-    // Create variable definition
-    // - Query for standard names if they exist
-    //    - knowledge_graph/find_standard_variables
-    //    - Get standard name mapping to id
-    // - If not, create standard names
-    //    - knowledge_graph/register_standard_variables
-    //    - Update standard name mapping to id
-    // - Create dataset
-    // - Create dataset variables
-    //    - datasets/register_variables
-    //      - dataset_id, name, metadata.units, standard_variable_ids
-    // - Get variable ids back and use in resource_def ( variable_ids )
-    // - Create resource
-
-    // Create dataset definition
-    this.dataset_def.record_id = dataset_id;
-    this.dataset_def.provenance_id = provenance_id;
-    this.dataset_def.metadata = this._getCustomMetadata();
-    var dataset_defs = {
-      datasets: [ this.dataset_def ]
+  _registerStandardNames(vars, fn) {
+    if(!vars || !vars.length) {
+      fn([]);
+      return;
     }
 
-    // Create resource definition
-    this.resource_def.record_id = resource_id;
-    this.resource_def.dataset_id = dataset_id;
-    this.resource_def.provenance_id = provenance_id;
-    this.resource_def.variable_ids = []; // TODO: Do this automatically
-    this.resource_def.layout = [];
-    this.resource_def.metadata = {
-      spatial_coverage:  {
-        type: "BoundingBox",
-        value: this.spatial
-      },
-      temporal_coverage: this.temporal
+    var std_var_defs = {
+      standard_variables : []
     };
-    var resource_defs = {
-      resources: [ this.resource_def ]
+    for(var i=0; i<vars.length; i++) {
+      var data = {
+        name: vars[i],
+        ontology: "GSN",
+        uri: "http://www.geoscienceontology.org/svo/svl/variable/#" + vars[i]
+      }
+      std_var_defs.standard_variables.push(data);
     }
-    console.log(dataset_defs);
-    console.log(resource_defs)
+    //console.log(std_var_defs);
+
+    /*
+    // Dummy response to test
+    var json = {
+      result: "success",
+      standard_variables: []
+    }
+    var stdvars = std_var_defs.standard_variables;
+    for(var i=0; i<stdvars.length; i++) {
+      json.standard_variables.push({
+        record_id: '2342342-23423-543353-132234'+i,
+        name: stdvars[i].name,
+        ontology: stdvars[i].ontology,
+        uri: stdvars[i].uri
+      })
+    }
+    var varmap = this._addNewStandardVariables(json.standard_variables);
+    fn(varmap);
+    */
+
+    var me = this;
+    me._postResource({
+      url: me.config.catalogs.data + "/knowledge_graph/register_standard_variables",
+      onLoad: function(e) {
+        var json = JSON.parse(e.target.responseText);
+        if(json.result == "success") {
+          console.log(json);
+          var varmap = me._addNewStandardVariables(json.standard_variables);
+          fn(varmap);
+        }
+      },
+      onError: function() {
+        console.log("Cannot register standard variables");
+      }
+    }, std_var_defs);
   }
 
+  _addNewStandardVariables(svars) {
+    var varmap = {};
+    for(var i=0; i<svars.length; i++) {
+      var svar = svars[i];
+      svar.id = svar.record_id;
+      this.push("standardVariables", svar);
+      varmap[svar.name] = svar.id;
+    }
+    return varmap;
+  }
+
+  _registerDataset(provid, fn) {
+    var def = {
+      name: this.dataset_def.name,
+      description: this.dataset_def.description,
+      provenance_id: provid,
+      metadata: this._getCustomMetadata()
+    };
+    var dataset_defs = {
+      datasets: [ def ]
+    }
+
+    //console.log(dataset_defs);
+
+    /*
+    // FIXME: Dummy response
+    var json = {
+      result: "success",
+      datasets: [{
+        record_id: "fa795c84-5bbb-40f6-a124-b0c133e06c3e"
+      }]
+    }
+    for(var i=0; i<json.datasets.length; i++) {
+      var ds = json.datasets[i];
+      fn(ds.record_id);
+    }
+    */
+
+    var me = this;
+    me._postResource({
+      url: me.config.catalogs.data + "/datasets/register_datasets",
+      onLoad: function(e) {
+        var json = JSON.parse(e.target.responseText);
+        if(json.result == "success") {
+          console.log(json);
+          for(var i=0; i<json.datasets.length; i++) {
+            var ds = json.datasets[i];
+            fn(ds.record_id);
+          }
+        }
+      },
+      onError: function() {
+        console.log("Cannot register dataset");
+      }
+    }, dataset_defs);
+  }
+
+  _registerDatasetVariables(dataset_id, variables, fn) {
+    var var_defs = {
+        variables: []
+    };
+    for(var i=0; i<variables.length; i++) {
+      var iv = variables[i];
+      var ov = {
+        dataset_id: dataset_id,
+        name: iv.name,
+        metadata: {},
+        standard_variable_ids: [
+          iv.standard_name.id
+        ]
+      }
+      if(iv.units)
+        ov.metadata.units = iv.units;
+
+      var_defs.variables.push(ov);
+    }
+
+
+    //console.log(var_defs);
+
+    /*
+    // FIXME: Dummy response
+    var json = {
+      variables: []
+    }
+    for(var i=0; i<variables.length; i++) {
+      json.variables.push({
+        record_id: "8723423423-234-23454-"+i
+      });
+    }
+    var varids = [];
+    for(var i=0; i<json.variables.length; i++) {
+      var v = json.variables[i];
+      varids.push(v.record_id);
+    }
+    fn(varids);
+    */
+
+    var me = this;
+    me._postResource({
+      url: me.config.catalogs.data + "/datasets/register_variables",
+      onLoad: function(e) {
+        var json = JSON.parse(e.target.responseText);
+        if(json.result == "success") {
+          console.log(json);
+          var varids = [];
+          for(var i=0; i<json.variables.length; i++) {
+            var v = json.variables[i];
+            varids.push(v.record_id);
+          }
+          fn(varids);
+        }
+      },
+      onError: function() {
+        console.log("Cannot register dataset variables");
+      }
+    }, var_defs);
+  }
+
+  _registerResource(provid, dataset_id, varids, fn) {
+    var temporal = {
+      start_time: this.temporal.start_time+"T00:00:00",
+      end_time: this.temporal.end_time+"T23:59:59"
+    }
+    var def = {
+      dataset_id: dataset_id,
+      provenance_id: provid,
+      data_url: this.resource_def.data_url,
+      resource_type: this.resource_def.resource_type,
+      is_zip: this.resource_def.is_zip+"",
+      name: this.dataset_def.name + '_resource',
+      metadata: {
+        spatial_coverage:  {
+          type: "BoundingBox",
+          value: this.spatial
+        },
+        temporal_coverage: temporal
+      },
+      variable_ids: varids,
+      layout: {}
+    };
+    var resource_defs = {
+      resources: [ def ]
+    }
+
+    //console.log(resource_defs);
+
+    // Dummy response
+    //fn();
+
+    var me = this;
+    me._postResource({
+      url: me.config.catalogs.data + "/datasets/register_resources",
+      onLoad: function(e) {
+        var json = JSON.parse(e.target.responseText);
+        if(json.result == "success") {
+          console.log(json);
+          fn();
+        }
+      },
+      onError: function() {
+        console.log("Cannot register resources");
+      }
+    }, resource_defs);
+  }
+
+  _validateItem(value, label) {
+    if(!value) {
+      alert(label + " is not Specified");
+      return false;
+    }
+    return true;
+  }
+
+  _validateDataset() {
+    return (
+      this._validateItem(this.dataset_def.name, "Name") &&
+      this._validateItem(this.dataset_def.description, "Description")
+    );
+  }
+
+  _validateVariables() {
+    var variables = this._getDatasetVariables();
+    var newvars = [];
+    for(var i=0; i<variables.length; i++) {
+      var v = variables[i];
+      if(!v.name) {
+        alert("Variable name is empty");
+        return false;
+      }
+      if(!v.standard_name.name) {
+        alert("Standard name is empty");
+        return false;
+      }
+      if(!v.standard_name.id) {
+        newvars.push(v.standard_name.name);
+      }
+    }
+    if(newvars.length) {
+      var r = confirm("We are going to create the following new standard variables. Is this ok ?\n" + newvars);
+      return r;
+    }
+    return true;
+  }
+
+  _validateMetadata() {
+    var metadata = this._getCustomMetadata();
+    if(metadata.viz_config) {
+      for(var key in metadata.viz_config.metadata) {
+        if(!this._validateItem(metadata.viz_config.metadata[key], "Visualization: " + key)) {
+          return false;
+        }
+      }
+    }
+    for(var key in metadata) {
+      if(key != "viz_config") {
+        if(!this._validateItem(key, "Metadata key")) {
+          return false;
+        }
+        if(!this._validateItem(metadata[key], "Metadata " + key)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  _validateResource() {
+    return (
+      this._validateItem(this.resource_def.data_url, "URL") &&
+      this._validateItem(this.resource_def.resource_type, "Format") &&
+      this._validateItem(this.spatial.xmin, "X Min") &&
+      this._validateItem(this.spatial.xmax, "X Max") &&
+      this._validateItem(this.spatial.ymin, "Y Min") &&
+      this._validateItem(this.spatial.ymax, "Y Max") &&
+      this._validateItem(this.temporal.start_time, "Start Time") &&
+      this._validateItem(this.temporal.end_time, "End Time")
+    );
+  }
+
+  _publishDataset() {
+    // Simple Validation (Nothing empty)
+    if(
+      !this._validateDataset() ||
+      !this._validateResource() ||
+      !this._validateVariables() ||
+      !this._validateMetadata()
+    ) {
+      return;
+    }
+
+    var provid = "217f5a9a-a8c5-4223-9db9-4fc8bcbf0411";
+    var variables = this._getDatasetVariables();
+    var vars_to_register = [];
+    for(var i=0; i<variables.length; i++) {
+      if(!variables[i].standard_name.id)
+        vars_to_register.push(variables[i].standard_name.name);
+    }
+
+    var me = this;
+    this._registerStandardNames(vars_to_register, function(varmap) {
+      variables = me._getDatasetVariablesAfterUpdate();
+      me._registerDataset(provid, function(dataset_id) {
+        me._registerDatasetVariables(dataset_id, variables, function(varids) {
+          me._registerResource(provid, dataset_id, varids, function(resid) {
+            alert("Successfully Registered");
+          });
+        });
+      });
+    });
+  }
 
   _getCustomMetadata() {
     var metadata = {};
@@ -481,17 +908,41 @@ class MintResultsPublish extends PolymerElement {
     return metadata;
   }
 
+  _getDatasetVariablesAfterUpdate() {
+    var combos = this.$.variables.querySelectorAll("vaadin-combo-box");
+    var stdmap = {};
+    for(var j=0; j<this.standardVariables.length; j++) {
+      var v = this.standardVariables[j];
+      stdmap[v.name] = v;
+    }
+    for(var i=0; i<combos.length; i++) {
+      var combo = combos[i];
+      if(!combo.selectedItem) {
+        if(stdmap[combo.value])
+          combos[i].selectedItem = stdmap[combo.value];
+      }
+    }
+    return this._getDatasetVariables();
+  }
+
   _getDatasetVariables() {
     var variables = [];
+    var combos = this.$.variables.querySelectorAll("vaadin-combo-box");
     var inputs = this.$.variables.querySelectorAll("paper-input");
-    for(var i=0; i<inputs.length; i+=3) {
-      var stdname = inputs[i];
-      var varname = inputs[i+1];
-      var units = inputs[i+2];
-      if(stdname.value) {
+    for(var i=2; i<inputs.length; i+=2) {
+      var stditem = combos[i/2];
+      var varname = inputs[i];
+      var units = inputs[i+1];
+      var selitem = stditem.selectedItem;
+      if(stditem.value && varname.value && units.value) {
+        // Combobox will return an object if standard name exists
+        // or will return a string if it doesn't
         var variable = {
-          stdname: stdname.value,
-          varname: varname.value,
+          standard_name: {
+            id: selitem ? selitem.id : null,
+            name: stditem.value
+          },
+          name: varname.value,
           units: units.value
         }
         variables.push(variable);

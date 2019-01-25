@@ -191,7 +191,7 @@ class MintDataBrowse extends PolymerElement {
       <paper-button>DATASETS: [[routeData.regionid]]</paper-button>
     </div>
     <div class="outer">
-      <loading-screen loading="[[loading]]"></loading-screen>    
+      <loading-screen loading="[[loading]]"></loading-screen>
       <div class="searchToolbar" id="searchToolbar">
         <!-- Select sub region -->
         <paper-dropdown-menu no-animations="" hotizontal-align="left" label="Select Sub-Region">
@@ -206,7 +206,7 @@ class MintDataBrowse extends PolymerElement {
         <paper-input label="Standard Names" value="{{queryConfig.variables}}"></paper-input>
         <vaadin-date-picker label="Start Date" value="{{queryConfig.startDate}}"></vaadin-date-picker>
         <vaadin-date-picker label="End Date" value="{{queryConfig.endDate}}"></vaadin-date-picker>
-        <paper-button on-tap="_getDataList">Search</paper-button>
+        <paper-button class="important" on-tap="_getDataList">Search</paper-button>
       </div>
       <div class="outer shifted">
         <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
@@ -257,7 +257,7 @@ class MintDataBrowse extends PolymerElement {
             <template is="dom-if" if="[[selectMode]]">
               <div class="selected_datasets">
                 <b>SELECTED DATASETS</b>
-                <paper-button on-tap="_submitDataSpecification">Submit</paper-button>
+                <paper-button class="important" on-tap="_submitDataSpecification">Submit</paper-button>
                 <ul>
                   <template is="dom-repeat" items="[[dataSpec.ensemble]]" as="ensemble">
                     <template is="dom-repeat" items="[[ensemble.datasets]]" as="dataset">

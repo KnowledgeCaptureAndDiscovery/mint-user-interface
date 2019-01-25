@@ -31,7 +31,7 @@ import './mint-common-styles.js';
 import './mint-data-catalog.js';
 import './mint-model-catalog.js';
 import './mint-vocabulary.js';
-import './mint-home.js';
+//import './mint-home.js';
 //import './mint-models.js';
 
 
@@ -56,6 +56,7 @@ class MintApp extends MintBaseRouter {
         --paper-spinner-color: var(--app-accent-color);
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         color: var(--app-primary-color);
+        background-color: #F5F6F7;
       }
 
       app-header {
@@ -119,6 +120,7 @@ class MintApp extends MintBaseRouter {
       }
 
       #tabContainer {
+        background-color: #F5F6F7;
         position: relative;
         height: 50px;
       }
@@ -261,6 +263,7 @@ class MintApp extends MintBaseRouter {
       </app-toolbar>
 
       <!-- Lazy-create the tabs for larger screen sizes. -->
+
       <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
         <dom-if if="[[_shouldRenderTabs]]">
           <template>
@@ -437,7 +440,7 @@ class MintApp extends MintBaseRouter {
   }
 
   _pageChanged(page, oldPage) {
-    if (page != null && page != 'home') {
+    if (page != null) {
       if(!this.loadedPages[page]) {
         this.$.pageLoading.loading = true;
         this.loadedPages[page] = true;

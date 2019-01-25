@@ -44,6 +44,7 @@ class MintGovernAnalysis extends PolymerElement {
         height: 100px;
         margin-left: 10px;
         border: 1px solid #638a40;
+        border-radius: 2px;
         /*
         border: 2px solid var(--app-primary-color);
         border-radius: 4px;
@@ -73,7 +74,7 @@ class MintGovernAnalysis extends PolymerElement {
         background-color: #EEE;
         display: flex;
         flex-flow: column;
-        /*border-radius: 5px;*/
+        border-radius: 2px;
       }
       .panel .panel_heading {
         padding: 5px;
@@ -120,7 +121,7 @@ class MintGovernAnalysis extends PolymerElement {
         /*max-width: 250px;*/
         text-decoration: none;
         color:inherit;
-        /*border-radius: 5px;*/
+        border-radius: 2px;
       }
       .admin_region {
         text-transform: uppercase;
@@ -132,7 +133,7 @@ class MintGovernAnalysis extends PolymerElement {
         margin-right: 10px;
         background-color: #EEE;
         border: 1px solid #999;
-        /*border-radius: 5px;*/
+        border-radius: 2px;
       }
       .region_exploration {
         grid-column-start: 1;
@@ -262,6 +263,13 @@ class MintGovernAnalysis extends PolymerElement {
         margin: 0px;
         color: #999;
       }
+      .scroller b {
+        font-size: 12px;
+      }
+      paper-button.important {
+        margin-left: 25px;
+        margin-bottom: 10px;
+      }
 
       @media (max-width: 767px) {
         .dashboard {
@@ -315,7 +323,7 @@ class MintGovernAnalysis extends PolymerElement {
       <mint-simple-question-creator id="question_creator" question="{{newQuestion}}"
         region="[[region]]" vocabulary="[[vocabulary]]"></mint-simple-question-creator>
 
-      <paper-button disabled="[[_isNull(newQuestion)]]" on-tap="_addQuestion">Add Question</paper-button>
+      <paper-button class="important" disabled="[[_isNull(newQuestion)]]" on-tap="_addQuestion">OK</paper-button>
     </paper-dialog>
 
     <!-- New Task Creator -->
@@ -328,7 +336,7 @@ class MintGovernAnalysis extends PolymerElement {
 
       <mint-task-creator id="task_creator" task="{{newTask}}" vocabulary="[[vocabulary]]"></mint-task-creator>
 
-      <paper-button on-tap="_addTask">Add Task</paper-button>
+      <paper-button class="important" on-tap="_addTask">OK</paper-button>
     </paper-dialog>
 
     <!-- GOVERN /dashboard -->
@@ -460,7 +468,11 @@ class MintGovernAnalysis extends PolymerElement {
           <div>
             <div class="scroller">
               <b>SUB REGION</b>
-              <ul><li>[[questionRegion.label]]</li></ul>
+              <ul>
+                <template is="dom-if" if="[[questionRegion]]">
+                  <li>[[questionRegion.label]]</li>
+                </template>
+              </ul>
 
               <b>DRIVING VARIABLES</b>
               <ul>
@@ -857,6 +869,9 @@ class MintGovernAnalysis extends PolymerElement {
         if(this._getLocalName(questions[i].id) == questionid)
           return questions[i];
       }
+    }
+    else {
+      this.dataSpecs = null;
     }
   }
 

@@ -42,7 +42,7 @@ class MintGovernCag extends PolymerElement {
       </template>
     </i>
     <br />
-    <paper-button on-tap="_submitVariableSelection">Submit</paper-button>
+    <paper-button class="important" on-tap="_submitVariableSelection">Submit</paper-button>
     <variable-graph id="cag" data="[[graphData]]" selected-items="{{selectedItems}}"></variable-graph>
 `
   }

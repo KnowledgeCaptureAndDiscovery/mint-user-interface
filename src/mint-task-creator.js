@@ -9,7 +9,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 class MintTaskCreator extends PolymerElement {
   static get template() {
     return html`
-    <style>
+    <style include="mint-common-styles">
       paper-item {
         min-height: 32px;
         font-size: 13px;

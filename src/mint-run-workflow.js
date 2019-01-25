@@ -117,7 +117,7 @@ class MintRunWorkflow extends PolymerElement {
             </template>
           </template>
         </div>
-        <paper-button on-tap="_runWorkflow">Run Workflow</paper-button>
+        <paper-button class="important" on-tap="_runWorkflow">Run Workflow</paper-button>
         <wings-workflow id="workflow" data="[[template]]"></wings-workflow>
       </template>
     </div>
@@ -179,13 +179,11 @@ class MintRunWorkflow extends PolymerElement {
   }
 
   _subrouteDataChanged(rd) {
-    console.log(rd);
     if(!rd.template_id)
       this.template_id = null;
   }
 
   _routeDataChanged(rd) {
-    console.log(rd);
   }
 
   _getWorkflowURL(config, userid, domainid, template_id) {

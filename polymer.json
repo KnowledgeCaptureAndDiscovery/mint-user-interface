@@ -3,6 +3,7 @@
   "entrypoint": "index.html",
   "shell": "src/mint-app.js",
   "fragments": [
+    "src/mint-home.js",
     "src/mint-govern.js",
     "src/mint-results.js",
     "src/mint-run-workflow.js",
@@ -30,10 +31,10 @@
     "preset": "es6-bundled",
 	"addServiceWorkfer": false,
     "css": { "minify": true },
-    "js": { 
+    "js": {
        "minify": { "exclude": ["js/lib/*"] }
     },
-    "html": { 
+    "html": {
        "minify": { "exclude": ["index.html"] }
     }
   }]

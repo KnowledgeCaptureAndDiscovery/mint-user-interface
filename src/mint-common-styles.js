@@ -118,6 +118,17 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
       background-color: var(--app-accent-color);
       color: white;
     }
+
+    paper-button.important {
+      border: 1px solid var(--app-accent-color);
+      color: var(--app-accent-color);
+      font-weight: bold;
+      margin: 4px;
+    }
+    paper-button.important:hover {
+      background-color: var(--app-accent-color);
+      color: white;
+    }
     /* End of outer box */
 
     paper-dropdown-menu {
@@ -133,7 +144,7 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
        font-size: inherit;
       }
     }
-    
+
     paper-input, paper-textarea {
       font-size: inherit;
       --paper-input-container-label: {
@@ -145,6 +156,9 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
       --paper-input-container: {
         padding: 2px;
       }
+    }
+    vaadin-text-field {
+      font-size: inherit;
     }
 
     @media (max-width: 767px) {

@@ -36,6 +36,7 @@
     "@vaadin/vaadin-combo-box": "^4.2.2",
     "@vaadin/vaadin-date-picker": "^3.3.2",
     "@vaadin/vaadin-grid": "^5.2.6",
+    "@vaadin/vaadin-text-field": "^2.1.7",
     "mint-chart": "git+ssh://git@github.com/spatial-computing/mint-chart.git",
     "mint-map": "git+ssh://git@github.com/spatial-computing/mint-map.git",
     "mint-time": "git+ssh://git@github.com/spatial-computing/mint-time.git",

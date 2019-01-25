@@ -63,16 +63,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <dom-module id="date-picker-theme" theme-for="vaadin-date-picker">
     <template>
       <style>
-        [part="text-field"] { font-size: 13px; line-height: 13px; }
-        [part$="button"] { line-height: 13px; height: 13px; }
-        [part="label"] { padding-bottom: 0px; }
+        [part="text-field"] {
+          font-size: inherit;
+          line-height: inherit;
+          margin-bottom: 0px !important;
+          height: 24px !important;
+        }
+        [part="clear-button"] { display: none }
+        [part="toggle-button"] { margin-bottom: 8px; }
+      </style>
+    </template>
+  </dom-module>
+  <dom-module id="text-field-theme" theme-for="vaadin-text-field">
+    <template>
+      <style>
+        [part="label"] {
+          top: 6px !important;
+        }
       </style>
     </template>
   </dom-module>
   <dom-module id="combo-box-theme" theme-for="vaadin-combo-box">
     <template>
       <style>
-        [part="text-field"] { font-size: 13px; line-height: 13px; }
+        [part="text-field"] {
+          font-size: inherit;
+          line-height: inherit;
+          margin-bottom: 0px !important;
+          height: 24px !important;
+        }
+        [part="clear-button"] { display: none }
+        [part="label"] { padding-bottom: 0px; }
+      </style>
+    </template>
+  </dom-module>
+  <dom-module id="combo-box-item-theme" theme-for="vaadin-combo-box-item">
+    <template>
+      <style>
+        [part="content"] { font-size: 13px; line-height: 13px; }
       </style>
     </template>
   </dom-module>
