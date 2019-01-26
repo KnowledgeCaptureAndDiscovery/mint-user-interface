@@ -133,6 +133,7 @@ class MintData extends MintBaseRouter {
       <!-- browse datasets for a region -->
       <mint-data-browse name="browse"
         data-catalog="[[dataCatalog]]"
+        vocabulary="[[vocabulary]]"
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.browse]]"></mint-data-browse>
 
@@ -160,6 +161,7 @@ class MintData extends MintBaseRouter {
     return {
       config: Object,
       userid: String,
+      vocabulary: Object,
       page: {
         type: String,
         reflectToAttribute: true

@@ -14,7 +14,7 @@ class LoadingScreen extends PolymerElement {
       }
 
       .screen {
-        position: absolute;
+        position: var(--loading-screen-position, absolute);
         top: 0px;
         bottom: 0px;
         left: 0px;

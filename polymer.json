@@ -6,8 +6,10 @@
     "src/mint-home.js",
     "src/mint-govern.js",
     "src/mint-results.js",
-    "src/mint-run-workflow.js",
+    "src/mint-workflow.js",
+    "src/mint-models.js",
     "src/mint-data.js",
+    "src/mint-visualizations.js",
     "src/lazy-resources.js"
   ],
   "sources": [

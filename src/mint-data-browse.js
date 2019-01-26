@@ -49,6 +49,9 @@ class MintDataBrowse extends PolymerElement {
       div.shifted {
         margin-left: -2px;
       }
+      div.noscroll {
+        overflow: hidden;
+      }
       div.searchToolbar paper-input {
         margin-top:2px;
       }
@@ -134,67 +137,40 @@ class MintDataBrowse extends PolymerElement {
       }
     </style>
 
-    <template is="dom-if" if="[[visible]]">
-      <iron-ajax auto url="[[config.server]]/common/regions/[[routeData.regionid]]" handle-as="json" last-response="{{region}}"></iron-ajax>
-      <iron-ajax auto url="[[_createGeoJsonURL(subregion)]]" handle-as="json" last-response="{{queryConfig.regionGeoJson}}"></iron-ajax>
-    </template>
+    <app-route route="[[route]]" pattern="/:regionid" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:questionid/:taskid/:varids/:op"
+      data="{{subrouteData}}"></app-route>
 
     <template is="dom-if" if="[[selectMode]]">
-      <!-- Get question and task -->
+      <!-- Get question, task, data specification, graph -->
       <template is="dom-if" if="[[visible]]">
         <template is="dom-if" if="[[userid]]">
-          <template is="dom-if" if="[[routeData.questionid]]">
-            <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]"
+          <template is="dom-if" if="[[subrouteData.questionid]]">
+            <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]"
               handle-as="json" last-response="{{question}}"></iron-ajax>
             <iron-ajax auto
-              url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+              url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
               handle-as="json" last-response="{{task}}"></iron-ajax>
             <iron-ajax auto
-              url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/data"
+              url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/data"
               handle-as="json" last-response="{{dataSpecs}}"></iron-ajax>
+            <template is="dom-if" if="[[question]]">
+              <iron-ajax auto="" url="[[question.graph]]" handle-as="json" last-response="{{graph}}"></iron-ajax>
+            </template>
           </template>
         </template>
       </template>
     </template>
-
-    <template is="dom-if" if="[[visible]]">
-      <template is="dom-if" if="[[userid]]">
-        <template is="dom-if" if="[[routeData.questionid]]">
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]" handle-as="json" last-response="{{question}}"></iron-ajax>
-          <template is="dom-if" if="[[question]]">
-            <iron-ajax auto="" url="[[question.graph]]" handle-as="json" last-response="{{graph}}"></iron-ajax>
-          </template>
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]" handle-as="json" last-response="{{task}}"></iron-ajax>
-        </template>
-
-        <iron-ajax auto="" url="[[config.server]]/common/regions/[[routeData.regionid]]" handle-as="json" last-response="{{region}}"></iron-ajax>
-        <iron-ajax auto="" url="[[_createGeoJsonURL(region)]]" handle-as="json" last-response="{{regionGeoJson}}"></iron-ajax>
-
-        <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/data" handle-as="json" last-response="{{dataSpecs}}"></iron-ajax>
-      </template>
-    </template>
-
-    <!--
-      TODO
-      - For routeData.op of "select", add
-        - Ajax for question id and task id
-        - Function to update task
-        - Function to update data selection
-        - Checkboxes to select datasets
-        - Button to save data specification
-    -->
-
-    <app-route route="[[route]]" pattern="/:regionid/:questionid/:taskid/:varids/:op" data="{{routeData}}"></app-route>
 
     <!-- Top toolbar -->
     <div class="toolbar">
       <paper-button>DATASETS: [[routeData.regionid]]</paper-button>
     </div>
-    <div class="outer">
+    <div class="outer noscroll">
       <loading-screen loading="[[loading]]"></loading-screen>
       <div class="searchToolbar" id="searchToolbar">
         <!-- Select sub region -->
-        <paper-dropdown-menu no-animations="" hotizontal-align="left" label="Select Sub-Region">
+        <paper-dropdown-menu no-animations label="Select Sub-Region">
           <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{subregion}}">
             <paper-item value="[[region]]">[[region.label]]</paper-item>
             <template is="dom-repeat" items="[[region.subRegions]]">
@@ -234,8 +210,10 @@ class MintDataBrowse extends PolymerElement {
                       <template is="dom-if" if="[[!item.resources]]">
                           [[item.dataset_name]] ([[item.dataset_description]])
                       </template>
-                      <a title="View" class="chartlink"
-                        href="/data/view/[[item.dataset_id]]"><iron-icon icon="chart" /></a>
+                      <template is="dom-if" if="[[_isVisualizable(item)]]">
+                        <a title="View" class="chartlink"
+                          href="[[_getVisualizationLink(item)]]"><iron-icon icon="chart" /></a>
+                      </template>
                     </div>
 
                     <iron-collapse closed>
@@ -257,7 +235,7 @@ class MintDataBrowse extends PolymerElement {
             <template is="dom-if" if="[[selectMode]]">
               <div class="selected_datasets">
                 <b>SELECTED DATASETS</b>
-                <paper-button class="important" on-tap="_submitDataSpecification">Submit</paper-button>
+                <paper-button class="important" on-tap="_submitDataSpecification">DONE</paper-button>
                 <ul>
                   <template is="dom-repeat" items="[[dataSpec.ensemble]]" as="ensemble">
                     <template is="dom-repeat" items="[[ensemble.datasets]]" as="dataset">
@@ -299,9 +277,13 @@ class MintDataBrowse extends PolymerElement {
       dataCatalog: Object,
       config: Object,
       userid: String,
+      vocabulary: Object,
       standardName: String,
       regionid: String,
-      region: Object,
+      region: {
+        type: Object,
+        computed: '_getRegionObject(vocabulary, routeData.regionid)'
+      },
       subregion: Object,
       dataList: Array,
       filesList: {
@@ -318,7 +300,7 @@ class MintDataBrowse extends PolymerElement {
       },
       selectMode: {
         type: Boolean,
-        computed: '_isSelectionMode(routeData.op)'
+        computed: '_isSelectionMode(subrouteData.op)'
       },
       dataSpecs: Array,
       dataSpec: Object,
@@ -334,8 +316,10 @@ class MintDataBrowse extends PolymerElement {
 
   static get observers() {
     return [
-      '_initialDataFetch(routeData.regionid, routeData.varids, routeData.op, dataSpec)',
-      '_createDataSpecsDetails(dataSpecs)'
+      '_initialDataFetch(question, subrouteData.op, subrouteData.varids, subregion)',
+      '_createDataSpecsDetails(dataSpecs)',
+      '_setSubregion(region, subregion, subrouteData)',
+      '_setSubregionForQuestion(vocabulary, question)'
     ];
   }
 
@@ -349,6 +333,73 @@ class MintDataBrowse extends PolymerElement {
         dp.set("i18n.parseDate", (function(a) { return this._parseDate(a); }).bind(this));
       }
     });
+  }
+
+  _isVisualizable(dataset) {
+    if(dataset.resources && dataset.resources.length > 0) {
+      var meta = dataset.resources[0].dataset_metadata;
+      for(var key in meta) {
+        if(key.match(/^viz_config/)) {
+          var viz_config = meta[key];
+          if(viz_config.visualized)
+            return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  _getVisualizationLink(dataset) {
+    if(dataset.resources && dataset.resources.length > 0) {
+      var meta = dataset.resources[0].dataset_metadata;
+      for(var key in meta) {
+        if(key.match(/^viz_config/)) {
+          var viz_config = meta[key];
+          if(viz_config.visualized)
+            return "/visualizations/"+dataset.dataset_id+"/"+dataset.dataset_name+"/"+viz_config.viz_type;
+        }
+      }
+    }
+  }
+
+  _setSubregion(region, subregion, subrouteData) {
+    if(subrouteData.op)
+      return;
+    if(!subregion && region) {
+      this.set("subregion", region);
+      this._getDataList();
+    }
+  }
+
+  _initialDataFetch(question, op, varids, subregion) {
+    if(!question)
+      return;
+    if(varids)
+      this.set("queryConfig.variables", varids);
+    if(subregion)
+      this.set("queryConfig.bbox", subregion.bbox);
+    if(subregion && op == "select")
+      this._getDataList();
+  }
+
+  _getRegionObject(vocabulary, regionid) {
+    if(vocabulary && regionid) {
+      var regions = [].concat(vocabulary.regions);
+      while(regions.length) {
+        var region = regions.pop();
+        if(regionid == this._getLocalName(region.id))
+          return region;
+        if(region.subRegions)
+          regions = regions.concat(region.subRegions);
+      }
+    }
+  }
+
+  _setSubregionForQuestion(vocabulary, question) {
+    if(vocabulary && question) {
+      var subregion = this._getRegionObject(vocabulary, this._getLocalName(question.region));
+      this.set("subregion", subregion);
+    }
   }
 
   _createDataSpecsDetails(dataSpecs) {
@@ -460,11 +511,9 @@ class MintDataBrowse extends PolymerElement {
   }
 
   _unmarkDatasetInFileList(dsid) {
-    console.log("unmark " + dsid);
     for(var i=0; i<this.filesList.length; i++) {
       var ds = this.filesList[i];
       if(ds.dataset_id == dsid) {
-        console.log("done");
         this.set("filesList."+i+".selected", false);
         break;
       }
@@ -472,11 +521,9 @@ class MintDataBrowse extends PolymerElement {
   }
 
   _markDatasetInFileList(dsid) {
-    console.log("mark " + dsid);
     for(var i=0; i<this.filesList.length; i++) {
       var ds = this.filesList[i];
       if(ds.dataset_id == dsid) {
-        console.log("done");
         this.set("filesList."+i+".selected", true);
         break;
       }
@@ -540,22 +587,26 @@ class MintDataBrowse extends PolymerElement {
     var me = this;
     if(this.queryConfig) {
       me.set("loading", true);
+      if(this.subregion)
+        this.queryConfig.bbox = this.subregion.bbox;
       return this.dataCatalog.findDatasets(this.queryConfig, function(bindings) {
+        me.set("loading", false);
         var selected = {};
-        if(me.dataSpec && me.dataSpec.ensemble) {
-          var ens = me.dataSpec.ensemble;
-          for(var j=0; j<ens.length; j++) {
-            for(var i=0; i<ens[j].datasets.length; i++) {
-              selected[ens[j].datasets[i].id] = true;
+        if(bindings) {
+          if(me.dataSpec && me.dataSpec.ensemble) {
+            var ens = me.dataSpec.ensemble;
+            for(var j=0; j<ens.length; j++) {
+              for(var i=0; i<ens[j].datasets.length; i++) {
+                selected[ens[j].datasets[i].id] = true;
+              }
             }
           }
+          for(var i=0; i<bindings.length; i++) {
+            var dsid = bindings[i].dataset_id;
+            bindings[i].selected = selected[dsid];
+          }
+          me.set("filesList", bindings);
         }
-        for(var i=0; i<bindings.length; i++) {
-          var dsid = bindings[i].dataset_id;
-          bindings[i].selected = selected[dsid];
-        }
-        me.set("loading", false);
-        me.set("filesList", bindings);
       });
     }
   }
@@ -580,7 +631,7 @@ class MintDataBrowse extends PolymerElement {
       // POST REQUEST
       me.dataSpecs[0] = me.dataSpec;
       me._postResource({
-        url: me.config.server + "/users/" + me.userid + "/questions/" + me.routeData.questionid + "/data",
+        url: me.config.server + "/users/" + me.userid + "/questions/" + me.subrouteData.questionid + "/data",
         onLoad: function(e) {
           var outputid = e.target.responseText;
           me.setTaskOutput(outputid);
@@ -594,7 +645,7 @@ class MintDataBrowse extends PolymerElement {
 
   _goBack() {
     var new_path = '/govern/analysis/' + this._getLocalName(this.routeData.regionid) + "/" +
-      this.routeData.questionid + "/" + this.routeData.taskid;
+      this.subrouteData.questionid + "/" + this.subrouteData.taskid;
     window.history.pushState({}, null, new_path)
     location.reload();
   }
@@ -621,15 +672,6 @@ class MintDataBrowse extends PolymerElement {
 
   _getLocalName(id) {
     return id.substring(id.lastIndexOf("/") + 1);
-  }
-
-  _initialDataFetch(regionid, varids, op, dataSpec) {
-    if(regionid && this.regionid != regionid && varids && dataSpec) {
-      this.set("queryConfig.variables", varids);
-      if(op == "select") {
-        this._getDataList();
-      }
-    }
   }
 
   _getViewDataURL(item) {

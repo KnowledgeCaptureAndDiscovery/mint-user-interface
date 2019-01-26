@@ -1,13 +1,11 @@
-import '../node_modules/@polymer/polymer/polymer-element.js';
-import './mint-common-styles.js';
-
+import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { MintBaseRouter} from './mint-base-router.js';
+import '@polymer/app-route/app-route.js';
 
+import './mint-common-styles.js';
 import 'mint-map/mint-map.js';
-import 'mint-trend/mint-trend.js';
 
-class MintVisualiztions extends MintBaseRouter {
+class MintVisualiztions extends PolymerElement {
 
   static get is() { return 'mint-visualizations'; }
 
@@ -20,11 +18,14 @@ class MintVisualiztions extends MintBaseRouter {
         height: 800px;
       }
     </style>
-    <!-- Insert parent template : app-router basically -->
-    ${super.template}
 
-    <!--mint-map variables="[[mapVariables]]"></mint-map-->
-    <mint-trend datasets="[[datasets]]"></mint-trend>
+    <app-route route="[[route]]" pattern="/:datasetid/:name/:viztype"
+      data="{{routeData}}"></app-route>
+
+    <template is="dom-if" if="[[_isEqual(routeData.viztype, 'mint-map')]]">
+      <mint-map variables="[[mapVariables]]"></mint-trend>
+    </template>
+
 
     <!--
     <div class="visualisation">
@@ -55,19 +56,22 @@ class MintVisualiztions extends MintBaseRouter {
         type: Array,
         notify:true,
         readOnly:false,
-        value:[{ layerName: 'FLDAS_A_Rainf_f_tavg_2017_Daily',
-                 md5: '604397880d1b057f4ea455d2a981de77',
-                 dcid: 0
-                }
-              ]
-      },
-      datasets: {
-        type: Object,
-        notify:true,
-        readOnly:false,
-        value:{id: "fldas01_fldas02_trend_chart", type:"trend",url:""}
+        computed: '_getMapVariables(routeData)'
       }
     };
+  }
+
+  _isEqual(a, b) {
+    return a==b;
+  }
+
+  _getMapVariables(routeData) {
+    return [
+      {
+        layerName: routeData.name.replace(/\s/, '_'),
+        dataset_id: routeData.datasetid
+      }
+    ];
   }
 }
 

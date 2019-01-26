@@ -140,41 +140,6 @@ class MintSimpleQuestionCreator extends PolymerElement {
     }
   }
 
-  _hasIntervention(qtindex) {
-    var label = this.vocabulary.question_templates[qtindex].label;
-    if(label.indexOf("<intervention>") >= 0)
-      return true;
-    return false;
-  }
-
-  _getInterventions(qtindex) {
-    var interventions = this.vocabulary.question_templates[qtindex].interventions;
-    var its = {}
-    for(var i=0; i<this.vocabulary.intervention_types.length; i++) {
-      var it = this.vocabulary.intervention_types[i];
-      its[it.id] = it;
-    }
-    var fullits = [];
-    for(var i=0; i<interventions.length; i++) {
-      fullits.push(its[interventions[i]]);
-    }
-    return fullits;
-  }
-
-  _getYears(qtindex) {
-    var years = this.vocabulary.question_templates[qtindex].years;
-    var fullyears = [];
-    for(var i=0; i<years.length; i++) {
-      fullyears.push({
-        id: {
-          fromDate: new Date(years[i] + "-01-01").getTime(),
-          toDate: new Date((years[i]+1) + "-01-01").getTime()
-        },
-        label: years[i]
-      });
-    }
-    return fullyears;
-  }
 }
 
 customElements.define(MintSimpleQuestionCreator.is, MintSimpleQuestionCreator);

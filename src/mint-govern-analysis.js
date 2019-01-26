@@ -112,7 +112,7 @@ class MintGovernAnalysis extends PolymerElement {
         flex-flow: row wrap;
       }
       .panel .buttons .button {
-        min-width: 100px;
+        min-width: 50px;
         margin: 2px;
         padding: 5px;
         line-height: 18px;
@@ -204,6 +204,9 @@ class MintGovernAnalysis extends PolymerElement {
         color: green;
         font-weight: bold;
       }
+      .activity .buttons .activity_optional {
+        opacity: 0.7;
+      }
       .history {
         grid-column-start: 1;
         grid-column-end: 8;
@@ -215,6 +218,11 @@ class MintGovernAnalysis extends PolymerElement {
         overflow: scroll;
         padding: 5px;
         max-height: 200px;
+      }
+
+      a.button iron-icon {
+        width: 16px;
+        height: 16px;
       }
 
       paper-dialog {
@@ -373,8 +381,10 @@ class MintGovernAnalysis extends PolymerElement {
           </div>
 
           <div class="buttons">
-            <a class="button" href="../data/browse/[[routeData.region]]////browse">Browse historical data</a>
-            <a class="button" href="../data/generate/[[routeData.region]]">Generate new data</a>
+            <a class="button" href="data/browse/[[routeData.region]]">Browse data</a>
+            <a class="button" href="workflow/list/[[routeData.region]]/DATA_GENERATION">Generate new data</a>
+            <a class="button" href="govern/cag/[[routeData.region]]/browse">Browse CAG</a>
+            <a class="button" href="govern/load-cag/[[routeData.region]]">Load New CAG</a>
           </div>
         </div>
 
@@ -462,7 +472,7 @@ class MintGovernAnalysis extends PolymerElement {
         <div class="panel history">
           <div class="panel_heading">
             <div class="title">
-              Information Panel for Question
+              Your Selections
             </div>
           </div>
           <div>
@@ -488,7 +498,7 @@ class MintGovernAnalysis extends PolymerElement {
                 </template>
               </ul>
 
-              <b>DATASETS SELECTED:</b>
+              <b>DATASETS:</b>
               <ul>
                 <template is="dom-repeat" items="[[dataSpecs]]" as="dataSpec">
                   <template is="dom-repeat" items="[[dataSpec.ensemble]]" as="ensemble">
@@ -503,7 +513,14 @@ class MintGovernAnalysis extends PolymerElement {
                 </template>
               </ul>
 
-              <b>WORKFLOW SELECTED</b> [[workflowid]]
+              <b>MODELS:</b>
+              <ul>
+                <template is="dom-repeat" items="[[question.models]]">
+                  <li>[[_getModelDetail(item, vocabulary)]]</li>
+                </template>
+              </ul>
+
+              <b>WORKFLOWS:</b> [[workflowid]]
             </div>
           </div>
         </div>
@@ -606,10 +623,22 @@ class MintGovernAnalysis extends PolymerElement {
     if(varid && graphData) {
       var v = this._getGraphVariable(varid, graphData);
       if(v) {
-        return v.localName + " (" + v.canonical_name + ")";
+        return v.localName + " (" + (v.standard_names?v.standard_names[0]:'') + ")";
       }
     }
   }
+
+  _getModelDetail(modelid, vocabulary) {
+    if(modelid && vocabulary) {
+      for(var i=0; i<vocabulary.models.length; i++) {
+        if(vocabulary.models[i].id == modelid) {
+          var m = vocabulary.models[i];
+          return this._getLocalName(m.id) + " (" + m.label + ")";
+        }
+      }
+    }
+  }
+
 
   _getGraphVariable(varid, graphData) {
     for(var i=0; i<graphData.variables.length; i++) {
@@ -620,13 +649,14 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
-  _getCanonicalNames(varids, graphData) {
+  _getStandardNames(varids, graphData) {
     var varnames = [];
     for(var i=0; i<graphData.variables.length; i++) {
       var v = graphData.variables[i];
       for(var j=0; j<varids.length; j++) {
         if(v.id == varids[j]) {
-          varnames.push(v.canonical_name);
+          if(v.standard_names)
+            varnames = varnames.concat(v.standard_names);
           break;
         }
       }
@@ -745,6 +775,8 @@ class MintGovernAnalysis extends PolymerElement {
     var cls = "button";
     if(this._isActivityDone(activity))
       cls += " activity_done";
+    if(!activity.required)
+      cls += " activity_optional";
     return cls;
   }
 
@@ -777,9 +809,18 @@ class MintGovernAnalysis extends PolymerElement {
       }
       link = link.replace("<dsid>", this._getLocalName(this.dsid));
     }
-    if(link.indexOf("<driving_variables>") > 0 && this.question && this.question.drivingVariables) {
-      link = link.replace("<driving_variables>",
-        this._getCanonicalNames(this.question.drivingVariables, this.graphData));
+    if(link.indexOf("<question_regionid>") > 0) {
+      if(this.question)
+        link = link.replace("<question_regionid>", this._getLocalName(this.question.region));
+      else
+        link = link.replace("<question_regionid>", "");
+    }
+    if(link.indexOf("<driving_variables>") > 0) {
+      if(this.question && this.question.drivingVariables)
+        link = link.replace("<driving_variables>",
+          this._getStandardNames(this.question.drivingVariables, this.graphData));
+      else
+        link = link.replace("<driving_variables>", "");
     }
     if(link.indexOf("<config.wings.") > 0) {
       var m = link.match(/\<config\.wings\.(.+?)\>/);

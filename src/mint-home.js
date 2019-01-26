@@ -12,7 +12,7 @@ import './mint-common-styles.js';
 import './mint-image.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
 
 class MintHome extends PolymerElement {
   static get template() {
@@ -81,7 +81,7 @@ class MintHome extends PolymerElement {
     </style>
 
     <div class="item">
-      <mint-image src="images/mint-banner.jpg" alt="MINT"></mint-image>
+      <mint-image src="images/south_sudan.jpg" alt="MINT"></mint-image>
     </div>
     <div class="detail" has-content="">
       <h1>Welcome to MINT</h1>

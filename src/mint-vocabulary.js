@@ -7,12 +7,10 @@ class MintVocabulary extends PolymerElement {
     return html`
     <template is="dom-if" if="[[config]]">
       <iron-ajax auto="" url="[[config.server]]/common/regions" handle-as="json" last-response="{{regions}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/question_templates" handle-as="json" last-response="{{question_templates}}"></iron-ajax>
       <iron-ajax auto="" url="[[config.server]]/common/task_types" handle-as="json" last-response="{{task_types}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/event_types" handle-as="json" last-response="{{event_types}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/intervention_types" handle-as="json" last-response="{{intervention_types}}"></iron-ajax>
       <iron-ajax auto="" url="[[config.server]]/common/graphs" handle-as="json" last-response="{{graphs}}"></iron-ajax>
       <iron-ajax auto="" url="[[config.server]]/common/models" handle-as="json" last-response="{{models}}"></iron-ajax>
+      <iron-ajax auto="" url="[[config.server]]/common/workflows" handle-as="json" last-response="{{workflows}}"></iron-ajax>
     </template>
 `;
   }
@@ -27,28 +25,24 @@ class MintVocabulary extends PolymerElement {
       vocabulary: {
         type: Object,
         notify: true,
-        computed: '_computeVocabulary(regions, task_types, event_types, intervention_types, question_templates, graphs, models)'
+        computed: '_computeVocabulary(regions, task_types, graphs, models, workflows)'
       },
       regions: Array,
       task_types: Array,
-      event_types: Array,
-      question_templates: Array,
-      intervention_types: Array,
       graphs: Array,
-      models: Array
+      models: Array,
+      workflows: Array
     };
   }
 
-  _computeVocabulary(regions, task_types, event_types, intervention_types, question_templates, graphs, models) {
-    if(regions && task_types && event_types && question_templates && graphs && models) {
+  _computeVocabulary(regions, task_types, graphs, models, workflows) {
+    if(regions && task_types && graphs && models, workflows) {
       return {
         regions: regions,
         task_types: task_types,
-        event_types: event_types,
-        question_templates: question_templates,
-        intervention_types: intervention_types,
         graphs: graphs,
-        models: models
+        models: models,
+        workflows: workflows
       };
     }
   }

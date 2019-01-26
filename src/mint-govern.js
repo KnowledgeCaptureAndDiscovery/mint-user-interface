@@ -19,7 +19,9 @@ import './mint-common-styles.js';
 import './mint-base-router.js';
 
 import './mint-govern-home.js';
+import './mint-govern-planner.js';
 import './mint-govern-cag.js';
+import './mint-govern-load-cag.js';
 import './mint-govern-analysis.js';
 
 class MintGovern extends MintBaseRouter {
@@ -42,17 +44,29 @@ class MintGovern extends MintBaseRouter {
       <mint-govern-home name="home" vocabulary="[[vocabulary]]"
         route="[[pageSubRoute.home]]"></mint-govern-home>
 
-      <!-- perform a govern analysis -->
+      <!-- govern analysis dashboard -->
       <mint-govern-analysis name="analysis" vocabulary="[[vocabulary]]"
         region="{{region}}" visible="[[visible]]"
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.analysis]]"></mint-govern-analysis>
+
+      <!-- govern planner -->
+      <mint-govern-planner name="planner" vocabulary="[[vocabulary]]"
+        region="{{region}}" visible="[[visible]]"
+        config="[[config]]" userid="[[userid]]"
+        route="[[pageSubRoute.planner]]"></mint-govern-planner>
 
       <!-- select variables from a cag -->
       <mint-govern-cag name="cag" vocabulary="[[vocabulary]]"
         visible="[[visible]]"
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.cag]]"></mint-govern-cag>
+
+      <!-- load a new cag and convert -->
+      <mint-govern-load-cag name="load-cag" vocabulary="[[vocabulary]]"
+        visible="[[visible]]"
+        config="[[config]]" userid="[[userid]]"
+        route="[[pageSubRoute.load-cag]]"></mint-govern-load-cag>
     </iron-pages>
 `;
   }

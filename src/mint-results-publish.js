@@ -131,7 +131,7 @@ class MintResultsPublish extends PolymerElement {
 
       <!-- Standard required information -->
       <fieldset id="required">
-        <legend>Required Information</legend>
+        <legend>Required Metadata</legend>
         <paper-input label="Name" value="{{dataset_def.name}}"></paper-input>
         <paper-input label="Description" value="{{dataset_def.description}}"></paper-input>
         <paper-input label="URL" value="{{resource_def.data_url}}"></paper-input>
@@ -141,9 +141,9 @@ class MintResultsPublish extends PolymerElement {
         </div>
       </fieldset>
 
-      <!-- Spatial Information -->
+      <!-- Spatial Metadata -->
       <fieldset>
-        <legend>Spatial Information</legend>
+        <legend>Spatial Metadata</legend>
         <vaadin-combo-box items="[[regionBoundingBoxes]]"
           label="Autofill Spatial information"
           value="{{spatial}}"></vaadin-combo-box>
@@ -157,9 +157,9 @@ class MintResultsPublish extends PolymerElement {
         </div>
       </fieldset>
 
-      <!-- Temporal Information -->
+      <!-- Temporal Metadata -->
       <fieldset id="temporal_fieldset">
-        <legend>Temporal Information</legend>
+        <legend>Temporal Metadata</legend>
         <vaadin-date-picker label="Start Time" value="{{temporal.start_time}}"></vaadin-date-picker>
         <vaadin-date-picker label="End Time" value="{{temporal.end_time}}"></vaadin-date-picker>
       </fieldset>
@@ -206,8 +206,8 @@ class MintResultsPublish extends PolymerElement {
 
       <!-- Visualization -->
       <fieldset>
-        <legend>Visualization</legend>
-        <paper-dropdown-menu no-animations="" label="Visualization Type">
+        <legend>Visualization Metadata</legend>
+        <paper-dropdown-menu no-animations="" label="Visualization Preference">
           <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{viz_config.viz_type}}">
             <paper-item value="">None</paper-item>
             <template is="dom-repeat" items="[[viz_type.types]]">
@@ -670,6 +670,11 @@ class MintResultsPublish extends PolymerElement {
     var var_defs = {
         variables: []
     };
+    if(!variables || !variables.length) {
+      fn([]);
+      return;
+    }
+
     for(var i=0; i<variables.length; i++) {
       var iv = variables[i];
       var ov = {

@@ -16,7 +16,10 @@ class MintGovernCag extends PolymerElement {
     <style include="mint-common-styles">
     </style>
 
-    <app-route route="[[route]]" pattern="/:regionid/:questionid/:taskid/:op" data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:regionid/:op"
+      data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:questionid/:taskid"
+      data="{{subrouteData}}"></app-route>
 
     <template is="dom-if" if="[[graphid]]">
       <iron-ajax url="[[graphid]]" auto handle-as="json" last-response="{{graphData}}"></iron-ajax>
@@ -24,26 +27,31 @@ class MintGovernCag extends PolymerElement {
 
     <template is="dom-if" if="[[visible]]">
       <template is="dom-if" if="[[userid]]">
-        <template is="dom-if" if="[[routeData.questionid]]">
-          <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]"
+        <template is="dom-if" if="[[subrouteData.questionid]]">
+
+          <iron-ajax auto
+            url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]"
             handle-as="json" last-response="{{question}}"></iron-ajax>
           <iron-ajax auto
-            url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+            url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
             handle-as="json" last-response="{{task}}"></iron-ajax>
+
+          <b>[[_getHeading(routeData.op)]]: </b>
+          <i>
+            <template is="dom-repeat" items="[[selectedItems]]">
+              <template is="dom-if" if="[[index]]">,</template>
+              [[_localName(item)]]
+            </template>
+          </i>
+          <br />
+          <paper-button class="important" on-tap="_submitVariableSelection">DONE</paper-button>
         </template>
       </template>
     </template>
 
-    <b>[[_getHeading(routeData.op)]]: </b>
-    <i>
-      <template is="dom-repeat" items="[[selectedItems]]">
-        <template is="dom-if" if="[[index]]">,</template>
-        [[_localName(item)]]
-      </template>
-    </i>
-    <br />
-    <paper-button class="important" on-tap="_submitVariableSelection">Submit</paper-button>
-    <variable-graph id="cag" data="[[graphData]]" selected-items="{{selectedItems}}"></variable-graph>
+    <variable-graph id="cag" data="[[graphData]]"
+      config="[[config]]" operation="edit"
+      editable="[[_isEqual(routeData.op, 'browse')]]" selected-items="{{selectedItems}}"></variable-graph>
 `
   }
 
@@ -60,16 +68,26 @@ class MintGovernCag extends PolymerElement {
       vocabulary: Object,
       question: Object,
       task: Object,
-      routeData: Object,
       route: Object,
+      routeData: {
+        type: Object,
+        observer: '_routeDataChanged'
+      },
+      subroute: Object,
+      subrouteData: Object,
       visible: Boolean
     }
   }
 
   static get observers() {
     return [
-      '_loadVariableGraph(graphData, question, visible)'
+      '_loadVariableGraph(graphData, visible)'
     ];
+  }
+
+  _routeDataChanged(rd) {
+    if(rd && rd.op == "browse")
+      this.subrouteData = {};
   }
 
   _getHeading(op) {
@@ -79,6 +97,10 @@ class MintGovernCag extends PolymerElement {
 
   _localName(id) {
     return id.replace(/^.+#/, '');
+  }
+
+  _isEqual(a,b) {
+    return a==b;
   }
 
   _getGraphId(regionid, vocabulary) {
@@ -93,17 +115,19 @@ class MintGovernCag extends PolymerElement {
     }
   }
 
-  _loadVariableGraph(graphData, question, visible) {
-    if(visible && question && graphData) {
+  _loadVariableGraph(graphData, visible) {
+    if(visible && graphData) {
       this.$.cag.loading = true;
       this.$.cag.loadGraph();
       this.$.cag.loading = true;
       this.$.cag.layout(false);
 
-      if(this.routeData.op == "SelectDrivingVariables")
-        this.$.cag.selectVariables(question.drivingVariables);
-      else if(this.routeData.op == "SelectResponseVariables")
-        this.$.cag.selectVariables(question.responseVariables);
+      if(this.question) {
+        if(this.routeData.op == "SelectDrivingVariables")
+          this.$.cag.selectVariables(this.question.drivingVariables);
+        else if(this.routeData.op == "SelectResponseVariables")
+          this.$.cag.selectVariables(this.question.responseVariables);
+      }
     }
   }
 
@@ -136,7 +160,7 @@ class MintGovernCag extends PolymerElement {
       url: me.task.id,
       onLoad: function(e) {
         var new_path = 'govern/analysis/' + this._getLocalName(me.routeData.regionid) + "/" +
-          me.routeData.questionid + "/" + me.routeData.taskid;
+          me.subrouteData.questionid + "/" + me.subrouteData.taskid;
         window.history.pushState({}, null, new_path);
         location.reload();
       },

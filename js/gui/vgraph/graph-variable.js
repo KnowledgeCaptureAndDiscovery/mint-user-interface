@@ -7,7 +7,7 @@ export function VGraphVariable(graph, v, config) {
 
   this.id = v.id
   this.text = v.label
-  this.alternate_text = v.canonical_name || v.standard_name;
+  this.alternate_text = v.standard_names ? v.standard_names.join("\n") : null;
   this.config = config;
 
   this.binding = null;
@@ -41,6 +41,12 @@ VGraphVariable.prototype.create = function() {
 };
 
 VGraphVariable.prototype.configure = function() {
+  if(this.config.bgcolor != "yellow") {// If it isn't being highlighted
+    if(!this.alternate_text) // Show nodes without standard names as reddish
+        this.config.bgcolor = "rgba(180,125,125,1)";
+    else
+      this.config.bgcolor = "rgba(125,125,125,1)";
+  }
   this.textitem
     .attr("pointer-events", "none")
     .attr("text-anchor", "middle")

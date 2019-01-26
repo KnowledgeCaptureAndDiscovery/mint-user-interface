@@ -15,9 +15,11 @@ import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/polymer/lib/utils/render-status.js';
 
 import './loading-screen.js';
+import './mint-icons.js';
 import './mint-common-styles.js';
 
 import { VGraph } from "../js/gui/vgraph/variable-graph.js";
@@ -81,6 +83,40 @@ class VariableVGraph extends PolymerElement {
       loading-screen#loader {
         --loading-screen-color: var(--app-accent-color);
       }
+      loading-screen.limitedloading {
+        --loading-screen-position: relative;
+      }
+      div.buttons {
+        padding: 8px 20px;
+      }
+      div.buttons paper-button {
+        margin: 4px;
+      }
+      div.row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-flow: row;
+      }
+      fieldset {
+        border:1px solid #CCC;
+        border-radius: 5px;;
+        margin: 10px;
+        padding: 0px;
+        padding-bottom: 20px;
+      }
+      legend {
+        font-weight: bold;
+        margin-left: 15px;
+      }
+      a.action {
+        cursor:pointer;
+        margin-bottom: -16px;
+      }
+      a.action iron-icon {
+        width: 18px;
+        height: 18px;
+      }
       @media (max-width: 767px) {
         .outer {
           height: 450px;
@@ -102,6 +138,7 @@ class VariableVGraph extends PolymerElement {
           <template is="dom-if" if="[[_isAnalysis(operation)]]">
             <paper-button on-click="analyze">ANALYZE</paper-button>
           </template>
+          <paper-button>&nbsp;</paper-button>
         </template>
         <!--
         <paper-button on-click="save">Save</paper-button>
@@ -129,28 +166,41 @@ class VariableVGraph extends PolymerElement {
     <div class="toolbar bottom">
       <paper-button on-click="zoomIn">+</paper-button>
       <paper-button on-click="zoomOut">-</paper-button>
-      <paper-toggle-button on-checked-changed="toggleView">CANONICAL NAMES</paper-toggle-button>
+      <paper-toggle-button on-checked-changed="toggleView">STANDARD NAMES</paper-toggle-button>
     </div>
 
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal="" id="variable_editor" on-iron-overlay-closed="_editVariable">
       <div class="heading">Edit Graph Node</div>
       <paper-input label="Name" value="{{edItem.label}}"></paper-input>
-      <paper-input label="Canonical Name" value="{{edItem.canonical_name}}"></paper-input>
-      <!--paper-dropdown-menu no-animations label="Category">
-        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{edItem.category}}">
-          <paper-item value="">None</paper-item>
-          <paper-item value="climate">Climate</paper-item>
-          <paper-item value="hydrology">Hydrology</paper-item>
-          <paper-item value="agronomy">Agronomy</paper-item>
-          <paper-item value="economics">Economics</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu-->
+
+      <fieldset>
+        <legend>
+          Standard Names
+          <a class="action" title="Add new" on-click="_addStandardName"><iron-icon icon="add" /></a>
+          <a class="action" title="Fetch Matching Standard Names from GSN"
+            on-click="_fetchStandardNames">ALIGN<iron-icon icon="file-download" /></a>
+        </legend>
+        <div id="standard_names_template_row" style="display:none">
+          <paper-input label="Standard Name" value="[[index]]"></paper-input>
+          <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
+        </div>
+        <div id="editor_standard_names">
+          <loading-screen class="limitedloading" loading="[[loadingStandardNames]]"></loading-screen>
+          <template is="dom-repeat" items="[[edItem.standard_names]]">
+            <div class="row">
+              <paper-input label="Standard Name" value="[[item]]"></paper-input>
+              <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
+            </div>
+          </template>
+        </div>
+      </fieldset>
+
       <div class="buttons">
         <paper-button on-click="_deleteVariable" class="delete">Delete</paper-button>
         <div class="grow">&nbsp;</div>
         <paper-button dialog-dismiss="">Cancel</paper-button>
-        <paper-button dialog-confirm="" autofocus="">Submit</paper-button>
+        <paper-button class="important" dialog-confirm="" autofocus="">DONE</paper-button>
       </div>
     </paper-dialog>
 
@@ -251,6 +301,41 @@ class VariableVGraph extends PolymerElement {
         questionid + "/planner/compose/" + dsid;
   }
 
+  _removeRow(e) {
+    e.target.parentNode.parentNode.remove();
+  }
+
+  _addStandardName() {
+    var div = document.createElement("div");
+    div.className = "row";
+    div.innerHTML = this.$.standard_names_template_row.innerHTML;
+    var btn = div.querySelector("a");
+    btn.addEventListener("click", this._removeRow);
+    this.$.editor_standard_names.appendChild(div);
+  }
+
+  _fetchStandardNames(e) {
+    var label = this.edItem.label;
+    var url = this.config.gsn.server + "/match_phrase/" + label.replace(/\s+/, '_') + "/";
+    var me = this;
+    me.set("loadingStandardNames", true);
+    this._getResource({
+      url: url,
+      onLoad: function(e) {
+        me.set("loadingStandardNames", false);
+        var json = JSON.parse(e.target.responseText);
+        var snames = [];
+        for(var i=0; i<json.results.length; i++)
+          snames.push(json.results[i].label);
+        me.set("edItem.standard_names", snames);
+      },
+      onError: function() {
+        me.set("loadingStandardNames", false);
+        console.log("Cannot align variable");
+      }
+    });
+  }
+
   _isEdit(operation) {
     return operation == "edit";
   }
@@ -286,7 +371,18 @@ class VariableVGraph extends PolymerElement {
 
   save() {
     this.graph.savePositions();
+    this._putResource({
+      url: this.data.id,
+      onLoad: function(e) {
+        alert('Saved');
+        //me.setTaskOutput(me.data.id);
+      },
+      onError: function() {
+        console.log("Cannot edit graph");
+      }
+    }, this.data);
 
+    /*
     var me = this;
     if(this.data.id.indexOf("/common/graphs") > 0) {
       me._postResource({
@@ -323,7 +419,8 @@ class VariableVGraph extends PolymerElement {
           console.log("Cannot edit graph");
         }
       }, me.data);
-    }
+    }*/
+
     /*this.graphJson = JSON.stringify(this.data, null, 2);
     this.$.save_display.open();*/
   }
@@ -383,18 +480,27 @@ class VariableVGraph extends PolymerElement {
 
   _editVariable(e) {
     if(e.detail.confirmed) {
-      // Check if existing edited
-      for (var i=0; i<this.data.variables.length; i++) {
-        if(this.edItem) {
+      if(this.edItem) {
+        var editem = Object.assign({}, this.edItem);
+        var inputs = this.$.editor_standard_names.querySelectorAll("paper-input");
+        editem.standard_names = [];
+        for(var i=0; i<inputs.length; i++) {
+          if(inputs[i].value)
+            editem.standard_names.push(inputs[i].value);
+        }
+        // Check if existing edited
+        for (var i=0; i<this.data.variables.length; i++) {
           if(this.data.variables[i].id == this.edItem.id) {
-            this.set("data.variables."+i, this.edItem);
+            this.set("data.variables."+i, editem);
             return;
           }
         }
+        // New Variable
+        this.graph.editor.push("data.variables", editem);
       }
-      // New Variable
-      if(this.edItem)
-        this.graph.editor.push("data.variables", this.edItem);
+    }
+    else {
+      this.edItem = null;
     }
   }
 
@@ -418,7 +524,7 @@ class VariableVGraph extends PolymerElement {
       else if(v.id in this.graph.variables) {
         // Update
         this.graph.variables[v.id].setText(v.label);
-        this.graph.variables[v.id].alternate_text = v.standard_name;
+        this.graph.variables[v.id].alternate_text = v.standard_names.join("\n");
         //this.graph.variables[v.id].config.setCategory(v.category);
         this.graph.variables[v.id].draw();
       }
@@ -473,6 +579,15 @@ class VariableVGraph extends PolymerElement {
     xhr.open('PUT', rq.url);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.send(JSON.stringify(data));
+  }
+
+  _getResource(rq) {
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', rq.onLoad.bind(this));
+    xhr.addEventListener('error', rq.onError.bind(this));
+    //xhr.withCredentials = true;
+    xhr.open('GET', rq.url);
+    xhr.send();
   }
 }
 

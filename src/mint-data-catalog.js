@@ -177,15 +177,14 @@ class MintDataCatalog extends PolymerElement {
 
   _createQueryData(queryConfig) {
     var data = {};
-    if(queryConfig.regionGeoJson) {
-      var bbox = this._calculateBoundingBox(queryConfig.regionGeoJson);
-      data["spatial_coverage__intersects"] = bbox;
+    if(queryConfig.bbox) {
+      data["spatial_coverage__intersects"] = queryConfig.bbox;
     }
     if(queryConfig.startDate) {
-      data["start_time__gte"] = queryConfig.startDate+"T00:00:00";
+      data["end_time__gte"] = queryConfig.startDate+"T00:00:00";
     }
     if(queryConfig.endDate) {
-      data["end_time__lte"] = queryConfig.endDate+"T00:00:00";
+      data["start_time__lte"] = queryConfig.endDate+"T00:00:00";
     }
     if(queryConfig.datasetName) {
       data["dataset_names__in"] = [ queryConfig.datasetName ];
@@ -256,10 +255,10 @@ class MintDataCatalog extends PolymerElement {
 
     var data = this._createQueryData(queryConfig);
     var url = me.config.catalogs.data + "/datasets/find";
-    if(!data['start_time__gte'] && !data['end_time__gte']) {
-      delete data["spatial_coverage__intersects"];
+    /*
+    if(!data['start_time__gte'] && !data['end_time__gte'] && !data['spatial_coverage__intersects']) {
       url = me.config.catalogs.data + "/find_datasets";
-    }
+    }*/
     me._postResource({
       url: url,
       onLoad: function(e) {
