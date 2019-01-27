@@ -356,7 +356,7 @@ class MintDataBrowse extends PolymerElement {
         if(key.match(/^viz_config/)) {
           var viz_config = meta[key];
           if(viz_config.visualized)
-            return "/visualizations/"+dataset.dataset_id+"/"+dataset.dataset_name+"/"+viz_config.viz_type;
+            return "/visualizations/"+dataset.dataset_id+"/"+viz_config.viz_type;
         }
       }
     }

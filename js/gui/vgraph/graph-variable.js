@@ -42,10 +42,15 @@ VGraphVariable.prototype.create = function() {
 
 VGraphVariable.prototype.configure = function() {
   if(this.config.bgcolor != "yellow") {// If it isn't being highlighted
-    if(!this.alternate_text) // Show nodes without standard names as reddish
-        this.config.bgcolor = "rgba(180,125,125,1)";
-    else
-      this.config.bgcolor = "rgba(125,125,125,1)";
+    if(!this.alternate_text) {
+      // Show nodes without standard names with red outline
+      this.config.strokecolor = "rgba(220,30,30,1)";
+      this.config.strokewidth = 2;
+    }
+    else {
+      this.config.strokecolor = "rgba(30,220,30,1)";
+      this.config.strokewidth = 2;
+    }
   }
   this.textitem
     .attr("pointer-events", "none")

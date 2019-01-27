@@ -8,19 +8,21 @@
     "src/mint-results.js",
     "src/mint-workflow.js",
     "src/mint-models.js",
-    "src/mint-data.js",
     "src/mint-visualizations.js",
+    "src/mint-data.js",
     "src/lazy-resources.js"
   ],
   "sources": [
    "src/**",
-   "js/**/*",
-   "files/**/*",
+   "js/**",
+   "files/**",
    "images/**"
   ],
   "extraDependencies": [
     ".htaccess",
     "node_modules/@webcomponents/webcomponentsjs/**",
+    "node_modules/mint-map/**",
+    "node_modules/mint-chart/**",
     "manifest.json"
   ],
   "lint": {
@@ -30,8 +32,6 @@
   },
   "builds": [{
     "name": "default",
-    "preset": "es6-bundled",
-	"addServiceWorkfer": false,
     "css": { "minify": true },
     "js": {
        "minify": { "exclude": ["js/lib/*"] }

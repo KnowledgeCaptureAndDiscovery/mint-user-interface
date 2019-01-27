@@ -139,6 +139,7 @@ class MintResultsPublish extends PolymerElement {
           <paper-input label="Format" value="{{resource_def.resource_type}}"></paper-input>
           <paper-checkbox checked="{{resource_def.is_zip}}">Is Zip ?</paper-input>
         </div>
+        <paper-input label="Data Type" value="{{datatype}}"></paper-input>
       </fieldset>
 
       <!-- Spatial Metadata -->
@@ -239,7 +240,7 @@ class MintResultsPublish extends PolymerElement {
       </fieldset>
     </div>
 
-    <paper-button class="important" on-tap="_publishDataset">Publish</paper-button>
+    <paper-button class="important" on-tap="_publishDataset">Register</paper-button>
 `;
   }
 
@@ -263,6 +264,7 @@ class MintResultsPublish extends PolymerElement {
         type: Object,
         value: {}
       },
+      datatype: String,
 
       dataset_def: {
         type: Object,
@@ -293,7 +295,7 @@ class MintResultsPublish extends PolymerElement {
 
       regionBoundingBoxes: {
         type: Array,
-        computed: '_setBoundingBoxesForRegion(vocabulary)'
+        computed: '_getBoundingBoxesForRegion(vocabulary)'
       },
 
       tplhtml: String,
@@ -376,7 +378,10 @@ class MintResultsPublish extends PolymerElement {
     }, data);
   }
 
-  _setBoundingBoxesForRegion(vocabulary) {
+  _getBoundingBoxesForRegion(vocabulary) {
+    if(!vocabulary || !vocabulary.regions.length)
+      return [];
+
     var regions = vocabulary.regions;
     var bboxregions = [];
     while(regions.length) {
@@ -573,8 +578,8 @@ class MintResultsPublish extends PolymerElement {
     }
     //console.log(std_var_defs);
 
+    // FIXME: Dummy response to test
     /*
-    // Dummy response to test
     var json = {
       result: "success",
       standard_variables: []
@@ -589,8 +594,7 @@ class MintResultsPublish extends PolymerElement {
       })
     }
     var varmap = this._addNewStandardVariables(json.standard_variables);
-    fn(varmap);
-    */
+    fn(varmap);*/
 
     var me = this;
     me._postResource({
@@ -633,8 +637,8 @@ class MintResultsPublish extends PolymerElement {
 
     //console.log(dataset_defs);
 
-    /*
     // FIXME: Dummy response
+    /*
     var json = {
       result: "success",
       datasets: [{
@@ -643,9 +647,9 @@ class MintResultsPublish extends PolymerElement {
     }
     for(var i=0; i<json.datasets.length; i++) {
       var ds = json.datasets[i];
-      fn(ds.record_id);
-    }
-    */
+      fn(ds.record_id, def);
+    }*/
+
 
     var me = this;
     me._postResource({
@@ -656,7 +660,7 @@ class MintResultsPublish extends PolymerElement {
           console.log(json);
           for(var i=0; i<json.datasets.length; i++) {
             var ds = json.datasets[i];
-            fn(ds.record_id);
+            fn(ds.record_id, def);
           }
         }
       },
@@ -694,8 +698,8 @@ class MintResultsPublish extends PolymerElement {
 
     //console.log(var_defs);
 
-    /*
     // FIXME: Dummy response
+    /*
     var json = {
       variables: []
     }
@@ -709,8 +713,7 @@ class MintResultsPublish extends PolymerElement {
       var v = json.variables[i];
       varids.push(v.record_id);
     }
-    fn(varids);
-    */
+    fn(varids);*/
 
     var me = this;
     me._postResource({
@@ -761,8 +764,8 @@ class MintResultsPublish extends PolymerElement {
 
     //console.log(resource_defs);
 
-    // Dummy response
-    //fn();
+    // FIXME: Dummy response
+    // fn(def);
 
     var me = this;
     me._postResource({
@@ -771,7 +774,7 @@ class MintResultsPublish extends PolymerElement {
         var json = JSON.parse(e.target.responseText);
         if(json.result == "success") {
           console.log(json);
-          fn();
+          fn(def);
         }
       },
       onError: function() {
@@ -829,7 +832,7 @@ class MintResultsPublish extends PolymerElement {
       }
     }
     for(var key in metadata) {
-      if(key != "viz_config") {
+      if(!key.match(/^viz_config/)) {
         if(!this._validateItem(key, "Metadata key")) {
           return false;
         }
@@ -845,6 +848,7 @@ class MintResultsPublish extends PolymerElement {
     return (
       this._validateItem(this.resource_def.data_url, "URL") &&
       this._validateItem(this.resource_def.resource_type, "Format") &&
+      this._validateItem(this.datatype, "Data Type") &&
       this._validateItem(this.spatial.xmin, "X Min") &&
       this._validateItem(this.spatial.xmax, "X Max") &&
       this._validateItem(this.spatial.ymin, "Y Min") &&
@@ -876,18 +880,43 @@ class MintResultsPublish extends PolymerElement {
     var me = this;
     this._registerStandardNames(vars_to_register, function(varmap) {
       variables = me._getDatasetVariablesAfterUpdate();
-      me._registerDataset(provid, function(dataset_id) {
+      me._registerDataset(provid, function(dataset_id, dataset_def) {
         me._registerDatasetVariables(dataset_id, variables, function(varids) {
-          me._registerResource(provid, dataset_id, varids, function(resid) {
-            alert("Successfully Registered");
+          me._registerResource(provid, dataset_id, varids, function(resource_def) {
+            me._kickoffTransformation(dataset_id, dataset_def, resource_def, function(response) {
+              alert("Successfully Registered");
+              console.log(response);
+            });
           });
         });
       });
     });
   }
 
+  _kickoffTransformation(dataset_id, dataset_def, resource_def, fn) {
+    dataset_def.dataset_id = dataset_id;
+    dataset_def.data_url = resource_def.data_url;
+    for(var key in dataset_def.metadata) {
+      if(key.match(/^viz_config/)) {
+        dataset_def.metadata[key].datatype = this.datatype;
+      }
+    }
+    var me = this;
+    me._postResource({
+      url: me.config.transformation.server,
+      onLoad: function(e) {
+        fn(e.target.responseText);
+      },
+      onError: function() {
+        console.log("Cannot send job to Transformation Service");
+      }
+    }, dataset_def);
+  }
+
   _getCustomMetadata() {
-    var metadata = {};
+    var metadata = {
+      datatype: this.datatype
+    };
     // Get metadata values specified by the user
     var inputs = this.$.custom.querySelectorAll("paper-input");
     for(var i=0; i<inputs.length; i+=2) {
