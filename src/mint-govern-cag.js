@@ -131,7 +131,7 @@ class MintGovernCag extends PolymerElement {
     }
   }
 
-  _setTaskOutput(varids) {
+  _setTaskOutput(question, varids) {
     var me = this;
     /* Update Task */
     var acttype = this.routeData.op;
@@ -161,8 +161,10 @@ class MintGovernCag extends PolymerElement {
       onLoad: function(e) {
         var new_path = 'govern/analysis/' + this._getLocalName(me.routeData.regionid) + "/" +
           me.subrouteData.questionid + "/" + me.subrouteData.taskid;
-        window.history.pushState({}, null, new_path);
-        location.reload();
+
+        window.history.pushState({question: question, task: me.task}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        //location.reload();
       },
       onError: function() {
         console.log("Cannot update task");
@@ -187,7 +189,7 @@ class MintGovernCag extends PolymerElement {
     me._putResource({
       url: me.question.id,
       onLoad: function(e) {
-        me._setTaskOutput(me.selectedItems);
+        me._setTaskOutput(me.question, me.selectedItems);
       },
       onError: function() {
         console.log("Cannot update task");

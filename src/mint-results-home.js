@@ -39,7 +39,8 @@ class MintResultsHome extends PolymerElement {
   static get properties() {
     return {
       config: Object,
-      userid: Object
+      userid: Object,
+      vocabulary: Object
     };
   }
 }

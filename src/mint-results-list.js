@@ -171,7 +171,8 @@ class MintResultsList extends PolymerElement {
   }
 
   _getTime(time) {
-    return new Date(time*1000).toISOString().slice(0,19).replace('T', ' ');
+    if(time)
+      return new Date(time*1000).toISOString().slice(0,19).replace('T', ' ');
   }
 
   _getLocalName(id) {

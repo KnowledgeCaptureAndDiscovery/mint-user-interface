@@ -46,13 +46,13 @@ class MintGovern extends MintBaseRouter {
 
       <!-- govern analysis dashboard -->
       <mint-govern-analysis name="analysis" vocabulary="[[vocabulary]]"
-        region="{{region}}" visible="[[visible]]"
+        visible="[[visible]]"
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.analysis]]"></mint-govern-analysis>
 
       <!-- govern planner -->
       <mint-govern-planner name="planner" vocabulary="[[vocabulary]]"
-        region="{{region}}" visible="[[visible]]"
+        visible="[[visible]]"
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.planner]]"></mint-govern-planner>
 

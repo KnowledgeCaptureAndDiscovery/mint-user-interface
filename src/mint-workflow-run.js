@@ -85,7 +85,7 @@ class MintWorkflowRun extends PolymerElement {
     <div id="form" class="outer">
       <template is="dom-if" if="[[template_id]]">
         <h3>[[_localName(template.id)]]</h3>
-        <div id="documentation">[[template.metadata.documentation]]</div>
+        <!--div id="documentation">[[template.metadata.documentation]]</div-->
         <div class="grid">
           <template is="dom-repeat" items="[[inputs]]" as="input">
             <template is="dom-if" if="[[_isInputParam(input)]]">
@@ -179,7 +179,8 @@ class MintWorkflowRun extends PolymerElement {
       this.inputs = json.inputs;
       this._resetBindings();
       this._sortInputData(this.inputs);
-      //this._setDocumentation(this.template.metadata.documentation);
+      if(this.template.metadata)
+        this._setDocumentation(this.template.metadata.documentation);
     }
   }
 

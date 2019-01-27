@@ -148,6 +148,10 @@ class MintModels extends PolymerElement {
       userid: String,
       vocabulary: Object,
       question: Object,
+      task: {
+        type: Object,
+        notify: true
+      },
       modelSpecs: Array,
       modelList: {
         type: Array,
@@ -263,35 +267,41 @@ class MintModels extends PolymerElement {
     }
   }
 
-  _setTaskOutput(modelids) {
+  _setTaskOutput(question) {
     var me = this;
     /* Update Task */
+    var modelids = question.models;
     var acttype = "ChooseModels";
     var done = true;
+    var started = false;
+
+    modelids = modelids.length ? modelids : null; // Setting to null on empty list
+
     for(var actid in me.task.activities) {
       var activity = me.task.activities[actid];
       if(actid.indexOf(acttype) > 0) {
         activity.output = modelids;
       }
+      if(activity.output) {
+        started = true;
+      }
       if(!activity.output && activity.required) {
         done = false;
       }
-      else {
-        me.task.status = "ONGOING";
-      }
     }
-    if(done) {
-      me.task.status = "DONE";
-    }
+
+    me.task.status = done ? "DONE" : (started ? "ONGOING" : "NOT_STARTED");
 
     /* Save new Task in Server */
     me._putResource({
       url: me.task.id,
       onLoad: function(e) {
+        //window.history.back();
         var new_path = 'govern/analysis/' + this._getLocalName(me.routeData.regionid) + "/" +
           me.routeData.questionid + "/" + me.routeData.taskid;
-        window.history.pushState({}, null, new_path);
-        location.reload();
+        window.history.pushState({question: question, task: me.task}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        //location.reload();
       },
       onError: function() {
         console.log("Cannot update task");
@@ -314,7 +324,7 @@ class MintModels extends PolymerElement {
     me._putResource({
       url: me.question.id,
       onLoad: function(e) {
-        me._setTaskOutput(me.question.models);
+        me._setTaskOutput(me.question);
       },
       onError: function() {
         console.log("Cannot add models");

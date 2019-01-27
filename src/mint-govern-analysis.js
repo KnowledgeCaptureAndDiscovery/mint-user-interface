@@ -22,9 +22,7 @@ import './google-map-data-layer.js';
 import './mint-common-styles.js';
 import './mint-button.js';
 import './mint-simple-question-creator.js';
-//import './mint-question-creator.js';
 import './mint-task-creator.js';
-import './mint-cag-data.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
@@ -295,16 +293,16 @@ class MintGovernAnalysis extends PolymerElement {
     <!--
       app-route provides the name of the region.
     -->
-    <app-route route="[[route]]" pattern="/:region" tail="{{subRoute}}" data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:regionid" tail="{{subroute}}"
+      data="{{routeData}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:questionid" tail="{{subroute2}}"
+      data="{{qrouteData}}"></app-route>
+    <app-route route="[[subroute2]]" pattern="/:taskid"
+      data="{{trouteData}}"></app-route>
 
     <template is="dom-if" if="[[graphid]]">
       <iron-ajax url="[[graphid]]" auto handle-as="json" last-response="{{graphData}}"></iron-ajax>
     </template>
-
-    <!--
-      mint-cag-data provides the cag for a given region.
-    -->
-    <mint-cag-data id="cagData" regions="[[vocabulary.regions]]" region-name="[[routeData.region]]" region="{{region}}" cag="{{cag}}"></mint-cag-data>
 
     <template is="dom-if" if="[[visible]]">
       <template is="dom-if" if="[[userid]]">
@@ -381,10 +379,10 @@ class MintGovernAnalysis extends PolymerElement {
           </div>
 
           <div class="buttons">
-            <a class="button" href="data/browse/[[routeData.region]]">Browse data</a>
-            <a class="button" href="workflow/list/[[routeData.region]]/DATA_GENERATION">Generate new data</a>
-            <a class="button" href="govern/cag/[[routeData.region]]/browse">Browse CAG</a>
-            <a class="button" href="govern/load-cag/[[routeData.region]]">Load New CAG</a>
+            <a class="button" href="data/browse/[[routeData.regionid]]">Browse data</a>
+            <a class="button" href="workflow/list/[[routeData.regionid]]/DATA_GENERATION">Generate new data</a>
+            <a class="button" href="govern/cag/[[routeData.regionid]]/browse">Browse CAG</a>
+            <a class="button" href="govern/load-cag/[[routeData.regionid]]">Load New CAG</a>
           </div>
         </div>
 
@@ -550,7 +548,7 @@ class MintGovernAnalysis extends PolymerElement {
       },
       graphid: {
         type: Object,
-        computed: '_getGraphId(routeData.region, vocabulary)'
+        computed: '_getGraphId(routeData.regionid, vocabulary)'
       },
       graphData: Object,
       newQuestion: Object,
@@ -575,10 +573,6 @@ class MintGovernAnalysis extends PolymerElement {
         type: Object,
         notify: true
       },
-      subRoute: {
-        type: Object,
-        observer: '_subRouteChanged'
-      },
 
       dsid: {
         type: String,
@@ -586,10 +580,19 @@ class MintGovernAnalysis extends PolymerElement {
       },
       dataSpecs: Array,
 
-      cag: Object,
-
       route: Object,
-      routeData: Object,
+      routeData: {
+        type: Object,
+        observer: '_routeDataChanged'
+      },
+      qrouteData: {
+        type: Object,
+        observer: '_qrouteDataChanged'
+      },
+      trouteData: {
+        type: Object,
+        observer: '_trouteDataChanged'
+      },
       visible: Boolean,
 
       geoJsonURL: String,
@@ -604,6 +607,81 @@ class MintGovernAnalysis extends PolymerElement {
     return [
       '_regionChanged(region)'
     ];
+  }
+
+  _routeDataChanged(rd) {
+    // Region changed
+    if(rd.regionid) {
+      // No change in region ?
+      if(this.region && (rd.regionid == this._getLocalName(this.region.id))) {
+        // Check if this page was called again after updating application state
+        var state = window.history.state;
+        if(state.task && this.tasks) {
+          this._updateTaskList(state.task);
+        }
+        if(state.question && this.questions) {
+          this._updateQuestionList(state.question);
+        }
+        if(state.dataSpecs) {
+          this.set("dataSpecs", state.dataSpecs);
+        }
+        // Reset history state
+        window.history.pushState({}, null);
+        return;
+      }
+
+      // Fetch region object from vocabulary
+      for(var i=0; i<this.vocabulary.regions.length; i++) {
+        var region = this.vocabulary.regions[i];
+        if(rd.regionid == this._getLocalName(region.id)) {
+          this.set("region", region);
+        }
+      }
+    }
+  }
+
+  _updateTaskList(task) {
+    var newtasks = [];
+    for(var i=0; i<this.tasks.length; i++) {
+      newtasks[i] = this.tasks[i];
+      if(this.tasks[i].id == task.id) {
+        newtasks[i] = task;
+      }
+    }
+    this.set("tasks", newtasks);
+  }
+
+  _updateQuestionList(question) {
+    var newquestions = [];
+    for(var i=0; i<this.questions.length; i++) {
+      newquestions[i] = this.questions[i];
+      if(this.questions[i].id == question.id) {
+        newquestions[i] = question;
+      }
+    }
+    this.set("questions", newquestions);
+  }
+
+  _qrouteDataChanged(rd) {
+    // Question changed
+    if(rd.questionid) {
+      // No change in question ?
+      if(this.question && (rd.questionid == this._getLocalName(this.question.id)))
+        return;
+      // Change question id
+      this.set("questionid", rd.questionid);
+    }
+  }
+
+  _trouteDataChanged(rd) {
+    // Task changed
+    if(rd.taskid) {
+      // No change in task ?
+      if(this.task && (rd.taskid == this._getLocalName(this.task.id)))
+        return;
+      // Change task id
+      this.set("taskid", rd.taskid);
+    }
   }
 
   _getListItems(govern) {
@@ -857,12 +935,6 @@ class MintGovernAnalysis extends PolymerElement {
 
   _isTaskPartlyDone(task) {
     return task.status == "ONGOING";
-  }
-
-  _getItemHref(cag) {
-    // By returning null when `cagId` is undefined, the href attribute won't be set and
-    // the link will be disabled.
-    return cag.name ? ['govern/detail', this.region.name, cag.name].join('/') : null;
   }
 
   _getPluralizedQuantity(quantity) {

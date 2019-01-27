@@ -316,9 +316,9 @@ class MintDataBrowse extends PolymerElement {
 
   static get observers() {
     return [
-      '_initialDataFetch(question, subrouteData.op, subrouteData.varids, subregion)',
+      '_initialOverallDataFetch(region, subroute)',
+      '_initialQuestionDataFetch(question, subrouteData.op, subrouteData.varids, subregion)',
       '_createDataSpecsDetails(dataSpecs)',
-      '_setSubregion(region, subregion, subrouteData)',
       '_setSubregionForQuestion(vocabulary, question)'
     ];
   }
@@ -362,24 +362,29 @@ class MintDataBrowse extends PolymerElement {
     }
   }
 
-  _setSubregion(region, subregion, subrouteData) {
-    if(subrouteData.op)
-      return;
-    if(!subregion && region) {
-      this.set("subregion", region);
-      this._getDataList();
+  _initialOverallDataFetch(region, subroute) {
+    if(!subroute.path || subroute.path == "" ) {
+      if(region) {
+        this.set("subregion", region);
+        this.set("queryConfig.variables", null);
+        this._getDataList();
+      }
     }
   }
 
-  _initialDataFetch(question, op, varids, subregion) {
+  _initialQuestionDataFetch(question, op, varids, subregion) {
     if(!question)
       return;
     if(varids)
       this.set("queryConfig.variables", varids);
     if(subregion)
       this.set("queryConfig.bbox", subregion.bbox);
-    if(subregion && op == "select")
-      this._getDataList();
+
+    if(subregion && op == "select") {
+      afterNextRender(this, () => {
+        this._getDataList();
+      });
+    }
   }
 
   _getRegionObject(vocabulary, regionid) {
@@ -620,7 +625,7 @@ class MintDataBrowse extends PolymerElement {
       me._putResource({
         url: me.dataSpecs[0].id,
         onLoad: function(e) {
-          me._goBack();
+          me.setTaskOutput(me.dataSpecs[0].id);
         },
         onError: function() {
           console.log("Cannot update data");
@@ -643,26 +648,27 @@ class MintDataBrowse extends PolymerElement {
     }
   }
 
-  _goBack() {
-    var new_path = '/govern/analysis/' + this._getLocalName(this.routeData.regionid) + "/" +
-      this.subrouteData.questionid + "/" + this.subrouteData.taskid;
-    window.history.pushState({}, null, new_path)
-    location.reload();
-  }
-
   setTaskOutput(output) {
     var me = this;
-    me.task.status = "DONE";
-    me.task.output = [output];
+    var empty = me.dataSpec.ensemble.length ? false: true;
+
+    me.task.status = empty ? "NOT_STARTED" : "DONE";
+    me.task.output = empty ? null : [output];
     for(var actid in me.task.activities) {
       if(actid.indexOf("SelectDatasets") > 0) {
-        me.task.activities[actid].output = [output];
+        me.task.activities[actid].output = empty ? null : [output];
       }
     }
+
     me._putResource({
       url: me.task.id,
       onLoad: function(e) {
-        me._goBack();
+        var new_path = '/govern/analysis/' + me._getLocalName(me.routeData.regionid) + "/" +
+          me.subrouteData.questionid + "/" + me.subrouteData.taskid;
+
+        window.history.pushState({task: me.task, dataSpecs: me.dataSpecs}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        //location.reload();
       },
       onError: function() {
         console.log("Cannot update task");
