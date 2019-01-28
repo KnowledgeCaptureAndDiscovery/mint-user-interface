@@ -604,14 +604,15 @@ class MintResultsPublish extends PolymerElement {
     var variables = [];
     for(var i=0; i<vocabulary.models.length; i++) {
       var m = vocabulary.models[i];
-      if(m.localName == cid) {
+      if(this._getLocalName(m.id) == cid) {
         for(var j=0; j<m.outputs.length; j++) {
           var io = m.outputs[j];
-          if(io.localName == vid) {
+          if(this._getLocalName(io.id) == vid) {
+            this.datatype = this._getLocalName(io.type); // Set the datatype
             for(var k=0; k<io.variables.length; k++) {
               variables.push({
                 standard_name: io.variables[k].standard_name,
-                name: io.variables[k].localName,
+                name: this._getLocalName(io.variables[k].id),
                 units: io.variables[k].units
               });
             }
@@ -619,11 +620,12 @@ class MintResultsPublish extends PolymerElement {
         }
         for(var j=0; j<m.inputs.length; j++) {
           var io = m.inputs[j];
-          if(io.localName == vid) {
+          if(this._getLocalName(io.id) == vid) {
+            this.datatype = this._getLocalName(io.type); // Set the datatype
             for(var k=0; k<io.variables.length; k++) {
               variables.push({
                 standard_name: io.variables[k].standard_name,
-                name: io.variables[k].localName,
+                name: this._getLocalName(io.variables[k].id),
                 units: io.variables[k].units
               });
             }
@@ -632,6 +634,12 @@ class MintResultsPublish extends PolymerElement {
       }
     }
     return variables;
+  }
+
+  _getLocalName(id) {
+    if(id.match(/#/))
+      return id.replace(/^.*#/, '');
+    return id.substring(id.lastIndexOf("/") + 1);
   }
 
   _registerStandardNames(vars, fn) {
