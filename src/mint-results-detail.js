@@ -306,7 +306,12 @@ class MintResultsDetail extends PolymerElement {
     if(varitem) {
       var type = varitem["@type"];
       if(Array.isArray(type)) {
-        type = type[type.length - 1];
+        for(var i=0; i<type.length; i++) {
+          if(!type[i].match(/(Data|Parameter)Variable/)) {
+            type = type[i];
+            break;
+          }
+        }
       }
       return type.replace(/^.+#/, '');
     }

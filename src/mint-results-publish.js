@@ -339,7 +339,7 @@ class MintResultsPublish extends PolymerElement {
     return [
       '_fetchGSNStandardVariables()',
       '_resetForm(subrouteData.dsid, subrouteData.compid, subrouteData.varid, subrouteData.vartype)',
-      '_fetchMetadata(config, userid, vocabulary, routeData.domain, subrouteData.runid, subrouteData.compid, subrouteData.varid, subrouteData.dsid)'
+      '_fetchMetadata(config, userid, vocabulary, routeData.domain, subrouteData.runid, subrouteData.compid, subrouteData.varid, subrouteData.vartype, subrouteData.dsid)'
     ]
   }
 
@@ -389,16 +389,18 @@ class MintResultsPublish extends PolymerElement {
     this.push("viz_configs", viz_config);
   }
 
-  _fetchMetadata(config, userid, vocabulary, dom, runid, cid, vid, dsid) {
-    if(config && userid && vocabulary && dom && runid && cid && vid && dsid) {
+  _fetchMetadata(config, userid, vocabulary, dom, runid, cid, vid, vtype, dsid) {
+    if(config && userid && vocabulary && dom && runid && cid && vid && vtype && dsid) {
       var variables = [];
-      var vars = this._getDataVariables(vocabulary, cid, vid);
+      var vars = this._getDataVariables(vocabulary, cid, vid, vtype);
       for(var i=0; i<vars.length; i++) {
-        variables.push({
-          standard_name: vars[i].standard_name,
-          name: vars[i].name,
-          units: vars[i].units
-        });
+        if(vars[i].standard_name) {
+          variables.push({
+            standard_name: vars[i].standard_name,
+            name: vars[i].name,
+            units: vars[i].units
+          });
+        }
       }
       this.set("variables", variables);
     }
@@ -600,14 +602,16 @@ class MintResultsPublish extends PolymerElement {
     btn.addEventListener("click", this._removeRow);
   }
 
-  _getDataVariables(vocabulary, cid, vid) {
+  _getDataVariables(vocabulary, cid, vid, vtype) {
     var variables = [];
     for(var i=0; i<vocabulary.models.length; i++) {
       var m = vocabulary.models[i];
       if(this._getLocalName(m.id) == cid) {
         for(var j=0; j<m.outputs.length; j++) {
           var io = m.outputs[j];
-          if(this._getLocalName(io.id) == vid) {
+          // Match the model's io id or io type
+          if(this._getLocalName(io.id) == vid ||
+              this._getLocalName(io.type) == vtype) {
             this.datatype = this._getLocalName(io.type); // Set the datatype
             for(var k=0; k<io.variables.length; k++) {
               variables.push({
@@ -620,7 +624,8 @@ class MintResultsPublish extends PolymerElement {
         }
         for(var j=0; j<m.inputs.length; j++) {
           var io = m.inputs[j];
-          if(this._getLocalName(io.id) == vid) {
+          if(this._getLocalName(io.id) == vid ||
+              this._getLocalName(io.type) == vtype) {
             this.datatype = this._getLocalName(io.type); // Set the datatype
             for(var k=0; k<io.variables.length; k++) {
               variables.push({

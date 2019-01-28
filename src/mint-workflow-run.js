@@ -17,6 +17,7 @@ import '@polymer/paper-item/paper-item.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 import './wings-workflow.js';
 import './mint-common-styles.js';
@@ -83,9 +84,9 @@ class MintWorkflowRun extends PolymerElement {
       <paper-button>Run Workflow</paper-button>
     </div>
     <div id="form" class="outer">
+      <h3>[[_localName(template.id)]]</h3>
+      <div id="documentation"></div>
       <template is="dom-if" if="[[template_id]]">
-        <h3>[[_localName(template.id)]]</h3>
-        <!--div id="documentation">[[template.metadata.documentation]]</div-->
         <div class="grid">
           <template is="dom-repeat" items="[[inputs]]" as="input">
             <template is="dom-if" if="[[_isInputParam(input)]]">
@@ -185,10 +186,12 @@ class MintWorkflowRun extends PolymerElement {
   }
 
   _setDocumentation(doc) {
-    if(doc)
-      this.$.documentation.innerHTML = doc;
-    else
-      this.$.documentation.innerHTML = '';
+    afterNextRender(this, () => {
+      if(doc)
+        this.$.documentation.innerHTML = doc;
+      else
+        this.$.documentation.innerHTML = '';
+    });
   }
 
   _setValues() {

@@ -616,6 +616,9 @@ class MintGovernAnalysis extends PolymerElement {
       if(this.region && (rd.regionid == this._getLocalName(this.region.id))) {
         // Check if this page was called again after updating application state
         var state = window.history.state;
+        if(!state)
+          return;
+
         if(state.task && this.tasks) {
           this._updateTaskList(state.task);
         }
