@@ -125,7 +125,7 @@ class MintResultsPublish extends PolymerElement {
       data="{{routeData}}" tail="{{subroute}}"></app-route>
 
     <app-route route="[[subroute]]"
-      pattern="/:runid/:compid/:varid/:dsid"
+      pattern="/:runid/:compid/:varid/:vartype/:dsid"
       data="{{subrouteData}}"></app-route>
 
     <iron-ajax auto last-response="{{viz_type}}"
@@ -138,7 +138,12 @@ class MintResultsPublish extends PolymerElement {
         <legend>Required Metadata</legend>
         <paper-input label="Name" value="{{dataset_def.name}}"></paper-input>
         <paper-input label="Description" value="{{dataset_def.description}}"></paper-input>
-        <paper-input label="URL" value="{{resource_def.data_url}}"></paper-input>
+        <div class="formatrow">
+          <paper-input label="URL" value="{{resource_def.data_url}}"></paper-input>
+          <template is="dom-if" if="[[subrouteData.runid]]">
+            <a class="action" on-tap="_publishFile" title="Get File URL"><iron-icon icon="cloud-upload" /></a>
+          </template>
+        </div>
         <div class="formatrow">
           <paper-input label="Format" value="{{resource_def.resource_type}}"></paper-input>
           <paper-checkbox checked="{{resource_def.is_zip}}">Is Zip ?</paper-input>
@@ -333,7 +338,7 @@ class MintResultsPublish extends PolymerElement {
   static get observers() {
     return [
       '_fetchGSNStandardVariables()',
-      '_resetForm(subrouteData.dsid, subrouteData.compid, subrouteData.varid)',
+      '_resetForm(subrouteData.dsid, subrouteData.compid, subrouteData.varid, subrouteData.vartype)',
       '_fetchMetadata(config, userid, vocabulary, routeData.domain, subrouteData.runid, subrouteData.compid, subrouteData.varid, subrouteData.dsid)'
     ]
   }
@@ -397,6 +402,27 @@ class MintResultsPublish extends PolymerElement {
       }
       this.set("variables", variables);
     }
+  }
+
+  _publishFile(e) {
+    var input = e.target.parentNode.parentNode.querySelector("paper-input");
+    input.placeholder = "Fetching URL ... ";
+    var url = this.config.wings.server + "/users/" + this.userid + "/" +
+      this.routeData.domain + "/data/publish";
+    var datalib = this.config.wings.internal_server + "/export/users/" +
+      this.userid + "/" + this.routeData.domain + "/data/library.owl#" +
+      this.subrouteData.dsid;
+    url = url + "?data_id=" + encodeURIComponent(datalib);
+    this._getResource({
+      url: url,
+      onLoad: function(e) {
+        input.placeholder = null;
+        input.value = e.target.responseText;
+      },
+      onError: function() {
+        console.log("Cannot publish file");
+      }
+    });
   }
 
   _fetchGSNStandardVariables() {
@@ -537,12 +563,15 @@ class MintResultsPublish extends PolymerElement {
     return vars.join("\n");
   }
 
-  _resetForm(dsid, compid, varid) {
+  _resetForm(dsid, compid, varid, vartype) {
     if(dsid) {
       this.set("dataset_def.name", dsid);
     }
     if(compid && varid) {
       this.set("dataset_def.description", varid+" output from "+ compid);
+    }
+    if(vartype) {
+      this.set("datatype", vartype);
     }
   }
 
@@ -1063,6 +1092,14 @@ class MintResultsPublish extends PolymerElement {
     xhr.send(JSON.stringify(data));
   }
 
+  _getResource(rq) {
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', rq.onLoad.bind(this));
+    xhr.addEventListener('error', rq.onError.bind(this));
+    xhr.withCredentials = true;
+    xhr.open('GET', rq.url);
+    xhr.send();
+  }
 }
 
 customElements.define(MintResultsPublish.is, MintResultsPublish);

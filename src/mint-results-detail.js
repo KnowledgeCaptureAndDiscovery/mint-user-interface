@@ -139,7 +139,7 @@ class MintResultsDetail extends PolymerElement {
             <h2>The workflow produced the following data:</h2>
             <div class="section">
               <template is="dom-repeat"
-              items="[[_getVariableBindings(runDetail.variables.output, originalTemplate)]]" as="varbinding">
+              items="[[_getVariableBindings(runDetail.variables.output, hashedTemplate)]]" as="varbinding">
                 <div class="head">[[varbinding.variable]]</div>
                 <div class="grid">
                     <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
@@ -153,7 +153,7 @@ class MintResultsDetail extends PolymerElement {
                             href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                             ><iron-icon icon="file-download"></iron-icon></a>
                           <a title="Publish"
-                            href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[_localName(binding.id)]]"
+                            href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
                             ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                         </template>
                       </span>
@@ -171,7 +171,7 @@ class MintResultsDetail extends PolymerElement {
           <h2>The workflow used these inputs:</h2>
           <div class="section">
             <template is="dom-repeat"
-            items="[[_getVariableBindings(runDetail.variables.input, originalTemplate)]]" as="varbinding">
+            items="[[_getVariableBindings(runDetail.variables.input, hashedTemplate)]]" as="varbinding">
               <div class="head">[[varbinding.variable]]</div>
               <div class="grid">
                 <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
@@ -207,6 +207,10 @@ class MintResultsDetail extends PolymerElement {
       routeData: Object,
       failure: Boolean,
       originalTemplate: Object,
+      hashedTemplate: {
+        type: Object,
+        computed: '_hashTemplate(originalTemplate)'
+      },
       runDetail: Object,
       visible: {
         type: Boolean,
@@ -229,6 +233,16 @@ class MintResultsDetail extends PolymerElement {
       turl = turl.replace(this.config.wings.internal_server, this.config.wings.server);
       return turl + "?format=json";
     }
+  }
+
+  _hashTemplate(tpl) {
+    var hash = {};
+    var gitems = tpl["@graph"];
+    for(var i=0; i<gitems.length; i++) {
+      var id = gitems[i]["@id"];
+      hash[id] = gitems[i];
+    }
+    return hash;
   }
 
   _getVariableBindings(bindings, tpl) {
@@ -256,6 +270,7 @@ class MintResultsDetail extends PolymerElement {
     for(var varname in bhash) {
       nbindings.push({
         variable: varname,
+        vartype: this._getVariableType(tpl, varname),
         component: this._getVariableProducer(tpl, varname),
         bindings: bhash[varname]
       })
@@ -270,28 +285,30 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _getVariableProducer(tpl, varname) {
-    var gitems = tpl["@graph"];
     var onodeid = null;
-    for(var i=0; i<gitems.length; i++) {
-      if(gitems[i]["hasVariable"] == "#" + varname) {
-        onodeid = gitems[i]["hasOriginNode"];
+    for(var id in tpl) {
+      if(tpl[id]["hasVariable"] == "#" + varname) {
+        onodeid = tpl[id]["hasOriginNode"];
       }
     }
     if(onodeid) {
-      var cvarid = null;
-      for(var i=0; i<gitems.length; i++) {
-        if(gitems[i]["@id"] == onodeid) {
-          cvarid = gitems[i]["hasComponent"];
-        }
-      }
+      var cvarid = tpl[onodeid]["hasComponent"];
       if(cvarid) {
-        for(var i=0; i<gitems.length; i++) {
-          if(gitems[i]["@id"] == cvarid) {
-            var cid = gitems[i]["hasComponentBinding"];
-            return cid.replace(/^.+#/, '');
-          }
-        }
+        var cid = tpl[cvarid]["hasComponentBinding"];
+        return cid.replace(/^.+#/, '');
       }
+    }
+    return null;
+  }
+
+  _getVariableType(tpl, varname) {
+    var varitem = tpl["#"+varname];
+    if(varitem) {
+      var type = varitem["@type"];
+      if(Array.isArray(type)) {
+        type = type[type.length - 1];
+      }
+      return type.replace(/^.+#/, '');
     }
     return null;
   }
