@@ -106,6 +106,10 @@ class MintResultsPublish extends PolymerElement {
         }
       }
 
+      fieldset fieldset {
+        margin: 5px;
+        margin-bottom: 15px;
+      }
       div.row paper-input.unitsinput {
         width: 140px;
       }
@@ -207,35 +211,46 @@ class MintResultsPublish extends PolymerElement {
 
       <!-- Visualization -->
       <fieldset>
-        <legend>Visualization Metadata</legend>
-        <paper-dropdown-menu no-animations="" label="Visualization Preference">
-          <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{viz_config.viz_type}}">
-            <paper-item value="">None</paper-item>
-            <template is="dom-repeat" items="[[viz_type.types]]">
-              <paper-item value="[[item]]">[[item]]</paper-item>
+        <legend>
+          Visualization Metadata
+          <a class="actionbig" on-click="_addVisualization"><iron-icon icon="add" /></a>
+        </legend>
+        <template is="dom-repeat" items="[[viz_configs]]" as="viz_config">
+          <fieldset>
+            <legend>
+              Visualization
+              <a class="action" on-click="_delVisualization"><iron-icon icon="cancel" /></a>
+            </legend>
+            <paper-dropdown-menu no-animations="" label="Visualization Preference">
+              <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{viz_config.viz_type}}">
+                <paper-item value="">None</paper-item>
+                <template is="dom-repeat" items="[[viz_type.types]]">
+                  <paper-item value="[[item]]">[[item]]</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <template is="dom-if" if="[[viz_config.viz_type]]">
+              <template is="dom-repeat" items="[[_getVizKeyMetadata(viz_config.id, viz_config.viz_type)]]">
+                <template is="dom-if" if="[[_isEqual(item.htmltag, 'select')]]">
+                  <paper-dropdown-menu no-animations name="[[item.name]]"
+                      label="[[_makeLabel(item.name)]] ([[item.description]])"
+                      placeholder="[[item.placeholder]]" always-float-label>
+                    <paper-listbox slot="dropdown-content"
+                      attr-for-selected="value" selected="{{item.value}}">
+                      <template is="dom-repeat" items="[[_getSelectOptions(item)]]" as="option">
+                        <paper-item value="[[option]]">[[option]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
+                </template>
+                <template is="dom-if" if="[[_isEqual(item.htmltag, 'input')]]">
+                  <paper-input name="[[item.name]]" value="{{item.value}}"
+                      label="[[_makeLabel(item.name)]] ([[item.description]])"
+                      placeholder="[[item.placeholder]]" always-float-label></paper-input>
+                </template>
+              </template>
             </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <template is="dom-if" if="[[viz_config.viz_type]]">
-          <template is="dom-repeat" items="[[_getVizKeyMetadata(viz_config.viz_type)]]">
-            <template is="dom-if" if="[[_isEqual(item.htmltag, 'select')]]">
-              <paper-dropdown-menu no-animations name="[[item.name]]"
-                  label="[[_makeLabel(item.name)]] ([[item.description]])"
-                  placeholder="[[item.placeholder]]" always-float-label>
-                <paper-listbox slot="dropdown-content"
-                  attr-for-selected="value" selected="{{item.value}}">
-                  <template is="dom-repeat" items="[[_getSelectOptions(item)]]" as="option">
-                    <paper-item value="[[option]]">[[option]]</paper-item>
-                  </template>
-                </paper-listbox>
-              </paper-dropdown-menu>
-            </template>
-            <template is="dom-if" if="[[_isEqual(item.htmltag, 'input')]]">
-              <paper-input name="[[item.name]]" value="{{item.value}}"
-                  label="[[_makeLabel(item.name)]] ([[item.description]])"
-                  placeholder="[[item.placeholder]]" always-float-label></paper-input>
-            </template>
-          </template>
+          </fieldset>
         </template>
       </fieldset>
     </div>
@@ -255,6 +270,10 @@ class MintResultsPublish extends PolymerElement {
       dsurl: String,
       metadata: Array,
       viz_type: Object,
+      keys: {
+        type: Object,
+        value: {}
+      },
 
       spatial: {
         type: Object,
@@ -278,11 +297,9 @@ class MintResultsPublish extends PolymerElement {
           metadata: {}
         }
       },
-      viz_config: {
-        type: Object,
-        value: {
-          metadata: {}
-        }
+      viz_configs: {
+        type: Array,
+        value: []
       },
       vocabulary: Object,
 
@@ -340,6 +357,31 @@ class MintResultsPublish extends PolymerElement {
         dp.set("i18n.parseDate", (function(a) { return this._parseDate(a); }).bind(this));
       }
     });
+  }
+
+  _uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  _delVisualization(evnt) {
+    var viz_config = evnt.model.get('viz_config');
+    var index = this.viz_configs.indexOf(viz_config);
+    if(index >= 0) {
+      this.splice("viz_configs", index, 1);
+    }
+  }
+
+  _addVisualization() {
+    var viz_config = {
+      id: this._uuidv4(),
+      transformed: false,
+      visualized: false,
+      metadata: {}
+    };
+    this.push("viz_configs", viz_config);
   }
 
   _fetchMetadata(config, userid, vocabulary, dom, runid, cid, vid, dsid) {
@@ -455,17 +497,21 @@ class MintResultsPublish extends PolymerElement {
   }
 
 
-  _getVizKeyMetadata(viztype) {
+  _getVizKeyMetadata(vizid, viztype) {
+    var hashid = vizid + viztype;
+    if(this.keys[hashid])
+      return this.keys[hashid];
     var metadata = [];
     if(this.viz_type && this.viz_type[viztype]) {
       var vtype = this.viz_type[viztype];
       for(var i=0; i<vtype.keys.length; i++) {
         var key = vtype.keys[i];
-        var keymeta = vtype[key];
+        var keymeta = Object.assign({}, vtype[key]);
         keymeta.name = key;
         metadata.push(keymeta);
       }
     }
+    this.keys[hashid] = metadata;
     return metadata;
   }
 
@@ -824,15 +870,21 @@ class MintResultsPublish extends PolymerElement {
 
   _validateMetadata() {
     var metadata = this._getCustomMetadata();
-    if(metadata.viz_config) {
-      for(var key in metadata.viz_config.metadata) {
-        if(!this._validateItem(metadata.viz_config.metadata[key], "Visualization: " + key)) {
+
+    for(var key in metadata) {
+      if(key.match(/^viz_config/)) {
+        // Viz config
+        var viz_config = metadata[key];
+        if(!this._validateItem(viz_config.viz_type, "Visualization Preference"))
           return false;
+        for(var vizkey in viz_config.metadata) {
+          if(!this._validateItem(viz_config.metadata[vizkey], "Visualization: " + vizkey)) {
+            return false;
+          }
         }
       }
-    }
-    for(var key in metadata) {
-      if(!key.match(/^viz_config/)) {
+      else {
+        // Normal custom metadata
         if(!this._validateItem(key, "Metadata key")) {
           return false;
         }
@@ -925,19 +977,25 @@ class MintResultsPublish extends PolymerElement {
       if(kip.value && vip.value)
         metadata[kip.value] = vip.value;
     }
-    // Convert viz_config to metadata
-    this.viz_config.transformed = false;
-    this.viz_config.visualized = false;
-    if(this.viz_config.viz_type) {
-      var vtype = this.viz_type[this.viz_config.viz_type];
-      var keys = vtype["keys"];
-      this.viz_config.metadata = {};
-      for(var i=0; i<keys.length; i++) {
-        var key = keys[i];
-        var value = vtype[key].value;
-        this.viz_config.metadata[key] = value;
+    // Convert viz_configs to metadata
+    for(var i=0; i<this.viz_configs.length; i++) {
+      var viz = this.viz_configs[i];
+      var viz_config = {
+        id: viz.id,
+        viz_type: viz.viz_type,
+        metadata: {}
       }
-      metadata["viz_config"] = this.viz_config;
+      if(viz.viz_type) {
+        var hashid = viz.id + viz.viz_type;
+        var keys = this.keys[hashid];
+        if(keys) {
+          for(var j=0; j<keys.length; j++) {
+            var key = keys[j];
+            viz_config.metadata[key.name] = key.value;
+          }
+        }
+      }
+      metadata["viz_config_"+viz_config.id] = viz_config;
     }
     return metadata;
   }
