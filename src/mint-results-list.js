@@ -68,15 +68,16 @@ class MintResultsList extends PolymerElement {
 
     </style>
 
-    <app-route
-        route="[[route]]"
-        pattern="/:domain"
-        data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:domain"
+      data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <app-route route="[[subroute]]" pattern="/:templateid"
+        data="{{subrouteData}}"></app-route>
 
     <mint-ajax id="runlistAjax"
       url="[[_getRunListURL(config.wings.server, userid, routeData.domain)]]"></mint-ajax>
 
-    <vaadin-grid id="results" items="[[runList]]" class="detail" active-item="{{activeItem}}" >
+    <vaadin-grid id="results" items="[[filteredRunList]]" class="detail" active-item="{{activeItem}}" >
       <vaadin-grid-selection-column hidden auto-select></vaadin-grid-selection-column>
       <vaadin-grid-column path="id" hidden></vaadin-grid-column>
       <vaadin-grid-column flex-grow="0" width="50px">
@@ -119,6 +120,10 @@ class MintResultsList extends PolymerElement {
         observer: '_changedActiveItem'
       },
       runList: Array,
+      filteredRunList: {
+        type: Array,
+        computed: '_filterRunList(runList, subrouteData)'
+      },
       route: Object,
       routeData: Object
     };
@@ -146,6 +151,19 @@ class MintResultsList extends PolymerElement {
     else {
       this.runList = [];
     }
+  }
+
+  _filterRunList(list, srd) {
+    if(!srd || !srd.template_id)
+      return list;
+    var tname = srd.template_id;
+    var nlist = [];
+    for(var i=0; i<list.length; i++) {
+      var runtname = this._getLocalName(list[i].template_id);
+      if(runtname == tname)
+        nlist.push(list[i]);
+    }
+    return nlist;
   }
 
   _getRunListURL(server, userid, domain) {

@@ -211,11 +211,29 @@ class MintGovernAnalysis extends PolymerElement {
         border: 1px solid #999999;
       }
       .history .scroller {
-        background-color: white;
+        display: flex;
+        flex-flow: row;
+        /*background-color: white;*/
         font-size: 13px;
         overflow: scroll;
         padding: 5px;
-        max-height: 200px;
+        max-height: 400px;
+      }
+
+      .left, .middle, .right {
+        width: 100%;
+        padding: 5px;
+        margin-right: 10px;
+        background-color: white;
+        border-radius: 5px;
+        border: 1px solid #DDD;
+      }
+      .scroller b {
+        font-size: 12px;
+        color: var(--app-accent-color);
+      }
+      .right {
+        margin-right: 0px;
       }
 
       a.button iron-icon {
@@ -475,55 +493,67 @@ class MintGovernAnalysis extends PolymerElement {
           </div>
           <div>
             <div class="scroller">
-              <b>SUB REGION</b>
-              <ul>
-                <template is="dom-if" if="[[questionRegion]]">
-                  <li>[[questionRegion.label]]</li>
-                </template>
-              </ul>
+              <div class="left">
+                <b>SUB REGION</b>
+                <ul>
+                  <template is="dom-if" if="[[questionRegion]]">
+                    <li>[[questionRegion.label]]</li>
+                  </template>
+                </ul>
 
-              <b>DRIVING VARIABLES</b>
-              <ul>
-                <template is="dom-repeat" items="[[question.drivingVariables]]">
-                  <li>[[_getVariableDetail(item, graphData)]]</li>
-                </template>
-              </ul>
+                <b>DRIVING VARIABLES</b>
+                <ul>
+                  <template is="dom-repeat" items="[[question.drivingVariables]]">
+                    <li>[[_getVariableDetail(item, graphData)]]</li>
+                  </template>
+                </ul>
 
-              <b>RESPONSE VARIABLES:</b>
-              <ul>
-                <template is="dom-repeat" items="[[question.responseVariables]]">
-                  <li>[[_getVariableDetail(item, graphData)]]</li>
-                </template>
-              </ul>
-
-              <b>DATASETS:</b>
-              <ul>
-                <template is="dom-repeat" items="[[dataSpecs]]" as="dataSpec">
-                  <template is="dom-repeat" items="[[dataSpec.ensemble]]" as="ensemble">
-                    <template is="dom-repeat" items="[[ensemble.datasets]]" as="dataset">
-                    <li>
-                      <div class="dataset">
-                        [[dataset.name]]
-                      </div>
-                    </li>
+                <b>RESPONSE VARIABLES:</b>
+                <ul>
+                  <template is="dom-repeat" items="[[question.responseVariables]]">
+                    <li>[[_getVariableDetail(item, graphData)]]</li>
+                  </template>
+                </ul>
+              </div>
+              <div class="middle">
+                <b>DATASETS:</b>
+                <ul>
+                  <template is="dom-repeat" items="[[dataSpecs]]" as="dataSpec">
+                    <template is="dom-repeat" items="[[dataSpec.ensemble]]" as="ensemble">
+                      <template is="dom-repeat" items="[[ensemble.datasets]]" as="dataset">
+                      <li>
+                        <div class="dataset">
+                          [[dataset.name]]
+                        </div>
+                      </li>
+                      </template>
                     </template>
                   </template>
-                </template>
-              </ul>
+                </ul>
 
-              <b>MODELS:</b>
-              <ul>
-                <template is="dom-repeat" items="[[question.models]]">
-                  <li>[[_getModelDetail(item, vocabulary)]]</li>
-                </template>
-              </ul>
+                <b>MODELS:</b>
+                <ul>
+                  <template is="dom-repeat" items="[[question.models]]">
+                    <li>[[_getModelDetail(item, vocabulary)]]</li>
+                  </template>
+                </ul>
+              </div>
 
-              <b>WORKFLOWS:</b>
-              <ul>
-                <template is="dom-if" if="[[workflow]]">
-                  <li>[[_getWorkflowDetail(workflow)]]</li>
-                </template>
-              </ul>
+              <div class="right">
+                <b>WORKFLOWS:</b>
+                <ul>
+                  <template is="dom-if" if="[[workflow]]">
+                    <li>[[_getWorkflowDetail(workflow)]]</li>
+                  </template>
+                </ul>
+
+                <b>RUNS:</b>
+                <ul>
+                  <template is="dom-if" if="[[run]]">
+                    <li>[[_getRunDetail(run)]]</li>
+                  </template>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -586,6 +616,10 @@ class MintGovernAnalysis extends PolymerElement {
       workflow: {
         type: String,
         computed: '_getWorkflow(tasks)'
+      },
+      run: {
+        type: String,
+        computed: '_getRun(tasks)'
       },
       dataSpecs: Array,
 
@@ -733,7 +767,11 @@ class MintGovernAnalysis extends PolymerElement {
   }
 
   _getWorkflowDetail(workflow) {
-    return workflow.id;
+    return workflow.name;
+  }
+
+  _getRunDetail(run) {
+    return run.name;
   }
 
   _getGraphVariable(varid, graphData) {
@@ -917,7 +955,32 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
+  _getRun(tasks) {
+    if(tasks == null)
+      return null;
+    for(var i=0; i<tasks.length; i++) {
+      var task = tasks[i];
+      if(task.type.indexOf("RunWorkflow") > 0) {
+        if(task.output && task.output.length > 0) {
+          var runid = task.output[0];
+          var regex = /\/([^\/]+)\/executions\/([^\/]+)\.owl/;
+          var m = regex.exec(runid);
+          if(m) {
+            return {
+              id: runid,
+              name: m[2],
+              label: m[2],
+              domain: m[1]
+            };
+          }
+        }
+      }
+    }
+  }
+
   _getActivityLink(link, region, questionid, taskid) {
+    if(!link || !region)
+      return;
     link = link.replace("<regionid>", this._getLocalName(region.id));
     link = link.replace("<questionid>", questionid);
     link = link.replace("<taskid>", taskid);
@@ -949,12 +1012,19 @@ class MintGovernAnalysis extends PolymerElement {
         link = link.replace("<response_variables>", "");
     }
     if(link.indexOf("<workflow.") > 0) {
-      console.log(this.workflow);
       var m;
       while(m = link.match(/\<workflow\.(.+?)\>/)) {
         if(!m)
           break;
         link = link.replace("<workflow."+m[1]+">", this.workflow[m[1]]);
+      }
+    }
+    if(link.indexOf("<run.") > 0) {
+      var m;
+      while(m = link.match(/\<run\.(.+?)\>/)) {
+        if(!m)
+          break;
+        link = link.replace("<run."+m[1]+">", this.run[m[1]]);
       }
     }
     if(link.indexOf("<config.wings.") > 0) {

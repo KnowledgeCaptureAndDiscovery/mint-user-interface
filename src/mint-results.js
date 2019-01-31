@@ -29,12 +29,15 @@ class MintResults extends MintBaseRouter {
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
       <!-- Results Home -->
       <mint-results-home name="home" config="[[config]]" userid="[[userid]]"
+        vocabulary="[[vocabulary]]"
         route="[[pageSubRoute.home]]"></mint-results-home>
       <!-- Results List -->
       <mint-results-list name="list" config="[[config]]" userid="[[userid]]"
+        vocabulary="[[vocabulary]]"
         route="[[pageSubRoute.list]]"></mint-results-list>
       <!-- Results Detail -->
       <mint-results-detail name="detail" config="[[config]]" userid="[[userid]]"
+        vocabulary="[[vocabulary]]"
         route="[[pageSubRoute.detail]]"></mint-results-detail>
       <!-- Results Publish -->
       <mint-results-publish name="publish" vocabulary="[[vocabulary]]"

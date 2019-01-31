@@ -127,12 +127,12 @@ class MintResultsDetail extends PolymerElement {
     <mint-ajax id="rundetailAjax" method="POST"
       result="{{runDetail}}"></mint-ajax>
 
-    <mint-ajax auto result="{{originalTemplate}}" url="[[_getOriginalTemplateURL(runDetail)]]"></mint-ajax>
+    <mint-ajax auto result="{{seededTemplate}}" url="[[_getOriginalTemplateURL(runDetail)]]"></mint-ajax>
 
     <div id="content">
       <template is="dom-if" if="[[_isDefined(userid)]]">
         <div class="detail" has-content$="[[_isRunDefined(runDetail)]]">
-          <h1>Ran the workflow '[[_localName(runDetail.execution.originalTemplateId)]]'
+          <h1>Ran the workflow '[[_localName(runDetail.execution.seededTemplateId)]]'
             [[_formatTime(runDetail.execution.runtimeInfo.startTime)]] ago</h1>
           <!--h4>Run Id: [[runid]]</h4-->
           <template is="dom-if" if="[[_isSuccessful(runDetail.execution.runtimeInfo.status)]]">
@@ -206,10 +206,10 @@ class MintResultsDetail extends PolymerElement {
       route: Object,
       routeData: Object,
       failure: Boolean,
-      originalTemplate: Object,
+      seededTemplate: Object,
       hashedTemplate: {
         type: Object,
-        computed: '_hashTemplate(originalTemplate)'
+        computed: '_hashTemplate(seededTemplate)'
       },
       runDetail: Object,
       visible: {
@@ -228,7 +228,7 @@ class MintResultsDetail extends PolymerElement {
 
   _getOriginalTemplateURL(run) {
     if(run && run.execution) {
-      var turl = run.execution.originalTemplateId;
+      var turl = run.execution.seededTemplateId;
       turl = turl.replace(/#.+$/, '');
       turl = turl.replace(this.config.wings.internal_server, this.config.wings.server);
       return turl + "?format=json";
@@ -412,7 +412,7 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _isRunDefined(run) {
-    return run && run.execution && run.execution.originalTemplateId != null;
+    return run && run.execution && run.execution.seededTemplateId != null;
   }
 
   _isDefined(item) {

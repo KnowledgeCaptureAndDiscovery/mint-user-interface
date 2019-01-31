@@ -539,7 +539,7 @@ class MintModels extends PolymerElement {
       url: me.task.id,
       onLoad: function(e) {
         //window.history.back();
-        var new_path = 'govern/analysis/' + this._getLocalName(me.routeData.regionid) + "/" +
+        var new_path = 'govern/analysis/' + me.routeData.regionid + "/" +
           me.routeData.questionid + "/" + me.routeData.taskid;
         window.history.pushState({question: question, task: me.task}, null, new_path);
         window.dispatchEvent(new CustomEvent('location-changed'));

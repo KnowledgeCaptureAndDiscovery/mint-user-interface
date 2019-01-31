@@ -14,6 +14,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@pushkar8723/paper-dropdown/paper-dropdown.js';
 import '@polymer/paper-item/paper-item.js';
+import '@polymer/iron-ajax/iron-ajax.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
@@ -69,7 +70,7 @@ class MintWorkflowRun extends PolymerElement {
       }
     </style>
 
-    <app-route route="[[route]]" pattern="/:domainid/:wdomainid/:template_id"
+    <app-route route="[[route]]" pattern="/:regionid/:wdomainid/:template_id"
       data="{{routeData}}" tail="{{subroute}}"></app-route>
     <app-route route="[[subroute]]" pattern="/:questionid/:taskid/:dsid"
       data="{{subrouteData}}"></app-route>
@@ -77,6 +78,16 @@ class MintWorkflowRun extends PolymerElement {
     <template is="dom-if" if="[[template_id]]">
       <mint-ajax auto result="{{workflowJSON}}"
         url="[[_getWorkflowURL(config, userid, routeData.wdomainid, template_id)]]"></mint-ajax>
+    </template>
+
+    <template is="dom-if" if="[[userid]]">
+      <template is="dom-if" if="[[subrouteData.questionid]]">
+        <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]"
+          handle-as="json" last-response="{{question}}"></iron-ajax>
+        <iron-ajax auto
+          url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
+          handle-as="json" last-response="{{task}}"></iron-ajax>
+      </template>
     </template>
 
     <!-- Top toolbar -->
@@ -152,7 +163,8 @@ class MintWorkflowRun extends PolymerElement {
         type: Object,
         value: {}
       },
-
+      question: Object,
+      task: Object,
       route: Object,
       routeData: Object,
       subroute: Object,
@@ -285,6 +297,29 @@ class MintWorkflowRun extends PolymerElement {
     xhr.send(JSON.stringify(data));
   }
 
+  _setTaskOutput(output) {
+    var me = this;
+    me.task.status = "DONE";
+    me.task.output = [output];
+    for(var actid in me.task.activities) {
+      if(actid.indexOf("RunWorkflow") > 0) {
+        me.task.activities[actid].output = [output];
+      }
+    }
+    me._putResourceSimple({
+      url: me.task.id,
+      onLoad: function(e) {
+        var new_path = 'govern/analysis/' + me.routeData.regionid + "/" +
+          me.subrouteData.questionid + "/" + me.subrouteData.taskid;
+        window.history.pushState({task: me.task}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+      },
+      onError: function() {
+        console.log("Cannot update task");
+      }
+    }, me.task)
+  }
+
   _runWorkflow() {
     this._setValues();
 
@@ -293,12 +328,14 @@ class MintWorkflowRun extends PolymerElement {
       if(expansions && expansions["success"]) {
         var seed = expansions.data.seed;
         var xtpl = expansions.data.templates[0];
-        me._executeWorkflow(xtpl, seed, function(viewuri) {
-          console.log(viewuri);
+        me._executeWorkflow(xtpl, seed, function(runid) {
+          //console.log(runid);
+          me._setTaskOutput(runid);
           alert("Workflow sent for execution.");
         });
       }
       else {
+        alert("Could not run workflow. Please see your browser console to debug");
         console.log(expansions);
       }
     });
@@ -548,8 +585,7 @@ class MintWorkflowRun extends PolymerElement {
       url: purl + "/executions/runWorkflow",
       onLoad: function(e) {
         var runuri = e.target.responseText;
-        var run_view_uri = purl + "/executions?run_id=" + encodeURIComponent(runuri);
-        fn(run_view_uri);
+        fn(runuri);
       },
       onError: function() {
         console.log("Cannot execute");

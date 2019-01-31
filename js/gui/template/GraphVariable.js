@@ -1,4 +1,5 @@
 import { GraphItem } from "./GraphItem.js";
+import { getLocalName } from "./common.js";
 
 export function GraphVariable(parent, vardata, config) {
   GraphItem.call(this, parent, vardata.id, vardata.name, config);

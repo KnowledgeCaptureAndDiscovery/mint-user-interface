@@ -27,10 +27,36 @@ class MintResultsHome extends PolymerElement {
 
     </style>
 
-    <ul>
-      <li><a href="/results/list/[[config.wings.gendomain]]">Browse Data Generation workflow runs</a></li>
-      <li><a href="/results/list/[[config.wings.domain]]">Browse Modeling workflow runs</a></li>
-    </ul>
+    <app-route route="[[route]]" pattern="/:domainid"
+      data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <app-route route="[[subroute]]" pattern="/:questionid/:taskid"
+      data="{{subrouteData}}"></app-route>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>[[routeData.type]] Workflows</paper-button>
+    </div>
+    <div id="form" class="outer">
+      <ul>
+        <template is="dom-repeat" items="[[_getWorkflows(vocabulary)]]" as="type">
+          <li><div class="bold">[[type.id]]</div>
+            <ul>
+              <template is="dom-repeat" items="[[type.workflows]]">
+                <li><a href="[[_getResultsListURL(config, item)]]">[[item.label]]</li>
+              </template>
+            </ul>
+          </li>
+        </template>
+        <li>
+          <a href="/results/list/[[config.wings.domain]]">ALL MODELING Runs</a>
+        </li>
+      </ul>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
 `;
   }
 
@@ -42,6 +68,40 @@ class MintResultsHome extends PolymerElement {
       userid: Object,
       vocabulary: Object
     };
+  }
+
+  _getResultsListURL(config, item) {
+    if(config && item) {
+      var rd = this.routeData;
+      var srd = this.subrouteData;
+      if(rd) {
+        var url = "results/list/" + item.domain + "/" + item.localName;
+        if(srd && srd.questionid) {
+          url += "/" + srd.questionid + "/" + srd.taskid;
+        }
+        return url;
+      }
+    }
+  }
+
+  _getWorkflows(vocabulary) {
+    if(vocabulary) {
+      var types = [];
+      for(var i=0; i<vocabulary.workflows.length; i++) {
+        var wflow = vocabulary.workflows[i];
+        var index = types.indexOf(wflow.type);
+        if(index >= 0) {
+          types[index].workflows.push(wflow)
+        }
+        else {
+          types.push({
+            id: wflow.type,
+            workflows: [wflow]
+          })
+        }
+      }
+      return types;
+    }
   }
 }
 customElements.define(MintResultsHome.is, MintResultsHome);
