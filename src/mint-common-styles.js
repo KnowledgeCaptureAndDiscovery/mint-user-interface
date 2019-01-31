@@ -122,12 +122,26 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
     paper-button.important {
       border: 1px solid var(--app-accent-color);
       color: var(--app-accent-color);
+      background-color: white;
       font-weight: bold;
       margin: 4px;
     }
     paper-button.important:hover {
       background-color: var(--app-accent-color);
+      border-color: white;
       color: white;
+    }
+    paper-button.important_inv {
+      border: 1px solid white;
+      color: white;
+      background-color: var(--app-accent-color);;
+      font-weight: bold;
+      margin: 4px;
+    }
+    paper-button.important_inv:hover {
+      background-color: white;
+      border-color: var(--app-accent-color);;
+      color: var(--app-accent-color);;
     }
     /* End of outer box */
 

@@ -12,8 +12,10 @@ import '@polymer/paper-radio-button/paper-radio-button.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/iron-ajax/iron-ajax.js';
 
 import './mint-icons.js';
+import './loading-screen.js';
 import './wings-workflow.js';
 import './mint-common-styles.js';
 
@@ -25,12 +27,6 @@ class MintWorkflows extends PolymerElement {
     <style include="mint-common-styles">
       :host {
         display: block;
-      }
-      .toolbar {
-        border-radius: 0px 4px 0px 0px;
-      }
-      .bottom {
-        border-radius: 0px 0px 4px 0px;
       }
       .toolbar paper-button {
         min-width:32px;
@@ -58,7 +54,6 @@ class MintWorkflows extends PolymerElement {
       .toolbar paper-button,
       .toolbar paper-icon-button {
         max-height: 36px;
-        color: white;
       }
       .heading paper-icon-button {
         max-height: 20px;
@@ -92,36 +87,36 @@ class MintWorkflows extends PolymerElement {
 
     </style>
 
+    <iron-ajax auto="" url="[[_createPlannerURL(question, dsid, userid, visible)]]"
+      handle-as="json" last-response="{{workflows}}"></iron-ajax>
+
     <!-- Top toolbar -->
     <div class="toolbar">
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
         <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
 
-      <div class="grow">&nbsp;</div>
+      <div class="grow"><paper-button>&nbsp;</paper-button></div>
 
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
-        <template is="dom-if" if="[[!showWorkflows]]">
-          <paper-button raised="" on-tap="_chooseModelGraph">Choose Model Graph</paper-button>
-          <!--paper-button>Model Graph</paper-button-->
-        </template>
+        <paper-button on-click="zoomIn">+</paper-button>
+        <paper-button on-click="zoomOut">-</paper-button>
+        <paper-button class="important_inv" on-tap="_selectWorkflow">DONE</paper-button>
       </template>
-
+      <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
+        style$="[[_getVisibilityStyle(selectedWorkflow)]]"
+        on-checked-changed="toggleView">WORKFLOW</paper-toggle-button>
       <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
-        <paper-button>Model choices</paper-button>
+        <paper-button noink>SELECT MODEL COMPOSITION</paper-button>
       </template>
-
-      <!--template is="dom-if" if="[[_showingWorkflows(selectedWorkflow, showWorkflows)]]">
-        <paper-button raised="" on-click="_chooseScenario">Run Workflow</paper-button>
-      </template-->
 
       <div class="grow">&nbsp;</div>
 
-      <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
     </div>
 
     <!-- Variable Graph Canvas -->
     <div class="outer">
+      <loading-screen loading="[[loading]]"></loading-screen>
       <iron-collapse id="list_section" opened="" no-animation="">
         <paper-listbox id="workflow_listbox" on-selected-changed="_changedSelection">
           <template is="dom-repeat" items="[[workflows]]" as="workflow" index-as="windex">
@@ -142,45 +137,16 @@ class MintWorkflows extends PolymerElement {
         </paper-listbox>
       </iron-collapse>
       <iron-collapse id="workflow_section" no-animation="">
-        <wings-workflow id="workflow" data="[[_getWorkflowView(selectedWorkflow)]]" selected="{{selectedItems}}"></wings-workflow>
+        <wings-workflow id="workflow" data="[[_getWorkflowView(selectedWorkflow)]]"
+          selected="{{selectedItems}}"></wings-workflow>
       </iron-collapse>
     </div>
 
     <!-- Bottom toolbar -->
     <div class="toolbar bottom">
       <paper-button>&nbsp;</paper-button>
-      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
-        <paper-button on-click="zoomIn">+</paper-button>
-        <paper-button on-click="zoomOut">-</paper-button>
-      </template>
-      <paper-toggle-button id="toggler" checked="{{showWorkflows}}" on-checked-changed="toggleView">WORKFLOW</paper-toggle-button>
     </div>
 
-    <!-- Workflow Run Status dialog -->
-    <paper-dialog id="runwindow">
-      <div class="heading">
-        <div>Workflow Run</div>
-        <div class="grow">&nbsp;</div>
-        <paper-icon-button icon="close" on-click="_closeRunWindow"></paper-icon-button>
-      </div>
-      <div id="runstatus"></div>
-    </paper-dialog>
-
-    <!-- Scenario Choose Dialog -->
-    <paper-dialog id="scenario_chooser">
-      <div class="heading">
-        <div>Choose a Scenario</div>
-        <div class="grow">&nbsp;</div>
-        <paper-icon-button icon="close" on-click="_closeScenarioChooser"></paper-icon-button>
-      </div>
-      <paper-radio-group selected="{{selectedScenarioIndex}}">
-        Sub Region: [[subRegion]] <br>
-        <template is="dom-repeat" items="[[scenarios]]" as="scenario">
-          <paper-radio-button name="[[index]]">[[scenario.name]]</paper-radio-button>
-        </template>
-      </paper-radio-group>
-      <paper-button on-tap="_runScenario">Run Scenario</paper-button>
-    </paper-dialog>
 `;
   }
 
@@ -191,12 +157,18 @@ class MintWorkflows extends PolymerElement {
     return {
       config: Object,
       userid: String,
-      questionid: String,
-      regionid: String,
-      taskid: String,
+      question: Object,
+      regionid: Object,
+      task: Object,
+      dsid: String,
       workflows: {
         type: Array,
-        notify: true
+        notify: true,
+        observer: '_gotWorkflows'
+      },
+      loading: {
+        type: Boolean,
+        value: true
       },
       selectedWorkflow: {
         type: Object,
@@ -228,8 +200,26 @@ class MintWorkflows extends PolymerElement {
     this.set("selectedGraph", null);
   }
 
+  _getVisibilityStyle(wflow) {
+    if(!wflow) {
+      return "display:none";
+    }
+    return "";
+  }
+
+  _gotWorkflows(wflows) {
+    if(wflows)
+      this.set("loading", false);
+  }
+
   _getLocalName(id) {
     return getLocalName(id);
+  }
+
+
+  _createPlannerURL(question, dsid, userid, visible) {
+    if(visible && userid && question)
+      return question.id + "/planner/compose/" + dsid;
   }
 
   _plusone(index) {
@@ -266,21 +256,22 @@ class MintWorkflows extends PolymerElement {
     }
   }
 
-  setTaskOutput(output) {
+  _setTaskOutput(output) {
     var me = this;
     me.task.status = "DONE";
     me.task.output = [output];
     for(var actid in me.task.activities) {
-      if(actid.indexOf("ChooseModel") > 0) {
+      if(actid.indexOf("CreateWorkflow") > 0) {
         me.task.activities[actid].output = [output];
       }
     }
-    me._putResourceSimple({
+    me._putResource({
       url: me.task.id,
       onLoad: function(e) {
-        var new_path = '/cags/list/' + getLocalName(me.regionid) + "/" + me.questionid + "/" + me.taskid;
-        window.history.pushState({}, null, new_path)
-        location.reload();
+        var new_path = 'govern/analysis/' + me._getLocalName(me.regionid) + "/" +
+          me._getLocalName(me.question.id) + "/" + me._getLocalName(me.task.id);
+        window.history.pushState({task: me.task}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
       },
       onError: function() {
         console.log("Cannot update task");
@@ -288,7 +279,7 @@ class MintWorkflows extends PolymerElement {
     }, me.task)
   }
 
-  _putResourceSimple(rq, data) {
+  _putResource(rq, data) {
     var xhr = new XMLHttpRequest();
     xhr.addEventListener('load', rq.onLoad.bind(this));
     xhr.addEventListener('error', rq.onError.bind(this));
@@ -298,7 +289,7 @@ class MintWorkflows extends PolymerElement {
     xhr.send(JSON.stringify(data));
   }
 
-  _postResourceSimple(rq, data) {
+  _postResource(rq, data) {
     var xhr = new XMLHttpRequest();
     xhr.addEventListener('load', rq.onLoad.bind(this));
     xhr.addEventListener('error', rq.onError.bind(this));
@@ -308,38 +299,28 @@ class MintWorkflows extends PolymerElement {
     xhr.send(JSON.stringify(data));
   }
 
-  _chooseModelGraph() {
+  _selectWorkflow() {
     var me = this;
+    var wflow = this.selectedWorkflow.wingsWorkflow;
+    var tpl = wflow.template;
+    var constraints = wflow.constraints;
 
-    /*
-    var tpl = this.selectedWorkflow.wingsWorkflow;
-    var gtpl = this.$.workflow;
-    // Add coordinates to Nodes and Variables
-    for(var nid in tpl.Nodes) {
-      var coords = gtpl.nodes[nid].getCoords();
-      tpl.Nodes[nid].comment = "center:x="+coords.x+",y="+coords.y;
-    }
+    // Remove extra items and add coordinates
     for(var vid in tpl.Variables) {
-      var coords = gtpl.variables[vid].getCoords();
-      tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
+      delete tpl.Variables[vid].extra;
+      delete tpl.Variables[vid].category;
+      delete tpl.Variables[vid].name;
     }
-    this.selectedWorkflow.wingsWorkflow = tpl;
-    */
+    for(var nid in tpl.Nodes) {
+      delete tpl.Nodes[nid].category;
+    }
 
-    var data = {
-      modelGraph: JSON.stringify(this.selectedWorkflow.modelGraph),
-      wingsWorkflow: JSON.stringify(this.selectedWorkflow.wingsWorkflow)
-    }
-    me._postResourceSimple({
-      url: me.config.server + "/users/" + me.userid + "/questions/" + me.questionid + "/workflows",
-      onLoad: function(e) {
-        var outputid = e.target.responseText;
-        me.setTaskOutput(outputid);
-      },
-      onError: function() {
-        console.log("Cannot add data");
-      }
-    }, data);
+    me._layoutTemplate(tpl, function(ntpl) {
+      // FIXME: me._addUnknownComponents(tpl, function(){})
+      me._saveTemplate(ntpl, constraints, function() {
+        me._setTaskOutput(ntpl.id);
+      });
+    });
   }
 
   _workflowDefined(w) {
@@ -367,79 +348,11 @@ class MintWorkflows extends PolymerElement {
     this.$.workflow.zoomOut();
   }
 
-  _chooseScenario() {
-    if(!this.userid) {
-      alert("You need to be logged in to run workflows");
-    }
-    else
-      this.$.scenario_chooser.open();
-  }
-
-  _closeScenarioChooser() {
-    this.$.scenario_chooser.close();
-  }
-
-  _runScenario() {
-    var scenario = this.scenarios[this.selectedScenarioIndex];
-    this._runWorkflow(scenario.data);
-    this.$.scenario_chooser.close();
-  }
-
-  _runWorkflow(inputs) {
-    var tpl = this.selectedWorkflow.wingsWorkflow;
-    var gtpl = this.$.workflow;
-
-    // Add coordinates to Nodes and Variables
-    for(var nid in tpl.Nodes) {
-      var coords = gtpl.nodes[nid].getCoords();
-      tpl.Nodes[nid].comment = "center:x="+coords.x+",y="+coords.y;
-    }
-    for(var vid in tpl.Variables) {
-      var coords = gtpl.variables[vid].getCoords();
-      tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
-    }
-
-    var wflowns = getNamespace(tpl.id);
-    var dclibns = tpl.props["lib.domain.data.url"] + "#";
-    var bindings = {};
-    for(var invar in inputs) {
-      var invarid = wflowns + invar;
-      bindings[invarid] = [ dclibns + inputs[invar] ];
-    }
-    this.$.runwindow.open();
-
-    var me = this;
-    // Save all components from workflow that aren't present
-    me._addUnknownComponents(tpl, function() {
-      // Save Template
-      me._saveTemplate(tpl, function() {
-        // Get Expansions for template
-        me._getExpansions(tpl, bindings, function(expansions) {
-          if(expansions && expansions["success"]) {
-            var seed = expansions.data.seed;
-            var xtpl = expansions.data.templates[0];
-            me._executeWorkflow(xtpl, seed, function(viewuri) {
-              dom(me.$.runstatus).innerHTML = "Workflow sent for execution. <br />" +
-                "<a target='_blank' href='" + viewuri + "'>View Run</a>"
-            });
-          }
-          else {
-            dom(me.$.runstatus).innerHTML = "Workflow couldn't be run";
-          }
-        });
-      });
-    });
-  }
-
-  _closeRunWindow() {
-    this.$.runwindow.close();
-  }
-
   toggleView(d) {
     if(!this.selectedWorkflow)
       return;
     if(this.$.toggler.checked)
-      this.$.workflow.set("data", this.selectedWorkflow.wingsWorkflow);
+      this.$.workflow.set("data", this.selectedWorkflow.wingsWorkflow.template);
     else
       this.$.workflow.set("data", this.selectedWorkflow.modelGraph);
   }
@@ -540,7 +453,7 @@ class MintWorkflows extends PolymerElement {
 
   _getComponents(fn) {
     // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
     this._getResource({
       url: purl + "/components/getComponentHierarchyJSON",
       onLoad: function(e) {
@@ -568,7 +481,7 @@ class MintWorkflows extends PolymerElement {
 
   _addComponent(c, ctop, fn) {
     // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
     var data = "cid=" + encodeURIComponent(c.id);
     data += "&parent_cid=";
     data += "&parent_type=" + encodeURIComponent(ctop);
@@ -589,7 +502,7 @@ class MintWorkflows extends PolymerElement {
 
   _saveComponentJSON(c, fn) {
     // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
     var data = "cid=" + encodeURIComponent(c.id);
     data += "&component_json=" + encodeURIComponent(JSON.stringify(c));
     // fn();
@@ -605,14 +518,30 @@ class MintWorkflows extends PolymerElement {
     }, data);
   }
 
-  _saveTemplate(tpl, fn) {
+  _layoutTemplate(tpl, fn) {
+    // Get url prefix for operations
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
+    // fn();
+    this._postResourceRaw({
+      url: purl + "/workflows/layoutTemplate",
+      onLoad: function(e) {
+        var ntpl = JSON.parse(e.target.responseText);
+        fn(ntpl.template);
+      },
+      onError: function() {
+        console.log("Cannot layout template");
+      }
+    }, JSON.stringify(tpl));
+  }
+
+  _saveTemplate(tpl, constraints, fn) {
     //TODO: Get a MD5 Hash for template to check if it is already saved.
     // - To avoid cluttering up template library
 
     // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
     var data = "template_id=" + encodeURIComponent(tpl.id);
-    data += "&constraints_json=[]";
+    data += "&constraints_json=" + encodeURIComponent(JSON.stringify(constraints));
     data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
     dom(this.$.runstatus).innerHTML = "Saving workflow";
     // fn();
@@ -623,55 +552,6 @@ class MintWorkflows extends PolymerElement {
       },
       onError: function() {
         console.log("Cannot save");
-      }
-    }, data);
-  }
-
-  _getExpansions(tpl, bindings, fn) {
-    // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
-    var data = {
-      templateId: tpl.id,
-      parameterBindings: {},
-      parameterTypes: {},
-      componentBindings: {},
-      dataBindings: bindings
-    };
-
-    dom(this.$.runstatus).innerHTML = "Preparing workflow for execution";
-    this._postResourceJSON({
-      url: purl + "/plan/getExpansions",
-      onLoad: function(e) {
-        var expansions = JSON.parse(e.target.responseText);
-        fn(expansions);
-      },
-      onError: function() {
-        console.log("Cannot save");
-      }
-    }, data);
-  }
-
-  _executeWorkflow(xtpl, seed, fn) {
-    // Get url prefix for operations
-    var purl = this.server + "/users/" + this.userid + "/" + this.domain;
-    var data = {
-      template_id: seed.template.id,
-      json: JSON.stringify(xtpl.template),
-      constraints_json: JSON.stringify(xtpl.constraints),
-      seed_json: JSON.stringify(seed.template),
-      seed_constraints_json: JSON.stringify(seed.constraints)
-    };
-
-    dom(this.$.runstatus).innerHTML = "Sending workflow for execution";
-    this._postResource({
-      url: purl + "/executions/runWorkflow",
-      onLoad: function(e) {
-        var runuri = e.target.responseText;
-        var run_view_uri = purl + "/executions?run_id=" + encodeURIComponent(runuri);
-        fn(run_view_uri);
-      },
-      onError: function() {
-        console.log("Cannot execute");
       }
     }, data);
   }

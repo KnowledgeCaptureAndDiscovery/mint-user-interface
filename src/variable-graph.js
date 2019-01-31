@@ -124,9 +124,9 @@ class VariableVGraph extends PolymerElement {
       }
     </style>
 
-    <template is="dom-if" if="[[_isAnalysis(operation)]]">
+    <!--template is="dom-if" if="[[_isAnalysis(operation)]]">
       <iron-ajax auto="" url="[[_createPlannerURL(questionid, dsid, userid, visible)]]" handle-as="json" last-response="{{workflows}}"></iron-ajax>
-    </template>
+    </template-->
 
     <!-- Top Toolbar -->
     <div class="toolbar">
@@ -293,12 +293,6 @@ class VariableVGraph extends PolymerElement {
   layout(animate) {
     this.$.loader.loading = true;
     this.graph.layout(animate, this.$.loader);
-  }
-
-  _createPlannerURL(questionid, dsid, userid, visible) {
-    if(visible && userid)
-      return this.config.server + "/users/" + userid + "/questions/" +
-        questionid + "/planner/compose/" + dsid;
   }
 
   _removeRow(e) {

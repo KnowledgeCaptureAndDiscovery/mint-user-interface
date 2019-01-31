@@ -518,7 +518,12 @@ class MintGovernAnalysis extends PolymerElement {
                 </template>
               </ul>
 
-              <b>WORKFLOWS:</b> [[workflowid]]
+              <b>WORKFLOWS:</b>
+              <ul>
+                <template is="dom-if" if="[[workflow]]">
+                  <li>[[_getWorkflowDetail(workflow)]]</li>
+                </template>
+              </ul>
             </div>
           </div>
         </div>
@@ -577,6 +582,10 @@ class MintGovernAnalysis extends PolymerElement {
       dsid: {
         type: String,
         computed: '_getDSId(tasks)'
+      },
+      workflow: {
+        type: String,
+        computed: '_getWorkflow(tasks)'
       },
       dataSpecs: Array,
 
@@ -723,6 +732,9 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
+  _getWorkflowDetail(workflow) {
+    return workflow.id;
+  }
 
   _getGraphVariable(varid, graphData) {
     for(var i=0; i<graphData.variables.length; i++) {
@@ -882,6 +894,29 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
+  _getWorkflow(tasks) {
+    if(tasks == null)
+      return null;
+    for(var i=0; i<tasks.length; i++) {
+      var task = tasks[i];
+      if(task.type.indexOf("ComposeWorkflow") > 0) {
+        if(task.output && task.output.length > 0) {
+          var wflowid = task.output[0];
+          var regex = /\/([^\/]+)\/workflows\/([^\/]+)\.owl/;
+          var m = regex.exec(wflowid);
+          if(m) {
+            return {
+              id: wflowid,
+              name: m[2],
+              label: m[2],
+              domain: m[1]
+            };
+          }
+        }
+      }
+    }
+  }
+
   _getActivityLink(link, region, questionid, taskid) {
     link = link.replace("<regionid>", this._getLocalName(region.id));
     link = link.replace("<questionid>", questionid);
@@ -912,6 +947,15 @@ class MintGovernAnalysis extends PolymerElement {
           this._getStandardNames(this.question.responseVariables, this.graphData));
       else
         link = link.replace("<response_variables>", "");
+    }
+    if(link.indexOf("<workflow.") > 0) {
+      console.log(this.workflow);
+      var m;
+      while(m = link.match(/\<workflow\.(.+?)\>/)) {
+        if(!m)
+          break;
+        link = link.replace("<workflow."+m[1]+">", this.workflow[m[1]]);
+      }
     }
     if(link.indexOf("<config.wings.") > 0) {
       var m = link.match(/\<config\.wings\.(.+?)\>/);
