@@ -10,12 +10,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 import './mint-data-catalog.js';
 import './mint-common-styles.js';
-/*
-import './mint-data-view.js';
-import './mint-data-select.js';
-import './mint-data-generate.js';
-*/
 import './mint-data-browse.js';
+
 import { MintBaseRouter } from './mint-base-router.js';
 
 import { scroll } from '@polymer/app-layout/helpers/helpers.js';
@@ -120,16 +116,6 @@ class MintData extends MintBaseRouter {
     ${super.template}
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-      <!-- data search by variables -->
-      <!--mint-data-search name="search"
-        data-catalog="[[dataCatalog]]"
-        config="[[config]]" userid="[[userid]]"
-        route="[[pageSubRoute.search]]"></mint-data-search-->
-
-      <!-- list view of datasets for a variable -->
-      <!--mint-data-list name="list" data-catalog="[[dataCatalog]]"
-        route="[[pageSubRoute.list]]"></mint-data-list-->
-
       <!-- browse datasets for a region -->
       <mint-data-browse name="browse"
         data-catalog="[[dataCatalog]]"
@@ -137,22 +123,6 @@ class MintData extends MintBaseRouter {
         config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.browse]]"></mint-data-browse>
 
-      <!-- visualize datasets for a variable >
-      <mint-data-view name="view"
-        data-catalog="[[dataCatalog]]"
-        config="[[config]]" userid="[[userid]]"
-        route="[[pageSubRoute.view]]"></mint-data-view-->
-
-      <!-- generate datasets for a region >
-      <mint-data-generate name="generate"
-        config="[[config]]" userid="[[userid]]"
-        data-catalog="[[dataCatalog]]"
-        route="[[pageSubRoute.generate]]"></mint-data-generate-->
-
-      <!-- Select datasets >
-      <mint-data-select name="select" data-catalog="[[dataCatalog]]"
-        config="[[config]]" userid="[[userid]]"
-        route="[[pageSubRoute.select]]"></mint-data-browse-->
     </iron-pages>
 `;
   }

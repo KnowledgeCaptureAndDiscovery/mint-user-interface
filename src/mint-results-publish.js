@@ -612,7 +612,8 @@ class MintResultsPublish extends PolymerElement {
           // Match the model's io id or io type
           if(this._getLocalName(io.id) == vid ||
               this._getLocalName(io.type) == vtype) {
-            this.datatype = this._getLocalName(io.type); // Set the datatype
+            this.set("datatype", this._getLocalName(io.type));
+            this.set("resource_def.resource_type", io.format);
             for(var k=0; k<io.variables.length; k++) {
               variables.push({
                 standard_name: io.variables[k].standard_name,
@@ -626,7 +627,8 @@ class MintResultsPublish extends PolymerElement {
           var io = m.inputs[j];
           if(this._getLocalName(io.id) == vid ||
               this._getLocalName(io.type) == vtype) {
-            this.datatype = this._getLocalName(io.type); // Set the datatype
+            this.set("datatype", this._getLocalName(io.type));
+            this.set("resource_def.resource_type", io.format);
             for(var k=0; k<io.variables.length; k++) {
               variables.push({
                 standard_name: io.variables[k].standard_name,
@@ -1024,6 +1026,9 @@ class MintResultsPublish extends PolymerElement {
       var viz = this.viz_configs[i];
       var viz_config = {
         id: viz.id,
+        transformed: false,
+        visualized: false,
+        datatype: this.datatype,
         viz_type: viz.viz_type,
         metadata: {}
       }

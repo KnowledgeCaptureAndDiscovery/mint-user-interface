@@ -38,9 +38,7 @@
     "@vaadin/vaadin-grid": "^5.2.6",
     "@vaadin/vaadin-text-field": "^2.1.7",
     "mint-chart": "git+https://github.com/spatial-computing/mint-chart.git",
-    "mint-map": "git+https://github.com/spatial-computing/mint-map.git",
-    "mint-time": "git+https://github.com/spatial-computing/mint-time.git",
-    "mint-trend": "git+ssh://git@github.com/spatial-computing/mint-trend.git"
+    "mint-map": "git+https://github.com/spatial-computing/mint-map.git"
   },
   "devDependencies": {
     "@polymer/test-fixture": "^4.0.2",

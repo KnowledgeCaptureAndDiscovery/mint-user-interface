@@ -633,6 +633,9 @@ class MintGovernAnalysis extends PolymerElement {
         return;
       }
 
+      if(!this.vocabulary)
+        return;
+
       // Fetch region object from vocabulary
       for(var i=0; i<this.vocabulary.regions.length; i++) {
         var region = this.vocabulary.regions[i];
@@ -902,6 +905,13 @@ class MintGovernAnalysis extends PolymerElement {
           this._getStandardNames(this.question.drivingVariables, this.graphData));
       else
         link = link.replace("<driving_variables>", "");
+    }
+    if(link.indexOf("<response_variables>") > 0) {
+      if(this.question && this.question.responseVariables)
+        link = link.replace("<response_variables>",
+          this._getStandardNames(this.question.responseVariables, this.graphData));
+      else
+        link = link.replace("<response_variables>", "");
     }
     if(link.indexOf("<config.wings.") > 0) {
       var m = link.match(/\<config\.wings\.(.+?)\>/);

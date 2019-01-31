@@ -21,7 +21,7 @@ class MintVisualiztions extends PolymerElement {
       }
     </style>
 
-    <app-route route="[[route]]" pattern="/:datasetid/:viztype"
+    <app-route route="[[route]]" pattern="/:viz_config_id/:viztype"
       data="{{routeData}}"></app-route>
 
     <div class="toolbar">
@@ -31,8 +31,11 @@ class MintVisualiztions extends PolymerElement {
       <template is="dom-if" if="[[_isEqual(routeData.viztype, 'mint-map')]]">
         <mint-map variables="[[mapVariables]]"></mint-map>
       </template>
+      <template is="dom-if" if="[[_isEqual(routeData.viztype, 'mint-map-time-series')]]">
+        <mint-map variables="[[mapVariables]]"></mint-map>
+      </template>
       <template is="dom-if" if="[[_isEqual(routeData.viztype, 'mint-chart')]]">
-        <mint-chart id="[[routeData.datasetid]]"></mint-chart>
+        <mint-chart viz_config_id="[[routeData.viz_config_id]]"></mint-chart>
       </template>
     </div>
     <div class="toolbar bottom">
@@ -59,7 +62,7 @@ class MintVisualiztions extends PolymerElement {
   _getMapVariables(routeData) {
     return [
       {
-        dataset_id: routeData.datasetid
+        dataset_id: routeData.viz_config_id
       }
     ];
   }

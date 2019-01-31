@@ -51,6 +51,7 @@ class MintDataBrowse extends PolymerElement {
       }
       div.noscroll {
         overflow: hidden;
+        padding-bottom: 70px;
       }
       div.searchToolbar paper-input {
         margin-top:2px;
@@ -114,12 +115,13 @@ class MintDataBrowse extends PolymerElement {
       div.dataset_area {
         display: flex;
         flex-flow: row;
+        margin-left: 10px;
       }
       div.dataset_list {
-        width: 50%;
+        width: 100%;
       }
       div.selected_datasets {
-        width: 50%;
+        width: 100%;
       }
       .selected_datasets ul {
         margin: 0px;
@@ -128,6 +130,12 @@ class MintDataBrowse extends PolymerElement {
       .selected_datasets ul li {
         margin: 0px;
         color: #999;
+      }
+
+      .footer {
+        margin-left: 10px;
+        margin-top: 30px;
+        font-size: 12px;
       }
 
       @media (max-width: 767px) {
@@ -173,7 +181,7 @@ class MintDataBrowse extends PolymerElement {
         <paper-dropdown-menu no-animations label="Select Sub-Region">
           <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{subregion}}">
             <paper-item value="[[region]]">[[region.label]]</paper-item>
-            <template is="dom-repeat" items="[[region.subRegions]]">
+            <template is="dom-repeat" items="[[regionsList]]">
               <paper-item value="[[item]]">[[item.label]]</paper-item>
             </template>
           </paper-listbox>
@@ -185,52 +193,56 @@ class MintDataBrowse extends PolymerElement {
         <paper-button class="important" on-tap="_getDataList">Search</paper-button>
       </div>
       <div class="outer shifted">
-        <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
-          <br>
-          <center>NO DATASETS FOUND</center>
-        </template>
-
-        <template is="dom-if" if="[[!_isEmpty(filesList, loading)]]">
-
-          <div class="dataset_area">
-
+        <div class="dataset_area">
+          <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
             <div class="dataset_list">
-              <ul>
-                <template is="dom-repeat" items="[[filesList]]">
-                  <li>
-                    <div class="datarow">
-                      <template is="dom-if" if="[[selectMode]]">
-                        <paper-checkbox on-change="_selectDataset" checked="[[item.selected]]"
-                          value="[[item]]"></paper-checkbox>
-                      </template>
-                      <template is="dom-if" if="[[item.resources]]">
-                        <a title="Show Resources" class="mint-button" on-tap="_toggleResources">
-                          [[item.dataset_name]] ([[item.resources.length]] resources)</a>
-                      </template>
-                      <template is="dom-if" if="[[!item.resources]]">
-                          [[item.dataset_name]] ([[item.dataset_description]])
-                      </template>
-                      <template is="dom-if" if="[[_isVisualizable(item)]]">
-                        <a title="View" class="chartlink"
-                          href="[[_getVisualizationLink(item)]]"><iron-icon icon="chart" /></a>
-                      </template>
-                    </div>
-
-                    <iron-collapse closed>
-                      <ul>
-                        <template is="dom-repeat" items="[[item.resources]]" as="res">
-                          <li>
-                            [[res.resource_name]]
-                            <a title="Download" href="[[res.resource_data_url]]"><iron-icon icon="file-download" /></a>
-                          </li>
-                        </template>
-                      </ul>
-                    </iron-collapse>
-                  </li>
-                  <!--li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li-->
-                </a></template>
-              </ul>
+              <br />
+              <template is="dom-if" if="[[!_isEmptyHash(queryConfig)]]">
+                NO DATASETS FOR CURRENT QUERY
+              </template>
+              <template is="dom-if" if="[[_isEmptyHash(queryConfig)]]">
+                SEARCH FOR DATASETS
+              </template>
             </div>
+          </template>
+          <template is="dom-if" if="[[!_isEmpty(filesList, loading)]]">
+              <div class="dataset_list">
+                <ul>
+                  <template is="dom-repeat" items="[[filesList]]">
+                    <li>
+                      <div class="datarow">
+                        <template is="dom-if" if="[[selectMode]]">
+                          <paper-checkbox on-change="_selectDataset" checked="[[item.selected]]"
+                            value="[[item]]"></paper-checkbox>
+                        </template>
+                        <template is="dom-if" if="[[item.resources]]">
+                          <a title="Show Resources" class="mint-button" on-tap="_toggleResources">
+                            [[item.dataset_name]] ([[item.resources.length]] resources)</a>
+                        </template>
+                        <template is="dom-if" if="[[!item.resources]]">
+                            [[item.dataset_name]] ([[item.dataset_description]])
+                        </template>
+                        <template is="dom-repeat" items="[[_getVizConfigs(item)]]" as="viz_config">
+                          <a title="View" class="chartlink"
+                            href="[[_getVisualizationLink(viz_config, item)]]"><iron-icon icon="[[_getVizIcon(viz_config)]]" /></a>
+                        </template>
+                      </div>
+
+                      <iron-collapse closed>
+                        <ul>
+                          <template is="dom-repeat" items="[[item.resources]]" as="res">
+                            <li>
+                              [[res.resource_name]]
+                              <a title="Download" href="[[res.resource_data_url]]"><iron-icon icon="file-download" /></a>
+                            </li>
+                          </template>
+                        </ul>
+                      </iron-collapse>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </template>
 
             <template is="dom-if" if="[[selectMode]]">
               <div class="selected_datasets">
@@ -258,6 +270,11 @@ class MintDataBrowse extends PolymerElement {
                 </ul>
               </div>
             </template>
+
+          </div>
+
+          <div class="footer">
+            <a href="/results/publish">REGISTER NEW DATASETS</a>
           </div>
 
         </template>
@@ -302,6 +319,10 @@ class MintDataBrowse extends PolymerElement {
         type: Boolean,
         computed: '_isSelectionMode(subrouteData.op)'
       },
+      regionsList: {
+        type: Array,
+        computed: '_getSubRegions(vocabulary, routeData)'
+      },
       dataSpecs: Array,
       dataSpec: Object,
       routeData: Object,
@@ -335,6 +356,33 @@ class MintDataBrowse extends PolymerElement {
     });
   }
 
+  _getSubRegions(vocabulary, rd) {
+    if(this.region)
+      return this.region.subRegions;
+    if(vocabulary)
+      return vocabulary.regions;
+  }
+
+  _getVizConfigs(dataset) {
+    var configs = [];
+    if(dataset.resources && dataset.resources.length > 0) {
+      var meta = dataset.resources[0].dataset_metadata;
+      for(var key in meta) {
+        if(key.match(/^viz_config/)) {
+          var viz_config = meta[key];
+          if(viz_config.viz_type && viz_config.visualized)
+            configs.push(viz_config);
+        }
+      }
+    }
+    //console.log(configs);
+    return configs;
+  }
+
+  _getVizIcon(config) {
+    return config.viz_type.replace(/^mint-/, '');
+  }
+
   _isVisualizable(dataset) {
     if(dataset.resources && dataset.resources.length > 0) {
       var meta = dataset.resources[0].dataset_metadata;
@@ -349,17 +397,9 @@ class MintDataBrowse extends PolymerElement {
     return false;
   }
 
-  _getVisualizationLink(dataset) {
-    if(dataset.resources && dataset.resources.length > 0) {
-      var meta = dataset.resources[0].dataset_metadata;
-      for(var key in meta) {
-        if(key.match(/^viz_config/)) {
-          var viz_config = meta[key];
-          if(viz_config.visualized)
-            return "/visualizations/"+dataset.dataset_id+"/"+viz_config.viz_type;
-        }
-      }
-    }
+  _getVisualizationLink(viz_config, dataset) {
+    var id = viz_config.id ? viz_config.id : dataset.dataset_id;
+    return "/visualizations/"+id+"/"+viz_config.viz_type;
   }
 
   _initialOverallDataFetch(region, subroute) {
@@ -687,6 +727,15 @@ class MintDataBrowse extends PolymerElement {
 
   _isEmpty(list, loading) {
     return !loading && (!Array.isArray(list) || list.length == 0);
+  }
+
+  _isEmptyHash(hash) {
+    if(!hash)
+      return true;
+    for(var key in hash)
+      if(hash[key])
+        return false;
+    return true;
   }
 
   _postResource(rq, data) {

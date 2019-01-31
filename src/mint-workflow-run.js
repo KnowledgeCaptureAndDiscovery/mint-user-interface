@@ -90,7 +90,8 @@ class MintWorkflowRun extends PolymerElement {
         <div class="grid">
           <template is="dom-repeat" items="[[inputs]]" as="input">
             <template is="dom-if" if="[[_isInputParam(input)]]">
-              <paper-input id="[[input.id]]" label="[[input.name]]"></paper-input>
+              <paper-input id="[[input.id]]" label="[[input.name]]"
+                type="[[_getInputType(input)]]" value="[[input.binding]]"></paper-input>
             </template>
             <template is="dom-if" if="[[_isInputData(input)]]">
               <template is="dom-if" if="[[_isMultiInput(input)]]">
@@ -192,6 +193,13 @@ class MintWorkflowRun extends PolymerElement {
       else
         this.$.documentation.innerHTML = '';
     });
+  }
+
+  _getInputType(input) {
+    var dtype = input.dtype;
+    if(dtype.match(/#int/))
+      return "number";
+    return "";
   }
 
   _setValues() {
@@ -493,14 +501,23 @@ class MintWorkflowRun extends PolymerElement {
     }, data);
   }
 
+  _getComponentBindings() {
+    var cbindings = {};
+    for(var nid in this.template.Nodes) {
+      var c = this.template.Nodes[nid].componentVariable;
+      cbindings[c.id] = c.binding.id;
+    }
+    return cbindings;
+  }
+
   _getExpansions(fn) {
     // Get url prefix for operations
-    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.routeData.domain;
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.routeData.wdomainid;
     var data = {
       templateId: this.template.id,
       parameterBindings: this.parameterBindings,
       parameterTypes: this.parameterTypes,
-      componentBindings: {},
+      componentBindings: this._getComponentBindings(),
       dataBindings: this.dataBindings
     };
 

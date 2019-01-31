@@ -74,20 +74,42 @@ class MintGovernCag extends PolymerElement {
         observer: '_routeDataChanged'
       },
       subroute: Object,
-      subrouteData: Object,
+      subrouteData: {
+        type: Object,
+        observer: '_subrouteDataChanged'
+      },
       visible: Boolean
     }
   }
 
   static get observers() {
     return [
-      '_loadVariableGraph(graphData, visible)'
+      '_loadVariableGraphPlain(graphData, visible, routeData.op)',
+      '_loadVariableGraphQuestion(graphData, visible, question, routeData.op)'
+      //'_initializeSelectedItems(routeData.op, question)'
     ];
   }
 
   _routeDataChanged(rd) {
-    if(rd && rd.op == "browse")
+    if(rd && rd.op == "browse") {
       this.subrouteData = {};
+    }
+  }
+
+  _subrouteDataChanged(rd) {
+    if(rd && rd.questionid) {
+
+    }
+  }
+
+  _initializeSelectedItems(op, question) {
+    if(op && question) {
+      console.log(question);
+      if(op == "SelectDrivingVariables")
+        this.set("selectedItems", question.drivingVariables);
+      if(op == "SelectResponseVariables")
+        this.set("selectedItems", question.responseVariables);
+    }
   }
 
   _getHeading(op) {
@@ -115,18 +137,29 @@ class MintGovernCag extends PolymerElement {
     }
   }
 
-  _loadVariableGraph(graphData, visible) {
-    if(visible && graphData) {
-      this.$.cag.loading = true;
-      this.$.cag.loadGraph();
-      this.$.cag.loading = true;
-      this.$.cag.layout(false);
+  _loadGraph() {
+    this.$.cag.loading = true;
+    this.$.cag.loadGraph();
+    this.$.cag.loading = true;
+    this.$.cag.layout(false);
+  }
 
-      if(this.question) {
-        if(this.routeData.op == "SelectDrivingVariables")
-          this.$.cag.selectVariables(this.question.drivingVariables);
-        else if(this.routeData.op == "SelectResponseVariables")
-          this.$.cag.selectVariables(this.question.responseVariables);
+  _loadVariableGraphPlain(graphData, visible, op) {
+    if(op == "browse" && graphData && visible) {
+      this._loadGraph();
+    }
+  }
+
+  _loadVariableGraphQuestion(graphData, visible, question, op) {
+    if(visible && graphData && question && op != "browse") {
+      this._loadGraph();
+
+      if(question) {
+        if(op == "SelectDrivingVariables")
+          this.set("selectedItems", question.drivingVariables);
+        if(op == "SelectResponseVariables")
+          this.set("selectedItems", question.responseVariables);
+        this.$.cag.selectVariables(this.selectedItems);
       }
     }
   }

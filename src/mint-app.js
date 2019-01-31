@@ -270,10 +270,10 @@ class MintApp extends MintBaseRouter {
             <mint-tabs selected="[[page]]" attr-for-selected="name">
               <mint-tab name="home"><a href="">Home</a></mint-tab>
               <mint-tab name="govern"><a href="govern/analysis/south_sudan">Analysis</a></mint-tab>
+              <mint-tab name="data"><a href="data/browse">Data</a></mint-tab>
+              <mint-tab name="models"><a href="models/browse">Models</a></mint-tab>
               <mint-tab name="results"><a href="results/home">Results</a></mint-tab>
-              <!--mint-tab name="data"><a href="data/browse">Data</a></mint-tab>
-              <mint-tab name="models"><a href="models">Models</a></mint-tab>
-              <mint-tab name="visualizations"><a href="visualizations">Visualizations</a></mint-tab-->
+              <!--mint-tab name="visualizations"><a href="visualizations">Visualizations</a></mint-tab-->
             </mint-tabs>
           </template>
         </dom-if>
@@ -287,10 +287,10 @@ class MintApp extends MintBaseRouter {
         <iron-selector role="navigation" class="drawer-list" selected="[[page]]" attr-for-selected="name">
           <a name="home" href="">Home</a>
           <a name="govern" href="govern/analysis/south_sudan">Analysis</a>
+          <a name="data" href="data/browse">Data</a>
+          <a name="models" href="models/browse">Models</a>
           <a name="results" href="results/home">Results</a>
-          <!--a name="data" href="data/browse">Data</a>
-          <a name="models" href="models">Models</a>
-          <a name="visualizations" href="visualizations">Visualizations</a-->
+          <!--a name="visualizations" href="visualizations">Visualizations</a-->
         </iron-selector>
       </app-drawer>
     </template>

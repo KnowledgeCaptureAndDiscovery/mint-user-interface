@@ -443,6 +443,8 @@ class VariableVGraph extends PolymerElement {
   }
 
   loadGraph(loader) {
+    if(!this.data)
+      return;
     this.id = this.data.id;
     this.graph = new VGraph(this.id, this.data, this);
     this.graph.setEditable(this.editable);

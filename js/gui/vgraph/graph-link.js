@@ -102,7 +102,8 @@ VGraphLink.prototype.drawLink = function(animate) {
 VGraphLink.prototype.getPathCoordinates = function(start, end) {
   var coords = [];
   coords.push(start);
-  var segments = this.getLineSegments(start, end);
+  /*
+  var segments = []; //this.getLineSegments(start, end);
   if(segments.length == 0) {
     var mid = {
       x: ( start.x + end.x ) / 2,
@@ -114,7 +115,7 @@ VGraphLink.prototype.getPathCoordinates = function(start, end) {
     for (var i = 0; i < segments.length; i++) {
       coords.push(segments[i]);
     }
-  }
+  }*/
   coords.push(end);
   return coords;
 };
