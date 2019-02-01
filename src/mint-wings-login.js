@@ -1,21 +1,13 @@
-/**
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
-import '@polymer/polymer/polymer-legacy.js';
-
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-icon/iron-icon.js';
+
 import './mint-icons.js';
 import './mint-ajax.js';
 import './mint-common-styles.js';
+import { getResource, postFormResource } from './mint-requests.js';
+
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 
@@ -126,16 +118,18 @@ class MintWingsLogin extends PolymerElement {
     return;
     */
 
-    this._getResource({
-      url: me.config.wings.server + '/sparql',
+    getResource({
+      url: me.config.wings.server + '/login',
       onLoad: function(e) {
         var txt = e.target.responseText;
         if(txt.match(/j_security_check/)) {
           if(!me.input_userid || !me.password)
             return;
-          var data = "j_username=" + encodeURIComponent(me.input_userid);
-          data += "&j_password=" + encodeURIComponent(me.password);
-          me._postResource({
+          var data = {
+            j_username: me.input_userid,
+            j_password: me.password
+          };
+          postFormResource({
             url: me.config.wings.server + '/j_security_check',
             onLoad: function(e2) {
               var txt2 = e2.target.responseText;
@@ -152,8 +146,8 @@ class MintWingsLogin extends PolymerElement {
             },
             onError: function() {
               //console.log("Cannot login");
-              this._getResource({
-                url: me.config.wings.server + '/sparql',
+              getResource({
+                url: me.config.wings.server + '/login',
                 onLoad: function(e2) {
                   var match = /USER_ID\s*=\s*"(.+)"\s*;/.exec(e2.target.responseText);
                   if(match) {
@@ -163,10 +157,9 @@ class MintWingsLogin extends PolymerElement {
                   }
                 },
                 onError: function(){}
-              });
-              //this._setFailure(true);
+              }, true);
             }
-          }, data);
+          }, data, true);
         } else {
           var match = /USER_ID\s*=\s*"(.+)"\s*;/.exec(txt);
           if(match) {
@@ -180,7 +173,7 @@ class MintWingsLogin extends PolymerElement {
         console.log("Cannot connect to wings");
         this._setFailure(true);
       }
-    });
+    }, true);
   }
 
   _logout() {
@@ -188,7 +181,7 @@ class MintWingsLogin extends PolymerElement {
     if(!me.config.wings.server)
       return;
 
-    this._getResource({
+    getResource({
       url: me.config.wings.server + '/jsp/login/logout.jsp',
       onLoad: function(e) {
         me.loggedIn = false;
@@ -199,26 +192,7 @@ class MintWingsLogin extends PolymerElement {
         me.loggedIn = false;
         //console.log("Could not logout !");
       }
-    });
-  }
-
-  _getResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('GET', rq.url);
-    xhr.send();
-  }
-
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.send(data);
+    }, true);
   }
 
   _setFailure(val) {

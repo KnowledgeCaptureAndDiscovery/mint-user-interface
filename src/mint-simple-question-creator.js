@@ -7,6 +7,7 @@ import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 
+import { getLocalName } from '../js/gui/template/common.js';
 import './mint-common-styles.js';
 
 class MintSimpleQuestionCreator extends PolymerElement {
@@ -82,6 +83,8 @@ class MintSimpleQuestionCreator extends PolymerElement {
       vocabulary: Object,
       region: Object,
       graphData: Object,
+      config: Object,
+      userid: String,
 
       question: {
         type: Object,
@@ -102,10 +105,13 @@ class MintSimpleQuestionCreator extends PolymerElement {
   _createQuestion(text) {
     if(text && this.region) {
       var regionid = this.subregion ? this.subregion.id : this.region.id;
+      var graphid = this.config.server + "/users/" + this.userid +
+        "/regions/" + getLocalName(this.region.id) + "/cag";
+
       this.set("question", {
         label: text,
         region: regionid,
-        graph: this.region.graph,
+        graph: graphid,
         type: "DIAGNOSTIC" // FIXME: Hardcoding this right now
       });
     }

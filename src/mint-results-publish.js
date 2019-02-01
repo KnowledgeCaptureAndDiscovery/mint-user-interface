@@ -25,6 +25,8 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
+import { getResource, postJSONResource } from './mint-requests.js';
+
 import './mint-icons.js';
 import './mint-csv-input.js';
 import './mint-image.js';
@@ -415,7 +417,7 @@ class MintResultsPublish extends PolymerElement {
       this.userid + "/" + this.routeData.domain + "/data/library.owl#" +
       this.subrouteData.dsid;
     url = url + "?data_id=" + encodeURIComponent(datalib);
-    this._getResource({
+    getResource({
       url: url,
       onLoad: function(e) {
         input.placeholder = null;
@@ -434,7 +436,7 @@ class MintResultsPublish extends PolymerElement {
       limit: 1000
     };
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.catalogs.data + "/knowledge_graph/find_standard_variables",
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
@@ -452,7 +454,7 @@ class MintResultsPublish extends PolymerElement {
     if(!vocabulary || !vocabulary.regions.length)
       return [];
 
-    var regions = vocabulary.regions;
+    var regions = vocabulary.regions.slice();
     var bboxregions = [];
     while(regions.length) {
       var region = regions.pop();
@@ -687,7 +689,7 @@ class MintResultsPublish extends PolymerElement {
     fn(varmap);*/
 
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.catalogs.data + "/knowledge_graph/register_standard_variables",
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
@@ -742,7 +744,7 @@ class MintResultsPublish extends PolymerElement {
 
 
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.catalogs.data + "/datasets/register_datasets",
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
@@ -806,7 +808,7 @@ class MintResultsPublish extends PolymerElement {
     fn(varids);*/
 
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.catalogs.data + "/datasets/register_variables",
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
@@ -858,7 +860,7 @@ class MintResultsPublish extends PolymerElement {
     // fn(def);
 
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.catalogs.data + "/datasets/register_resources",
       onLoad: function(e) {
         var json = JSON.parse(e.target.responseText);
@@ -998,7 +1000,7 @@ class MintResultsPublish extends PolymerElement {
       }
     }
     var me = this;
-    me._postResource({
+    postJSONResource({
       url: me.config.transformation.server,
       onLoad: function(e) {
         fn(e.target.responseText);
@@ -1088,35 +1090,6 @@ class MintResultsPublish extends PolymerElement {
       }
     }
     return variables;
-  }
-
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _getResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('GET', rq.url);
-    xhr.send();
   }
 }
 

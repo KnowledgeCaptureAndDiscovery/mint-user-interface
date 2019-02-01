@@ -6,6 +6,7 @@ import '@polymer/app-route/app-route.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-button/paper-button.js';
 
+import { putJSONResource } from './mint-requests.js';
 import './mint-common-styles.js';
 
 class MintModels extends PolymerElement {
@@ -115,16 +116,18 @@ class MintModels extends PolymerElement {
     <app-route route="[[route]]" pattern="/:regionid/:questionid/:taskid/:dvarids/:rvarids/:op"
       data="{{routeData}}"></app-route>
 
+    <app-route route="[[route]]" pattern="/:op" data="{{plainData}}"></app-route>
+
     <app-route route="[[route]]" pattern="/:op/all" data="{{tmpData}}"></app-route>
 
     <!-- Get question, task -->
     <template is="dom-if" if="[[selectMode]]">
       <template is="dom-if" if="[[userid]]">
         <template is="dom-if" if="[[routeData.questionid]]">
-          <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]"
+          <iron-ajax auto url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[routeData.questionid]]"
             handle-as="json" last-response="{{question}}"></iron-ajax>
           <iron-ajax auto
-            url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
             handle-as="json" last-response="{{task}}"></iron-ajax>
         </template>
       </template>
@@ -142,7 +145,7 @@ class MintModels extends PolymerElement {
         <paper-input label="Driving Variables" value="{{queryConfig.drivingVariables}}"></paper-input>
         <paper-input label="Response Variables" value="{{queryConfig.responseVariables}}"></paper-input>
         <paper-input label="Data Type" value="{{queryConfig.dataType}}"></paper-input>
-        <paper-button class="important" on-tap="_getModelList">Search</paper-button>
+        <paper-button class="important" on-tap="_setFilteredModelList">Search</paper-button>
       </div>
       <div class="outer shifted">
         <div class="model_list">
@@ -208,7 +211,7 @@ class MintModels extends PolymerElement {
 
         <template is="dom-if" if="[[selectMode]]">
           <div class="selected_models">
-            <div class='bold'>SELECTED MODELS</div>
+            <b>SELECTED MODELS</b>
             <paper-button class="important" on-tap="_submitModelSpecification">DONE</paper-button>
             <ul>
               <template is="dom-repeat" items="[[modelSpecs]]" as="model">
@@ -256,16 +259,21 @@ class MintModels extends PolymerElement {
         type: Object,
         observer: '_routeDataChanged'
       },
-      tmpData: Object,
+      tmpData: {
+        type: Object,
+        observer: '_tmpDataChanged'
+      },
+      plainData: {
+        type: Object,
+        observer: '_plainDataChanged'
+      },
       visible: Boolean
     };
   }
 
   static get observers() {
     return [
-      '_createModelSpecDetails(question, modelList)',
-      '_makeDefaultList(vocabulary.models, showAllModels)',
-      '_makeAllList(vocabulary.models, tmpData.op)'
+      '_createModelSpecDetails(question, modelList)'
     ]
   }
 
@@ -274,19 +282,31 @@ class MintModels extends PolymerElement {
       this.set("selectMode", true);
     } else {
       this.set("selectMode", false);
+      this._makeDefaultList(this.vocabulary.models);
+    }
+    if(rd) {
+      if(rd.dvarids) {
+        this.set("queryConfig.drivingVariables", rd.dvarids);
+      }
+      if(rd.rvarids) {
+        this.set("queryConfig.responseVariables", rd.rvarids);
+      }
+      if(rd.questionid)
+        this._setFilteredModelList();
     }
   }
 
-  _makeAllList(models, op) {
-    if(op) {
+  _tmpDataChanged(rd) {
+    if(rd.op == "browse") {
       this.set("showAllModels", true);
-
+      this._makeDefaultList(this.vocabulary.models);
     }
   }
-  _setAllModelsMode(trd) {
-    if(trd && trd.op == "browse") {
-      this.set("showAllModels", true);
-      this._makeDefaultList(this.vocabulary.models, true);
+
+  _plainDataChanged(rd) {
+    if(rd.op == "browse") {
+      this.set("showAllModels", false);
+      this._makeDefaultList(this.vocabulary.models);
     }
   }
 
@@ -402,7 +422,7 @@ class MintModels extends PolymerElement {
     });
   }
 
-  _getModelList() {
+  _setFilteredModelList() {
     var qc = this.queryConfig;
     var list = this._cloneModelsArray(this.vocabulary.models);
     // Filter by model name (wildcards allowed)
@@ -535,7 +555,7 @@ class MintModels extends PolymerElement {
     me.task.status = done ? "DONE" : (started ? "ONGOING" : "NOT_STARTED");
 
     /* Save new Task in Server */
-    me._putResource({
+    putJSONResource({
       url: me.task.id,
       onLoad: function(e) {
         //window.history.back();
@@ -563,7 +583,7 @@ class MintModels extends PolymerElement {
       this.question.models.push(this.modelSpecs[i].id);
 
     var me = this;
-    me._putResource({
+    putJSONResource({
       url: me.question.id,
       onLoad: function(e) {
         me._setTaskOutput(me.question);
@@ -572,16 +592,6 @@ class MintModels extends PolymerElement {
         console.log("Cannot add models");
       }
     }, me.question)
-  }
-
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
   }
 }
 

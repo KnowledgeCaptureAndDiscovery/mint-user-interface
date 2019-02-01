@@ -14,14 +14,13 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 //import './mint-button.js';
 //import './mint-ajax.js';
 //import './mint-image.js';
-//import './mint-region-data.js';
 import './mint-common-styles.js';
 import './mint-base-router.js';
 
 import './mint-govern-home.js';
 import './mint-govern-planner.js';
 import './mint-govern-cag.js';
-import './mint-govern-load-cag.js';
+import './mint-govern-loadcag.js';
 import './mint-govern-analysis.js';
 
 class MintGovern extends MintBaseRouter {
@@ -35,9 +34,6 @@ class MintGovern extends MintBaseRouter {
 
     <!-- Insert parent template : app-router basically -->
     ${super.template}
-
-    <!-- mint-region-data provides the list of regions -->
-    <!--mint-region-data auto regions="{{regions}}"></mint-region-data-->
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
       <!-- govern home  -->
@@ -63,10 +59,10 @@ class MintGovern extends MintBaseRouter {
         route="[[pageSubRoute.cag]]"></mint-govern-cag>
 
       <!-- load a new cag and convert -->
-      <mint-govern-load-cag name="load-cag" vocabulary="[[vocabulary]]"
+      <mint-govern-loadcag name="loadcag" vocabulary="[[vocabulary]]"
         visible="[[visible]]"
         config="[[config]]" userid="[[userid]]"
-        route="[[pageSubRoute.load-cag]]"></mint-govern-load-cag>
+        route="[[pageSubRoute.loadcag]]"></mint-govern-loadcag>
     </iron-pages>
 `;
   }

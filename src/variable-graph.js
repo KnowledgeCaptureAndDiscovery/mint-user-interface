@@ -22,6 +22,7 @@ import './loading-screen.js';
 import './mint-icons.js';
 import './mint-common-styles.js';
 
+import { getResource, putJSONResource } from './mint-requests.js';
 import { VGraph } from "../js/gui/vgraph/variable-graph.js";
 import { getLocalName, getNamespace } from "../js/gui/template/common.js";
 
@@ -181,15 +182,11 @@ class VariableVGraph extends PolymerElement {
           <a class="action" title="Fetch Matching Standard Names from GSN"
             on-click="_fetchStandardNames">ALIGN<iron-icon icon="file-download" /></a>
         </legend>
-        <div id="standard_names_template_row" style="display:none">
-          <paper-input label="Standard Name" value="[[index]]"></paper-input>
-          <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
-        </div>
         <div id="editor_standard_names">
           <loading-screen class="limitedloading" loading="[[loadingStandardNames]]"></loading-screen>
           <template is="dom-repeat" items="[[edItem.standard_names]]">
             <div class="row">
-              <paper-input label="Standard Name" value="[[item]]"></paper-input>
+              <paper-input label="Standard Name" value="{{item}}"></paper-input>
               <a class="action" on-click="_removeRow"><iron-icon icon="cancel" /></a>
             </div>
           </template>
@@ -296,16 +293,12 @@ class VariableVGraph extends PolymerElement {
   }
 
   _removeRow(e) {
-    e.target.parentNode.parentNode.remove();
+    var index = e.model.get('index');
+    this.splice("edItem.standard_names", index, 1);
   }
 
   _addStandardName() {
-    var div = document.createElement("div");
-    div.className = "row";
-    div.innerHTML = this.$.standard_names_template_row.innerHTML;
-    var btn = div.querySelector("a");
-    btn.addEventListener("click", this._removeRow);
-    this.$.editor_standard_names.appendChild(div);
+    this.push("edItem.standard_names", null);
   }
 
   _fetchStandardNames(e) {
@@ -313,7 +306,7 @@ class VariableVGraph extends PolymerElement {
     var url = this.config.gsn.server + "/match_phrase/" + label.replace(/\s+/, '_') + "/";
     var me = this;
     me.set("loadingStandardNames", true);
-    this._getResource({
+    getResource({
       url: url,
       onLoad: function(e) {
         me.set("loadingStandardNames", false);
@@ -343,80 +336,18 @@ class VariableVGraph extends PolymerElement {
       this.graph.resizePanel();
   }
 
-  setTaskOutput(output) {
-    var me = this;
-    me.task.status = "DONE";
-    me.task.output = [output];
-    for(var actid in me.task.activities) {
-      me.task.activities[actid].output = [output];
-    }
-    me._putResource({
-      url: me.task.id,
-      onLoad: function(e) {
-        var new_path = '/cags/list/' + getLocalName(me.region.id) + "/" + me.questionid + "/" + me.taskid;
-        window.history.pushState({}, null, new_path)
-        location.reload();
-      },
-      onError: function() {
-        console.log("Cannot update question");
-      }
-    }, me.task)
-  }
-
   save() {
     this.graph.savePositions();
-    this._putResource({
+    var me = this;
+    putJSONResource({
       url: this.data.id,
       onLoad: function(e) {
         alert('Saved');
-        //me.setTaskOutput(me.data.id);
       },
       onError: function() {
         console.log("Cannot edit graph");
       }
     }, this.data);
-
-    /*
-    var me = this;
-    if(this.data.id.indexOf("/common/graphs") > 0) {
-      me._postResource({
-        url: me.config.server + "/users/" + me.userid + "/graphs",
-        onLoad: function(e) {
-          var id = e.target.responseText;
-          me.question.graph = id;
-          me._putResource({
-            url: me.config.server + "/users/" + me.userid + "/questions/" + me.questionid,
-            onLoad: function(e) {
-              var graphid = e.target.responseText;
-              //console.log(graphid);
-              me.setTaskOutput(graphid);
-              //location.reload();
-            },
-            onError: function() {
-              console.log("Cannot update question");
-            }
-          }, me.question);
-        },
-        onError: function() {
-          console.log("Cannot add graph");
-        }
-      }, me.data);
-    } else {
-      // Edit Graph call
-      me._putResource({
-        url: me.data.id,
-        onLoad: function(e) {
-          // Nothing to do
-          // me.setTaskOutput(me.data.id);
-        },
-        onError: function() {
-          console.log("Cannot edit graph");
-        }
-      }, me.data);
-    }*/
-
-    /*this.graphJson = JSON.stringify(this.data, null, 2);
-    this.$.save_display.open();*/
   }
 
   toggleView(d) {
@@ -477,22 +408,27 @@ class VariableVGraph extends PolymerElement {
   _editVariable(e) {
     if(e.detail.confirmed) {
       if(this.edItem) {
-        var editem = Object.assign({}, this.edItem);
-        var inputs = this.$.editor_standard_names.querySelectorAll("paper-input");
-        editem.standard_names = [];
-        for(var i=0; i<inputs.length; i++) {
-          if(inputs[i].value)
-            editem.standard_names.push(inputs[i].value);
+        var newitem = Object.assign({}, this.edItem);
+        newitem.standard_names = [];
+        var snames = this.edItem.standard_names;
+        if(snames) {
+          for(var i=0; i<snames.length; i++) {
+            if(snames[i])
+              newitem.standard_names.push(snames[i]);
+          }
         }
+        // Clear existing item
+        this.edItem = {};
+
         // Check if existing edited
         for (var i=0; i<this.data.variables.length; i++) {
-          if(this.data.variables[i].id == this.edItem.id) {
-            this.set("data.variables."+i, editem);
+          if(this.data.variables[i].id == newitem.id) {
+            this.set("data.variables."+i, newitem);
             return;
           }
         }
         // New Variable
-        this.graph.editor.push("data.variables", editem);
+        this.graph.editor.push("data.variables", newitem);
       }
     }
     else {
@@ -555,35 +491,6 @@ class VariableVGraph extends PolymerElement {
         }
       }, this);
     }
-  }
-
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _getResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('GET', rq.url);
-    xhr.send();
   }
 }
 

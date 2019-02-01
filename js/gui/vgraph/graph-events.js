@@ -407,6 +407,13 @@ VGraphEvents.prototype.editVariableInformation = function(item) {
     return;
 
   var ed = this.graph.editor;
-  ed.set('edItem', Object.assign({}, vardata));
+  var datacopy = Object.assign({}, vardata);
+  if(vardata.standard_names) {
+    datacopy.standard_names = vardata.standard_names.slice();
+  }
+  else {
+    datacopy.standard_names = [];
+  }
+  ed.set('edItem', datacopy);
   ed.variable_editor.open();
 };

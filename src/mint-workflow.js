@@ -24,9 +24,6 @@ class MintWorkflow extends MintBaseRouter {
     <!-- Insert parent template : app-router basically -->
     ${super.template}
 
-    <!-- mint-region-data provides the list of regions -->
-    <!--mint-region-data auto regions="{{regions}}"></mint-region-data-->
-
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
       <!-- workflow list -->
       <mint-workflow-list name="list" vocabulary="[[vocabulary]]"

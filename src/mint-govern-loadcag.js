@@ -5,11 +5,12 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/app-route/app-route.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 
+import { getResource } from './mint-requests.js';
 import './variable-graph.js';
 
-class MintGovernLoadCag extends PolymerElement {
+class MintGovernLoadcag extends PolymerElement {
 
-  static get is() { return "mint-govern-load-cag"; }
+  static get is() { return "mint-govern-loadcag"; }
 
   static get template() {
     return html`
@@ -34,7 +35,7 @@ class MintGovernLoadCag extends PolymerElement {
       <div><b>Created On:</b> [[cag.dateCreated]]</div>
 
       <!--paper-button class="important" on-tap="_startAligning">Align Variables to GSN</paper-button-->
-      <paper-button class="important" on-tap="_saveGraph">Save</paper-button>
+      <paper-button class="important" on-tap="_saveGraph">DONE</paper-button>
       <hr />
     </template>
 
@@ -99,7 +100,7 @@ class MintGovernLoadCag extends PolymerElement {
   }
 
   _convertToGraph(cag) {
-    var graphid = this.config.server + "/common/graphs/" + cag.name;
+    var graphid = this.config.server + "/users/" + this.userid + "/regions/" + this.routeData.regionid + "/cag";
     var graph = {
       id: graphid,
       label: cag.name,
@@ -136,6 +137,9 @@ class MintGovernLoadCag extends PolymerElement {
 
   _saveGraph() {
     this.$.cag.save();
+    var new_path = 'govern/analysis/' + this.routeData.regionid;
+    window.history.pushState({cag: this.$.cag.data}, null, new_path);
+    window.dispatchEvent(new CustomEvent('location-changed'));
   }
 
   _startAligning() {
@@ -144,7 +148,7 @@ class MintGovernLoadCag extends PolymerElement {
       for(var i=0; i<this.cag.variables.length; i++) {
         var v = this.cag.variables[i];
         var url = this.config.gsn.server + "/match_phrase/" + v.name.replace(/\s+/, '_') + "/";
-        this._getResource({
+        getResource({
           url: url,
           onLoad: function(e) {
             var json = JSON.parse(e.target.responseText);
@@ -163,15 +167,6 @@ class MintGovernLoadCag extends PolymerElement {
   _localName(id) {
     return id.replace(/^.+#/, '');
   }
-
-  _getResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('GET', rq.url);
-    xhr.send();
-  }
 }
 
-customElements.define(MintGovernLoadCag.is, MintGovernLoadCag);
+customElements.define(MintGovernLoadcag.is, MintGovernLoadcag);

@@ -5,6 +5,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/app-route/app-route.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 
+import { putJSONResource } from './mint-requests.js';
 import './variable-graph.js';
 
 class MintGovernCag extends PolymerElement {
@@ -30,17 +31,16 @@ class MintGovernCag extends PolymerElement {
         <template is="dom-if" if="[[subrouteData.questionid]]">
 
           <iron-ajax auto
-            url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]"
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[subrouteData.questionid]]"
             handle-as="json" last-response="{{question}}"></iron-ajax>
           <iron-ajax auto
-            url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
             handle-as="json" last-response="{{task}}"></iron-ajax>
 
           <b>[[_getHeading(routeData.op)]]: </b>
           <i>
             <template is="dom-repeat" items="[[selectedItems]]">
-              <template is="dom-if" if="[[index]]">,</template>
-              [[_localName(item)]]
+              <li>[[_getVariableDetail(item, graphData)]]</li>
             </template>
           </i>
           <br />
@@ -61,7 +61,7 @@ class MintGovernCag extends PolymerElement {
       userid: Object,
       graphid: {
         type: Object,
-        computed: '_getGraphId(routeData.regionid, vocabulary)'
+        computed: '_getGraphId(routeData.regionid, userid)'
       },
       selectedItems: Array,
       graphData: Object,
@@ -125,7 +125,10 @@ class MintGovernCag extends PolymerElement {
     return a==b;
   }
 
-  _getGraphId(regionid, vocabulary) {
+  _getGraphId(regionid, userid) {
+    if(regionid && userid)
+      return this.config.server + "/users/" + userid + "/regions/" + regionid + "/cag";
+    /*
     if(vocabulary && regionid) {
       for(var i=0; i<vocabulary.regions.length; i++) {
         var region = vocabulary.regions[i];
@@ -134,7 +137,7 @@ class MintGovernCag extends PolymerElement {
           return region.graph;
         }
       }
-    }
+    }*/
   }
 
   _loadGraph() {
@@ -189,10 +192,10 @@ class MintGovernCag extends PolymerElement {
     }
 
     /* Save new Task in Server */
-    me._putResource({
+    putJSONResource({
       url: me.task.id,
       onLoad: function(e) {
-        var new_path = 'govern/analysis/' + this._getLocalName(me.routeData.regionid) + "/" +
+        var new_path = 'govern/analysis/' + me._getLocalName(me.routeData.regionid) + "/" +
           me.subrouteData.questionid + "/" + me.subrouteData.taskid;
 
         window.history.pushState({question: question, task: me.task}, null, new_path);
@@ -219,7 +222,7 @@ class MintGovernCag extends PolymerElement {
     }
 
     var me = this;
-    me._putResource({
+    putJSONResource({
       url: me.question.id,
       onLoad: function(e) {
         me._setTaskOutput(me.question, me.selectedItems);
@@ -230,14 +233,24 @@ class MintGovernCag extends PolymerElement {
     }, me.question)
   }
 
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
+  _getVariableDetail(varid, graphData) {
+    console.log(varid);
+    console.log(graphData);
+    if(varid && graphData) {
+      var v = this._getGraphVariable(varid, graphData);
+      if(v) {
+        return v.label + " (" + (v.standard_names?v.standard_names.join(", "):'') + ")";
+      }
+    }
+  }
+
+  _getGraphVariable(varid, graphData) {
+    for(var i=0; i<graphData.variables.length; i++) {
+      var v = graphData.variables[i];
+      if(v.id == varid) {
+        return v;
+      }
+    }
   }
 }
 

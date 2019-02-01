@@ -15,7 +15,6 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import './mint-button.js';
 import './mint-common-styles.js';
 import './mint-ajax.js';
-import './variable-graph.js';
 import './loading-screen.js';
 import './mint-workflows.js';
 
@@ -152,22 +151,22 @@ class MintGovernPlanner extends PolymerElement {
     <template is="dom-if" if="[[visible]]">
       <template is="dom-if" if="[[userid]]">
         <template is="dom-if" if="[[routeData.questionid]]">
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]"
+          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[routeData.questionid]]"
             handle-as="json" last-response="{{question}}"></iron-ajax>
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
             handle-as="json" last-response="{{task}}"></iron-ajax>
         </template>
       </template>
     </template>
 
     <div class="content">
-      <mint-workflows workflows="{{workflows}}"
+      <mint-workflows id="workflows" workflows="{{workflows}}"
         selected-workflow="{{workflow}}" selected-graph="{{selectedWorkflowGraph}}"
         selected-items="{{selectedWorkflowItems}}"
         config="[[config]]" userid="[[userid]]" visible="[[visible]]"
-        task="[[task]]" regionid="[[routeData.regionid]]"
-        dsid="[[routeData.dsid]]"
-        question="[[question]]"
+        task="[[task]]" taskid="[[routeData.taskid]]"
+        regionid="[[routeData.regionid]]" dsid="[[routeData.dsid]]"
+        question="[[question]]" questionid="[[routeData.questionid]]"
         ></mint-workflows>
     </div>
 
@@ -218,13 +217,19 @@ class MintGovernPlanner extends PolymerElement {
       },
       visible: {
         type: Boolean,
-        value: false
+        value: false,
+        observer: '_visibleChanged'
       }
     };
   }
 
+  _visibleChanged(visible) {
+    if(!visible)
+      this.$.workflows._resetWorkflows();
+  }
+
   _useridChanged(userid) {
-    //console.log(userid);
+      //this.$.workflows._resetWorkflows();
   }
 
   _onSelectedWorkflowItemsChanged(cags) {
@@ -232,7 +237,7 @@ class MintGovernPlanner extends PolymerElement {
   }
 
   _routeChanged() {
-    // this.$.workflows._resetWorkflows();
+    this.$.workflows._resetWorkflows();
   }
 }
 

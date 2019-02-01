@@ -20,6 +20,7 @@ import './wings-workflow.js';
 import './mint-common-styles.js';
 
 import { getNamespace, getLocalName } from "../js/gui/template/common.js";
+import { getResource, postJSONResource, postFormResource, putJSONResource } from './mint-requests.js';
 
 class MintWorkflows extends PolymerElement {
   static get template() {
@@ -87,7 +88,7 @@ class MintWorkflows extends PolymerElement {
 
     </style>
 
-    <iron-ajax auto="" url="[[_createPlannerURL(question, dsid, userid, visible)]]"
+    <iron-ajax auto="" url="[[_createPlannerURL(regionid, questionid, taskid, dsid, userid, visible)]]"
       handle-as="json" last-response="{{workflows}}"></iron-ajax>
 
     <!-- Top toolbar -->
@@ -158,7 +159,9 @@ class MintWorkflows extends PolymerElement {
       config: Object,
       userid: String,
       question: Object,
-      regionid: Object,
+      questionid: String,
+      regionid: String,
+      taskid: String,
       task: Object,
       dsid: String,
       workflows: {
@@ -195,6 +198,7 @@ class MintWorkflows extends PolymerElement {
     this.$.workflow_listbox.selected = null;
     this.$.list_section.show();
     this.$.workflow_section.hide();
+    this.$.toggler.checked = false;
     this.set("workflows", []);
     this.set("selectedWorkflow", null);
     this.set("selectedGraph", null);
@@ -217,9 +221,10 @@ class MintWorkflows extends PolymerElement {
   }
 
 
-  _createPlannerURL(question, dsid, userid, visible) {
-    if(visible && userid && question)
-      return question.id + "/planner/compose/" + dsid;
+  _createPlannerURL(regionid, questionid, taskid, dsid, userid, visible) {
+    if(visible && userid && questionid && taskid && dsid)
+      return this.config.server + "/users/" + userid + "/regions/" + regionid
+        + "/questions/" + questionid + "/planner/compose/" + dsid;
   }
 
   _plusone(index) {
@@ -265,7 +270,8 @@ class MintWorkflows extends PolymerElement {
         me.task.activities[actid].output = [output];
       }
     }
-    me._putResource({
+
+    putJSONResource({
       url: me.task.id,
       onLoad: function(e) {
         var new_path = 'govern/analysis/' + me._getLocalName(me.regionid) + "/" +
@@ -277,26 +283,6 @@ class MintWorkflows extends PolymerElement {
         console.log("Cannot update task");
       }
     }, me.task)
-  }
-
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
   }
 
   _selectWorkflow() {
@@ -454,7 +440,7 @@ class MintWorkflows extends PolymerElement {
   _getComponents(fn) {
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
-    this._getResource({
+    getResource({
       url: purl + "/components/getComponentHierarchyJSON",
       onLoad: function(e) {
         var ctree = JSON.parse(e.target.responseText);
@@ -465,7 +451,7 @@ class MintWorkflows extends PolymerElement {
       onError: function() {
         console.log("Cannot fetch components");
       }
-    })
+    }, true);
   }
 
   _getComponentMap(node, map) {
@@ -482,13 +468,12 @@ class MintWorkflows extends PolymerElement {
   _addComponent(c, ctop, fn) {
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
-    var data = "cid=" + encodeURIComponent(c.id);
-    data += "&parent_cid=";
-    data += "&parent_type=" + encodeURIComponent(ctop);
-    dom(this.$.runstatus).innerHTML = "Adding component "+c.id;
-
-    // fn();
-    this._postResourceRaw({
+    var data = {
+      cid: c.id,
+      parent_cid: null,
+      parent_type: ctop
+    };
+    postFormResource({
       url: purl + "/components/type/addComponent",
       onLoad: function(e) {
         if(e.target.responseText == "OK")
@@ -497,16 +482,17 @@ class MintWorkflows extends PolymerElement {
       onError: function() {
         console.log("Cannot save");
       }
-    }, data);
+    }, data, true);
   }
 
   _saveComponentJSON(c, fn) {
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
-    var data = "cid=" + encodeURIComponent(c.id);
-    data += "&component_json=" + encodeURIComponent(JSON.stringify(c));
-    // fn();
-    this._postResourceRaw({
+    var data = {
+      cid: c.id,
+      component_json: JSON.stringify(c)
+    }
+    postFormResource({
       url: purl + "/components/type/saveComponentJSON",
       onLoad: function(e) {
         if(e.target.responseText == "OK")
@@ -515,14 +501,13 @@ class MintWorkflows extends PolymerElement {
       onError: function() {
         console.log("Cannot save");
       }
-    }, data);
+    }, data, true);
   }
 
   _layoutTemplate(tpl, fn) {
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
-    // fn();
-    this._postResourceRaw({
+    postJSONResource({
       url: purl + "/workflows/layoutTemplate",
       onLoad: function(e) {
         var ntpl = JSON.parse(e.target.responseText);
@@ -531,7 +516,7 @@ class MintWorkflows extends PolymerElement {
       onError: function() {
         console.log("Cannot layout template");
       }
-    }, JSON.stringify(tpl));
+    }, tpl, true);
   }
 
   _saveTemplate(tpl, constraints, fn) {
@@ -540,12 +525,12 @@ class MintWorkflows extends PolymerElement {
 
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
-    var data = "template_id=" + encodeURIComponent(tpl.id);
-    data += "&constraints_json=" + encodeURIComponent(JSON.stringify(constraints));
-    data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
-    dom(this.$.runstatus).innerHTML = "Saving workflow";
-    // fn();
-    this._postResourceRaw({
+    var data = {
+      template_id: tpl.id,
+      constraints_json: JSON.stringify(constraints),
+      json: JSON.stringify(tpl)
+    }
+    postFormResource({
       url: purl + "/workflows/saveTemplateJSON",
       onLoad: function(e) {
         fn();
@@ -553,49 +538,8 @@ class MintWorkflows extends PolymerElement {
       onError: function() {
         console.log("Cannot save");
       }
-    }, data);
+    }, data, true);
   }
 
-  _getResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('GET', rq.url);
-    xhr.send();
-  }
-
-  _postResource(rq, data) {
-    var rawstr = "";
-    for(var key in data) {
-      if(rawstr)
-        rawstr += "&";
-      rawstr += key + "=";
-      if(data[key])
-        rawstr += encodeURIComponent(data[key]);
-    }
-    this._postResourceRaw(rq, rawstr);
-  }
-
-  _postResourceRaw(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('POST', rq.url, true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.send(data);
-  }
-
-  _postResourceJSON(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    xhr.withCredentials = true;
-    xhr.open('POST', rq.url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
-    var payload = JSON.stringify(data)
-    xhr.send(payload);
-  }
 }
 window.customElements.define(MintWorkflows.is, MintWorkflows);

@@ -23,6 +23,7 @@ import './mint-common-styles.js';
 import './mint-button.js';
 import './mint-simple-question-creator.js';
 import './mint-task-creator.js';
+import { deleteResource, postJSONResource } from './mint-requests.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
@@ -294,6 +295,11 @@ class MintGovernAnalysis extends PolymerElement {
         margin-left: 25px;
         margin-bottom: 10px;
       }
+      span.variables {
+        font-style: italic;
+        font-weight: lighter;
+        font-size: 10px;
+      }
 
       @media (max-width: 767px) {
         .dashboard {
@@ -319,18 +325,25 @@ class MintGovernAnalysis extends PolymerElement {
       data="{{trouteData}}"></app-route>
 
     <template is="dom-if" if="[[graphid]]">
-      <iron-ajax url="[[graphid]]" auto handle-as="json" last-response="{{graphData}}"></iron-ajax>
+
     </template>
 
     <template is="dom-if" if="[[visible]]">
       <template is="dom-if" if="[[userid]]">
         <template is="dom-if" if="[[region]]">
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions?region=[[region.id]]" handle-as="json" last-response="{{questions}}"></iron-ajax>
+          <iron-ajax auto
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/cag"
+            handle-as="json" last-response="{{graphData}}"></iron-ajax>
+          <iron-ajax auto=""
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions"
+            handle-as="json" last-response="{{questions}}"></iron-ajax>
         </template>
         <template is="dom-if" if="[[questionid]]">
-          <iron-ajax auto="" url="[[config.server]]/users/[[userid]]/questions/[[questionid]]/tasks" handle-as="json" last-response="{{tasks}}"></iron-ajax>
+          <iron-ajax auto=""
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[questionid]]/tasks"
+            handle-as="json" last-response="{{tasks}}"></iron-ajax>
           <iron-ajax auto
-            url="[[config.server]]/users/[[userid]]/questions/[[questionid]]/data"
+            url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[questionid]]/data"
             handle-as="json" last-response="{{dataSpecs}}"></iron-ajax>
         </template>
       </template>
@@ -345,7 +358,8 @@ class MintGovernAnalysis extends PolymerElement {
       </div>
 
       <mint-simple-question-creator id="question_creator" question="{{newQuestion}}"
-        region="[[region]]" vocabulary="[[vocabulary]]"></mint-simple-question-creator>
+        region="[[region]]" uerid="[[userid]]" config="[[config]]"
+        vocabulary="[[vocabulary]]"></mint-simple-question-creator>
 
       <paper-button class="important" disabled="[[_isNull(newQuestion)]]" on-tap="_addQuestion">OK</paper-button>
     </paper-dialog>
@@ -399,8 +413,10 @@ class MintGovernAnalysis extends PolymerElement {
           <div class="buttons">
             <a class="button" href="data/browse/[[routeData.regionid]]">Browse data</a>
             <a class="button" href="workflow/list/[[routeData.regionid]]/DATA_GENERATION">Generate new data</a>
-            <a class="button" href="govern/cag/[[routeData.regionid]]/browse">Browse CAG</a>
-            <a class="button" href="govern/load-cag/[[routeData.regionid]]">Load New CAG</a>
+            <template is="dom-if" if="[[graphData]]">
+              <a class="button" href="govern/cag/[[routeData.regionid]]/browse">Browse CAG</a>
+            </template>
+            <a class="button" href="govern/loadcag/[[routeData.regionid]]">Load New CAG</a>
           </div>
         </div>
 
@@ -581,10 +597,6 @@ class MintGovernAnalysis extends PolymerElement {
         type: Object,
         computed: '_getQuestionRegion(region, question)'
       },
-      graphid: {
-        type: Object,
-        computed: '_getGraphId(routeData.regionid, vocabulary)'
-      },
       graphData: Object,
       newQuestion: Object,
 
@@ -624,10 +636,7 @@ class MintGovernAnalysis extends PolymerElement {
       dataSpecs: Array,
 
       route: Object,
-      routeData: {
-        type: Object,
-        observer: '_routeDataChanged'
-      },
+      routeData: Object,
       qrouteData: {
         type: Object,
         observer: '_qrouteDataChanged'
@@ -648,42 +657,45 @@ class MintGovernAnalysis extends PolymerElement {
 
   static get observers() {
     return [
-      '_regionChanged(region)'
-    ];
+      '_routeDataChanged(routeData, vocabulary)'
+    ]
   }
 
-  _routeDataChanged(rd) {
-    // Region changed
-    if(rd.regionid) {
-      // No change in region ?
-      if(this.region && (rd.regionid == this._getLocalName(this.region.id))) {
-        // Check if this page was called again after updating application state
-        var state = window.history.state;
-        if(!state)
+  _routeDataChanged(rd, vocabulary) {
+    if(rd && vocabulary) {
+      // Region changed
+      if(rd.regionid) {
+        // No change in region ?
+        if(this.region && (rd.regionid == this._getLocalName(this.region.id))) {
+          // Check if this page was called again after updating application state
+          var state = window.history.state;
+          if(!state)
+            return;
+
+          if(state.task && this.tasks) {
+            this._updateTaskList(state.task);
+          }
+          if(state.question && this.questions) {
+            this._updateQuestionList(state.question);
+          }
+          if(state.dataSpecs) {
+            this.set("dataSpecs", state.dataSpecs);
+          }
+          if(state.cag) {
+            this.set("graphData", state.cag);
+          }
+
+          // Reset history state
+          window.history.pushState({}, null);
           return;
-
-        if(state.task && this.tasks) {
-          this._updateTaskList(state.task);
         }
-        if(state.question && this.questions) {
-          this._updateQuestionList(state.question);
-        }
-        if(state.dataSpecs) {
-          this.set("dataSpecs", state.dataSpecs);
-        }
-        // Reset history state
-        window.history.pushState({}, null);
-        return;
-      }
 
-      if(!this.vocabulary)
-        return;
-
-      // Fetch region object from vocabulary
-      for(var i=0; i<this.vocabulary.regions.length; i++) {
-        var region = this.vocabulary.regions[i];
-        if(rd.regionid == this._getLocalName(region.id)) {
-          this.set("region", region);
+        // Fetch region object from vocabulary
+        for(var i=0; i<vocabulary.regions.length; i++) {
+          var region = Object.assign({}, vocabulary.regions[i]);
+          if(rd.regionid == this._getLocalName(region.id)) {
+            this.set("region", region);
+          }
         }
       }
     }
@@ -750,7 +762,7 @@ class MintGovernAnalysis extends PolymerElement {
     if(varid && graphData) {
       var v = this._getGraphVariable(varid, graphData);
       if(v) {
-        return v.localName + " (" + (v.standard_names?v.standard_names[0]:'') + ")";
+        return v.label + " (" + (v.standard_names?v.standard_names.join(", "):'') + ")";
       }
     }
   }
@@ -809,8 +821,8 @@ class MintGovernAnalysis extends PolymerElement {
   _addQuestion() {
     var me = this;
     var newQuestion = this.newQuestion;
-    me._postResource({
-      url: me.config.server + "/users/" + me.userid + "/questions",
+    postJSONResource({
+      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions",
       onLoad: function(e) {
         var id = e.target.responseText;
         newQuestion.id = id;
@@ -834,8 +846,8 @@ class MintGovernAnalysis extends PolymerElement {
 
   _deleteQuestion() {
     var me = this;
-    me._delResource({
-      url: me.config.server + "/users/" + me.userid + "/questions/" + me.questionid,
+    deleteResource({
+      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions/" + me.questionid,
       onLoad: function(e) {
         me._removeQuestionFromList(me.questionid);
         me.set("question", null);
@@ -855,8 +867,8 @@ class MintGovernAnalysis extends PolymerElement {
   _addTask() {
     var me = this;
     var newTask = this.newTask;
-    me._postResource({
-      url: me.config.server + "/users/" + me.userid + "/questions/" + me.questionid + "/tasks",
+    postJSONResource({
+      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions/" + me.questionid + "/tasks",
       onLoad: function(e) {
         var id = e.target.responseText;
         newTask.id = id;
@@ -881,7 +893,7 @@ class MintGovernAnalysis extends PolymerElement {
   _deleteTask() {
     var me = this;
     me._delResource({
-      url: me.config.server + "/users/" + me.userid + "/questions/" + me.questionid + "/tasks/" + me.taskid,
+      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions/" + me.questionid + "/tasks/" + me.taskid,
       onLoad: function(e) {
         me._removeTaskFromList(me.taskid);
         me.set("task", null);
@@ -1011,7 +1023,7 @@ class MintGovernAnalysis extends PolymerElement {
       else
         link = link.replace("<response_variables>", "");
     }
-    if(link.indexOf("<workflow.") > 0) {
+    if(link.indexOf("<workflow.") > 0 && this.workflow) {
       var m;
       while(m = link.match(/\<workflow\.(.+?)\>/)) {
         if(!m)
@@ -1019,7 +1031,7 @@ class MintGovernAnalysis extends PolymerElement {
         link = link.replace("<workflow."+m[1]+">", this.workflow[m[1]]);
       }
     }
-    if(link.indexOf("<run.") > 0) {
+    if(link.indexOf("<run.") > 0 && this.run) {
       var m;
       while(m = link.match(/\<run\.(.+?)\>/)) {
         if(!m)
@@ -1115,18 +1127,6 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
-  _getGraphId(regionid, vocabulary) {
-    if(vocabulary && regionid) {
-      for(var i=0; i<vocabulary.regions.length; i++) {
-        var region = vocabulary.regions[i];
-        var rid = region.id.replace(/^.+\//, '');
-        if(rid == regionid) {
-          return region.graph;
-        }
-      }
-    }
-  }
-
   _getQuestionRegion(region, question) {
     if(region && question) {
       if(region.id == question.region)
@@ -1165,25 +1165,6 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
-  _regionChanged(region) {
-    var me = this;
-
-    this._changeSectionDebouncer = Debouncer.debounce(this._changeSectionDebouncer,
-      microTask, () => {
-        if (region) {
-          // Notify the region and the page's title
-          this.dispatchEvent(new CustomEvent('change-section', {
-            bubbles: true, composed: true, detail: {
-              region: region.name,
-              title: region.title
-            }}));
-        } else {
-          this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
-            bubbles: true, composed: true}));
-        }
-      });
-  }
-
   _createGeoJsonURL(region, visible) {
     if(region && visible) {
       var url = region.boundaryVector;
@@ -1193,24 +1174,6 @@ class MintGovernAnalysis extends PolymerElement {
     return null;
   }
 
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _delResource(rq) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('DELETE', rq.url);
-    xhr.send();
-  }
 }
 
 customElements.define(MintGovernAnalysis.is, MintGovernAnalysis);

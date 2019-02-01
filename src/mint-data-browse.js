@@ -13,6 +13,7 @@ import '@vaadin/vaadin-date-picker/theme/material/vaadin-date-picker.js';
 import './loading-screen.js';
 import './mint-icons.js';
 import './mint-common-styles.js';
+import { putJSONResource, postJSONResource } from './mint-requests.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
@@ -154,13 +155,13 @@ class MintDataBrowse extends PolymerElement {
       <template is="dom-if" if="[[visible]]">
         <template is="dom-if" if="[[userid]]">
           <template is="dom-if" if="[[subrouteData.questionid]]">
-            <iron-ajax auto url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]"
+            <iron-ajax auto url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[subrouteData.questionid]]"
               handle-as="json" last-response="{{question}}"></iron-ajax>
             <iron-ajax auto
-              url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
+              url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[subrouteData.questionid]]/tasks/[[subrouteData.taskid]]"
               handle-as="json" last-response="{{task}}"></iron-ajax>
             <iron-ajax auto
-              url="[[config.server]]/users/[[userid]]/questions/[[subrouteData.questionid]]/data"
+              url="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[subrouteData.questionid]]/data"
               handle-as="json" last-response="{{dataSpecs}}"></iron-ajax>
             <template is="dom-if" if="[[question]]">
               <iron-ajax auto="" url="[[question.graph]]" handle-as="json" last-response="{{graph}}"></iron-ajax>
@@ -337,6 +338,7 @@ class MintDataBrowse extends PolymerElement {
 
   static get observers() {
     return [
+      '_emptyHandler(route)',
       '_initialOverallDataFetch(region, subroute)',
       '_initialQuestionDataFetch(question, subrouteData.op, subrouteData.varids, subregion)',
       '_createDataSpecsDetails(dataSpecs)',
@@ -365,6 +367,8 @@ class MintDataBrowse extends PolymerElement {
 
   _getVizConfigs(dataset) {
     var configs = [];
+    if(!dataset)
+      return configs;
     if(dataset.resources && dataset.resources.length > 0) {
       var meta = dataset.resources[0].dataset_metadata;
       for(var key in meta) {
@@ -389,7 +393,7 @@ class MintDataBrowse extends PolymerElement {
       for(var key in meta) {
         if(key.match(/^viz_config/)) {
           var viz_config = meta[key];
-          if(viz_config.visualized)
+          if(viz_config.visualized && viz_config.id)
             return true;
         }
       }
@@ -398,8 +402,19 @@ class MintDataBrowse extends PolymerElement {
   }
 
   _getVisualizationLink(viz_config, dataset) {
-    var id = viz_config.id ? viz_config.id : dataset.dataset_id;
+    var id = viz_config.id;
     return "/visualizations/"+id+"/"+viz_config.viz_type;
+  }
+
+  _emptyHandler(route) {
+    if(!route.path || route.path == "" ) {
+      this.set("dataSpecs", []);
+      this.set("subrouteData", {});
+      this.set("subregion", null);
+      this.set("dataSpec", {});
+      this.set("filesList", {});
+      this.set("queryConfig", {});
+    }
   }
 
   _initialOverallDataFetch(region, subroute) {
@@ -662,7 +677,7 @@ class MintDataBrowse extends PolymerElement {
     if(existing) {
       me.dataSpecs[0] = me.dataSpec;
       // PUT REQUEST
-      me._putResource({
+      putJSONResource({
         url: me.dataSpecs[0].id,
         onLoad: function(e) {
           me.setTaskOutput(me.dataSpecs[0].id);
@@ -675,8 +690,8 @@ class MintDataBrowse extends PolymerElement {
     else {
       // POST REQUEST
       me.dataSpecs[0] = me.dataSpec;
-      me._postResource({
-        url: me.config.server + "/users/" + me.userid + "/questions/" + me.subrouteData.questionid + "/data",
+      postJSONResource({
+        url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions/" + me.subrouteData.questionid + "/data",
         onLoad: function(e) {
           var outputid = e.target.responseText;
           me.setTaskOutput(outputid);
@@ -700,7 +715,7 @@ class MintDataBrowse extends PolymerElement {
       }
     }
 
-    me._putResource({
+    putJSONResource({
       url: me.task.id,
       onLoad: function(e) {
         var new_path = '/govern/analysis/' + me._getLocalName(me.routeData.regionid) + "/" +
@@ -736,26 +751,6 @@ class MintDataBrowse extends PolymerElement {
       if(hash[key])
         return false;
     return true;
-  }
-
-  _postResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('POST', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-  }
-
-  _putResource(rq, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', rq.onLoad.bind(this));
-    xhr.addEventListener('error', rq.onError.bind(this));
-    //xhr.withCredentials = true;
-    xhr.open('PUT', rq.url);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
   }
 }
 

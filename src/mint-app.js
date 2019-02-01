@@ -29,7 +29,6 @@ import './mint-icons.js';
 import './mint-wings-login.js';
 import './mint-common-styles.js';
 import './mint-data-catalog.js';
-import './mint-model-catalog.js';
 import './mint-vocabulary.js';
 //import './mint-home.js';
 //import './mint-models.js';
@@ -302,10 +301,6 @@ class MintApp extends MintBaseRouter {
     <mint-data-catalog config="[[config]]" userid="[[userid]]"
       region="[[region]]" data-catalog="{{dataCatalog}}"></mint-data-catalog>
 
-    <!-- Model Catalog -->
-    <!--mint-model-catalog config="[[config]]" userid="[[userid]]"
-      model-catalog="{{modelCatalog}}" data-catalog="[[dataCatalog]]"></mint-model-catalog-->
-
     <!-- Loading screen -->
     <loading-screen loading="true" id="pageLoading"></loading-screen>
 
@@ -319,12 +314,6 @@ class MintApp extends MintBaseRouter {
         <mint-govern name="govern" vocabulary="[[vocabulary]]"
           config="[[config]]" userid="[[userid]]"
           route="{{pageSubRoute.govern}}"></mint-govern>
-
-        <!-- cags view -->
-        <!--mint-cags name="cags" vocabulary="[[vocabulary]]"
-          config="[[config]]" userid="[[userid]]"
-          model-catalog="[[modelCatalog]]" region="{{region}}"
-          route="{{pageSubRoute.cags}}"></mint-cags-->
 
         <!-- results view -->
         <mint-results name="results" vocabulary="[[vocabulary]]"
@@ -378,9 +367,6 @@ class MintApp extends MintBaseRouter {
         type: String,
         value: null
       },
-
-      // Model Catalog object
-      modelCatalog: Object,
 
       // Data catalog object
       dataCatalog: Object,
