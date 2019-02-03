@@ -22,7 +22,7 @@ import './mint-common-styles.js';
 import { getNamespace, getLocalName } from "../js/gui/template/common.js";
 import { getResource, postJSONResource, postFormResource, putJSONResource } from './mint-requests.js';
 
-class MintWorkflows extends PolymerElement {
+class MintPlannerResults extends PolymerElement {
   static get template() {
     return html`
     <style include="mint-common-styles">
@@ -152,7 +152,7 @@ class MintWorkflows extends PolymerElement {
   }
 
   static get is() {
-    return 'mint-workflows';
+    return 'mint-planner-results';
   }
   static get properties() {
     return {
@@ -199,7 +199,8 @@ class MintWorkflows extends PolymerElement {
     this.$.list_section.show();
     this.$.workflow_section.hide();
     this.$.toggler.checked = false;
-    this.set("workflows", []);
+    this.set("showWorkflows", false);
+    this.set("workflows", null);
     this.set("selectedWorkflow", null);
     this.set("selectedGraph", null);
   }
@@ -222,9 +223,12 @@ class MintWorkflows extends PolymerElement {
 
 
   _createPlannerURL(regionid, questionid, taskid, dsid, userid, visible) {
-    if(visible && userid && questionid && taskid && dsid)
+    if(visible && userid && questionid && taskid && dsid) {
+      this.set("loading", true);
+      console.log("loading..");
       return this.config.server + "/users/" + userid + "/regions/" + regionid
         + "/questions/" + questionid + "/planner/compose/" + dsid;
+    }
   }
 
   _plusone(index) {
@@ -244,6 +248,7 @@ class MintWorkflows extends PolymerElement {
     this.$.list_section.toggle();
     this.$.workflow_section.toggle();
     this.$.workflow_listbox.selected = null;
+    this.set("showWorkflows", false);
     this.set("selectedWorkflow", null);
     this.set("selectedGraph", null);
   }
@@ -254,7 +259,7 @@ class MintWorkflows extends PolymerElement {
       var nodes = workflow.modelGraph.Nodes;
       for(var nid in nodes) {
         var n = nodes[nid];
-        //if(n.category && n.category != "none")
+        if(n.category && n.category != "none")
           wnodes.push(n);
       }
       return wnodes;
@@ -274,6 +279,8 @@ class MintWorkflows extends PolymerElement {
     putJSONResource({
       url: me.task.id,
       onLoad: function(e) {
+        me.set("loading", false);
+        alert("Saved");
         var new_path = 'govern/analysis/' + me._getLocalName(me.regionid) + "/" +
           me._getLocalName(me.question.id) + "/" + me._getLocalName(me.task.id);
         window.history.pushState({task: me.task}, null, new_path);
@@ -301,9 +308,10 @@ class MintWorkflows extends PolymerElement {
       delete tpl.Nodes[nid].category;
     }
 
+    me.set("loading", true);
     me._layoutTemplate(tpl, function(ntpl) {
       // FIXME: me._addUnknownComponents(tpl, function(){})
-      me._saveTemplate(ntpl, constraints, function() {
+      me._saveTemplate(tpl, constraints, function() {
         me._setTaskOutput(ntpl.id);
       });
     });
@@ -542,4 +550,4 @@ class MintWorkflows extends PolymerElement {
   }
 
 }
-window.customElements.define(MintWorkflows.is, MintWorkflows);
+window.customElements.define(MintPlannerResults.is, MintPlannerResults);

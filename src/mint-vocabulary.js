@@ -21,12 +21,27 @@ class MintVocabulary extends PolymerElement {
   static get properties() {
     return {
       config: Object,
+      regions: Array,
+      task_types: Array,
+      models: Array,
+      workflows: Array,
       vocabulary: {
         type: Object,
         notify: true,
-        value: {}
+        computed: '_createVocabulary(regions, task_types, models, workflows)'
       }
     };
+  }
+
+  _createVocabulary(regions, task_types, models, workflows) {
+    if(regions && task_types && models && workflows) {
+      return {
+        regions: regions,
+        task_types: task_types,
+        models: models,
+        workflows: workflows
+      }
+    }
   }
 }
 

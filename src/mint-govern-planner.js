@@ -15,8 +15,7 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import './mint-button.js';
 import './mint-common-styles.js';
 import './mint-ajax.js';
-import './loading-screen.js';
-import './mint-workflows.js';
+import './mint-planner-results.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
@@ -160,14 +159,14 @@ class MintGovernPlanner extends PolymerElement {
     </template>
 
     <div class="content">
-      <mint-workflows id="workflows" workflows="{{workflows}}"
+      <mint-planner-results id="results" workflows="{{workflows}}"
         selected-workflow="{{workflow}}" selected-graph="{{selectedWorkflowGraph}}"
         selected-items="{{selectedWorkflowItems}}"
         config="[[config]]" userid="[[userid]]" visible="[[visible]]"
         task="[[task]]" taskid="[[routeData.taskid]]"
         regionid="[[routeData.regionid]]" dsid="[[routeData.dsid]]"
         question="[[question]]" questionid="[[routeData.questionid]]"
-        ></mint-workflows>
+        ></mint-planner-results>
     </div>
 
 `;
@@ -224,8 +223,8 @@ class MintGovernPlanner extends PolymerElement {
   }
 
   _visibleChanged(visible) {
-    if(!visible)
-      this.$.workflows._resetWorkflows();
+    /*if(!visible)
+      this.$.results._resetWorkflows();*/
   }
 
   _useridChanged(userid) {
@@ -237,7 +236,7 @@ class MintGovernPlanner extends PolymerElement {
   }
 
   _routeChanged() {
-    this.$.workflows._resetWorkflows();
+    this.$.results._resetWorkflows();
   }
 }
 

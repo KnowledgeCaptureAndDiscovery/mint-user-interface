@@ -104,7 +104,6 @@ class MintGovernCag extends PolymerElement {
 
   _initializeSelectedItems(op, question) {
     if(op && question) {
-      console.log(question);
       if(op == "SelectDrivingVariables")
         this.set("selectedItems", question.drivingVariables);
       if(op == "SelectResponseVariables")

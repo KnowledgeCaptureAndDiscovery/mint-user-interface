@@ -135,7 +135,7 @@ class MintWingsLogin extends PolymerElement {
               var txt2 = e2.target.responseText;
               if(txt2.match(/j_security_check/)) {
                 console.log("Incorrect Login ?");
-                this._setFailure(true);
+                me._setFailure(true);
               }
               else {
                 // Success: Logged in

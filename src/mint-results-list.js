@@ -71,7 +71,7 @@ class MintResultsList extends PolymerElement {
     <app-route route="[[route]]" pattern="/:domain"
       data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-    <app-route route="[[subroute]]" pattern="/:templateid"
+    <app-route route="[[subroute]]" pattern="/:template_id"
         data="{{subrouteData}}"></app-route>
 
     <mint-ajax id="runlistAjax"

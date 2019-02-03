@@ -31,7 +31,7 @@ class MintWorkflow extends MintBaseRouter {
         route="[[pageSubRoute.list]]"></mint-workflow-list>
 
       <!-- workflow run -->
-      <mint-workflow-run name="run" vocabulary="[[vocabulary]]"
+      <mint-workflow-run name="run" vocabulary"";
         visible="[[visible]]" config="[[config]]" userid="[[userid]]"
         route="[[pageSubRoute.run]]"></mint-workflow-run>
 

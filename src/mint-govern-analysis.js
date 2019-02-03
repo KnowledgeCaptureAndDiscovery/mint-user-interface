@@ -36,11 +36,11 @@ class MintGovernAnalysis extends PolymerElement {
     <style include="mint-common-styles">
       #map {
         width:150px;
-        height:100px;
+        height:150px;
       }
       .map {
         width: 150px;
-        height: 100px;
+        height: 150px;
         margin-left: 10px;
         border: 1px solid #638a40;
         border-radius: 2px;
@@ -53,7 +53,7 @@ class MintGovernAnalysis extends PolymerElement {
         margin: 0px;
         margin-left: 15px;
         vertical-align: top;
-        height: 100px;
+        height: 150px;
         overflow: auto;
       }
       .content {
@@ -66,8 +66,8 @@ class MintGovernAnalysis extends PolymerElement {
       .dashboard {
         display: grid;
         grid-gap: 10px;
-        justify-content: stretch;
         width: 100%;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
       }
       .panel {
         background-color: #EEE;
@@ -79,6 +79,8 @@ class MintGovernAnalysis extends PolymerElement {
         padding: 5px;
         padding-left: 10px;
         font-size: 12px;
+        display: flex;
+        flex-flow: row;
         text-transform: uppercase;
         /*padding-left: 15px;
         font-size: 14px;*/
@@ -89,10 +91,11 @@ class MintGovernAnalysis extends PolymerElement {
         font-weight: bold;
       }
       .panel .add_button, .panel .delete_button {
-        right: 0;
-        float: right;
         /*font-weight:lighter*/;
         font-size: 10px;
+      }
+      .panel .add_button {
+        margin-left: 10px;
       }
       .delete_button {
         color: maroon;
@@ -106,9 +109,6 @@ class MintGovernAnalysis extends PolymerElement {
         flex-flow: column;
         align-items: stretch;
         margin: 5px;
-      }
-      .region_exploration .buttons {
-        flex-flow: row wrap;
       }
       .panel .buttons .button {
         min-width: 50px;
@@ -134,9 +134,19 @@ class MintGovernAnalysis extends PolymerElement {
         border: 1px solid #999;
         border-radius: 2px;
       }
+      fieldset.panel legend {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+      }
+      .region_information {
+        grid-column: 1 / 4;
+      }
       .region_exploration {
-        grid-column-start: 1;
-        grid-column-end: 8;
+        grid-column: 4 / 5;
+      }
+      .region_exploration,
+      .region_information {
         background-color:#e5efdb;
         border: 1px solid #638a40;
       }
@@ -149,8 +159,7 @@ class MintGovernAnalysis extends PolymerElement {
         color:white;
       }
       .question {
-        grid-column-start: 1;
-        grid-column-end: 4;
+        grid-column: 1 / 3;
         background-color: #fdf2d0;
         border: 1px solid #c69908;
       }
@@ -167,8 +176,7 @@ class MintGovernAnalysis extends PolymerElement {
         font-weight: bold;
       }
       .task {
-        grid-column-start: 4;
-        grid-column-end: 6;
+        grid-column: 3 / 4;
         background-color: #dce3f2;
         border: 1px solid #385995;
       }
@@ -186,8 +194,7 @@ class MintGovernAnalysis extends PolymerElement {
         font-weight: bold;
       }
       .activity {
-        grid-column-start: 6;
-        grid-column-end: 8;
+        grid-column: 4 / 5;
         background-color: #f7e6d8;
         border: 1px solid #b1631f;
       }
@@ -207,8 +214,7 @@ class MintGovernAnalysis extends PolymerElement {
         opacity: 0.7;
       }
       .history {
-        grid-column-start: 1;
-        grid-column-end: 8;
+        grid-column: 1 / 5;
         border: 1px solid #999999;
       }
       .history .scroller {
@@ -358,7 +364,7 @@ class MintGovernAnalysis extends PolymerElement {
       </div>
 
       <mint-simple-question-creator id="question_creator" question="{{newQuestion}}"
-        region="[[region]]" uerid="[[userid]]" config="[[config]]"
+        region="[[region]]" userid="[[userid]]" config="[[config]]"
         vocabulary="[[vocabulary]]"></mint-simple-question-creator>
 
       <paper-button class="important" disabled="[[_isNull(newQuestion)]]" on-tap="_addQuestion">OK</paper-button>
@@ -385,12 +391,12 @@ class MintGovernAnalysis extends PolymerElement {
 
       <div class="dashboard">
         <!-- Region Exploration Panel -->
-        <div class="panel region_exploration">
-          <div class="panel_heading">
+        <fieldset class="panel region_information">
+          <legend class="panel_heading">
             <div class="title">
-              Region Exploration
+              Region Information
             </div>
-          </div>
+          </legend>
 
           <div class="content">
             <!-- Map -->
@@ -409,6 +415,14 @@ class MintGovernAnalysis extends PolymerElement {
               [[region.description]]
             </div>
           </div>
+        </fieldset>
+
+        <fieldset class="panel region_exploration">
+          <legend class="panel_heading">
+            <div class="title">
+              Region Exploration
+            </div>
+          </legend>
 
           <div class="buttons">
             <a class="button" href="data/browse/[[routeData.regionid]]">Browse data</a>
@@ -418,11 +432,11 @@ class MintGovernAnalysis extends PolymerElement {
             </template>
             <a class="button" href="govern/loadcag/[[routeData.regionid]]">Load New CAG</a>
           </div>
-        </div>
+        </fieldset>
 
         <!-- Question Panel -->
-        <div class="panel question">
-          <div class="panel_heading">
+        <fieldset class="panel question">
+          <legend class="panel_heading">
             <div class="title">
               Questions
             </div>
@@ -434,21 +448,22 @@ class MintGovernAnalysis extends PolymerElement {
                 <paper-button on-click="_deleteQuestion">- Delete question</paper-button>
               </div>
             </template>
-          </div>
+          </legend>
           <div class="buttons">
             <template is="dom-repeat" items="[[questions]]">
               <a class\$="[[_getQuestionClass(item, questionid)]]"
                 href="/govern/analysis/[[_getLocalName(region.id)]]/[[_getLocalName(item.id)]]">[[item.label]]</a>
             </template>
           </div>
-        </div>
+        </fieldset>
 
         <!-- Task Panel -->
-        <div class="panel task">
-          <div class="panel_heading">
+        <fieldset class="panel task">
+          <legend class="panel_heading">
             <div class="title">
               Tasks
             </div>
+            <!--
             <template is="dom-if" if="[[questionid]]">
               <div class="add_button">
                 <paper-button on-click="_openTaskCreator">+ Add new task</paper-button>
@@ -459,7 +474,8 @@ class MintGovernAnalysis extends PolymerElement {
                 </div>
               </template>
             </template>
-          </div>
+            -->
+          </legend>
           <div class="buttons">
             <template is="dom-if" if="[[questionid]]">
               <template is="dom-repeat" items="[[tasks]]">
@@ -475,15 +491,15 @@ class MintGovernAnalysis extends PolymerElement {
               </template>
             </template>
           </div>
-        </div>
+        </fieldset>
 
         <!-- Activity Panel -->
-        <div class="panel activity">
-          <div class="panel_heading">
+        <fieldset class="panel activity">
+          <legend class="panel_heading">
             <div class="title">
               Activities
             </div>
-          </div>
+          </legend>
           <template is="dom-if" if="[[_notNull(task)]]">
             <div class="buttons">
               <template is="dom-if" if="[[questionid]]">
@@ -498,15 +514,15 @@ class MintGovernAnalysis extends PolymerElement {
               </template>
             </div>
           </template>
-        </div>
+        </fieldset>
 
         <!-- Information Panel (TODO) -->
-        <div class="panel history">
-          <div class="panel_heading">
+        <fieldset class="panel history">
+          <legend class="panel_heading">
             <div class="title">
               Your Selections
             </div>
-          </div>
+          </legend>
           <div>
             <div class="scroller">
               <div class="left">
@@ -662,32 +678,38 @@ class MintGovernAnalysis extends PolymerElement {
   }
 
   _routeDataChanged(rd, vocabulary) {
-    if(rd && vocabulary) {
+    if(rd && vocabulary && vocabulary.regions) {
       // Region changed
       if(rd.regionid) {
         // No change in region ?
         if(this.region && (rd.regionid == this._getLocalName(this.region.id))) {
           // Check if this page was called again after updating application state
           var state = window.history.state;
-          if(!state)
+          if(state) {
+            if(state.task && this.tasks) {
+              this._updateTaskList(state.task);
+            }
+            if(state.question && this.questions) {
+              this._updateQuestionList(state.question);
+            }
+            if(state.dataSpecs) {
+              this.set("dataSpecs", state.dataSpecs);
+            }
+            if(state.cag) {
+              this.set("graphData", state.cag);
+            }
+
+            // Reset history state
+            window.history.pushState({}, null);
             return;
-
-          if(state.task && this.tasks) {
-            this._updateTaskList(state.task);
-          }
-          if(state.question && this.questions) {
-            this._updateQuestionList(state.question);
-          }
-          if(state.dataSpecs) {
-            this.set("dataSpecs", state.dataSpecs);
-          }
-          if(state.cag) {
-            this.set("graphData", state.cag);
           }
 
-          // Reset history state
-          window.history.pushState({}, null);
-          return;
+          if(!this.trouteData.taskid) {
+            this.set("taskid", null);
+          }
+          if(!this.qrouteData.questionid) {
+            this.set("questionid", null);
+          }
         }
 
         // Fetch region object from vocabulary
@@ -727,7 +749,7 @@ class MintGovernAnalysis extends PolymerElement {
     // Question changed
     if(rd.questionid) {
       // No change in question ?
-      if(this.question && (rd.questionid == this._getLocalName(this.question.id)))
+      if(this.question && (rd.questionid == this.questionid))
         return;
       // Change question id
       this.set("questionid", rd.questionid);
@@ -821,8 +843,10 @@ class MintGovernAnalysis extends PolymerElement {
   _addQuestion() {
     var me = this;
     var newQuestion = this.newQuestion;
+    console.log(newQuestion);
     postJSONResource({
-      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions",
+      url: me.config.server + "/users/" + me.userid +
+        "/regions/" + me.routeData.regionid + "/questions",
       onLoad: function(e) {
         var id = e.target.responseText;
         newQuestion.id = id;

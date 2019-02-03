@@ -31,6 +31,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     var layoutWorker = new Worker("./js/lib/layout-worker.js");
     layoutWorker.listeners = {};
+
+    var gzipWorker = new Worker("./js/lib/gzip-worker.js");
+    gzipWorker.listeners = {};
   </script>
 
   <style>

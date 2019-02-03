@@ -7,6 +7,26 @@ export function getResource(rq, withCredentials) {
   xhr.send();
 }
 
+function sendData(xhr, payload) {
+  if(payload.length > 5000) {
+    // Zip larger payloads
+    var myid = Math.random()
+    xhr.setRequestHeader("Content-Encoding", "gzip");
+    gzipWorker.addEventListener("message", function(e) {
+      var msgid = e.data[0];
+      if(msgid == myid) {
+        gzipWorker.removeEventListener("message", this);
+        var data = new Uint8Array(e.data[1]);
+        xhr.send(data);
+      }
+    });
+    gzipWorker.postMessage([myid, payload]);
+  }
+  else {
+    xhr.send(payload);
+  }
+}
+
 export function postJSONResource(rq, data, withCredentials, authHeaders) {
   var xhr = new XMLHttpRequest();
   xhr.addEventListener('load', rq.onLoad.bind(this));
@@ -19,7 +39,7 @@ export function postJSONResource(rq, data, withCredentials, authHeaders) {
       xhr.setRequestHeader(header, authHeaders[header]);
     }
   }
-  xhr.send(JSON.stringify(data));
+  sendData(xhr, JSON.stringify(data));
 }
 
 export function putJSONResource(rq, data, withCredentials) {
@@ -29,7 +49,7 @@ export function putJSONResource(rq, data, withCredentials) {
   xhr.withCredentials = withCredentials;
   xhr.open('PUT', rq.url);
   xhr.setRequestHeader("Content-type", "application/json");
-  xhr.send(JSON.stringify(data));
+  sendData(xhr, JSON.stringify(data));
 }
 
 export function postFormResource(rq, keyvalues, withCredentials) {
@@ -46,7 +66,7 @@ export function postFormResource(rq, keyvalues, withCredentials) {
   xhr.withCredentials = withCredentials;
   xhr.open('POST', rq.url);
   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  xhr.send(data);
+  sendData(xhr, data);
 }
 
 export function deleteResource(rq, withCredentials) {

@@ -87,18 +87,20 @@ class MintResultsHome extends PolymerElement {
   _getWorkflows(vocabulary) {
     if(vocabulary) {
       var types = [];
+      var typemap = {};
       for(var i=0; i<vocabulary.workflows.length; i++) {
         var wflow = vocabulary.workflows[i];
-        var index = types.indexOf(wflow.type);
-        if(index >= 0) {
-          types[index].workflows.push(wflow)
+        var wflowtype = wflow.type;
+        var type_workflows = typemap[wflow.type];
+        if(!type_workflows) {
+          type_workflows = {
+            id: wflowtype,
+            workflows: []
+          };
+          types.push(type_workflows);
         }
-        else {
-          types.push({
-            id: wflow.type,
-            workflows: [wflow]
-          })
-        }
+        type_workflows.workflows.push(wflow);
+        typemap[wflow.type] = type_workflows;
       }
       return types;
     }

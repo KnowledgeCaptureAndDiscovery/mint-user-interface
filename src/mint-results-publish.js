@@ -426,7 +426,7 @@ class MintResultsPublish extends PolymerElement {
       onError: function() {
         console.log("Cannot publish file");
       }
-    });
+    }, true);
   }
 
   _fetchGSNStandardVariables() {

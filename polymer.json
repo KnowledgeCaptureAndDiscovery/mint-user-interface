@@ -2,6 +2,14 @@
   "npm": true,
   "entrypoint": "index.html",
   "shell": "src/mint-app.js",
+  "sources": [
+    "src/**",
+    "js/gui/**",
+    "files/**",
+    "images/**",
+    "manifest/**",
+    "package.json"
+  ],
   "fragments": [
     "src/mint-home.js",
     "src/mint-govern.js",
@@ -12,33 +20,14 @@
     "src/mint-data.js",
     "src/lazy-resources.js"
   ],
-  "sources": [
-   "src/**",
-   "js/gui/**",
-   "files/**",
-   "images/**"
-  ],
   "extraDependencies": [
     ".htaccess",
     "node_modules/@webcomponents/webcomponentsjs/**",
-    "node_modules/mint-map/**",
-    "node_modules/mint-chart/**",
     "js/lib/**",
     "manifest.json"
   ],
-  "lint": {
-    "rules": [
-      "polymer-3"
-    ]
-  },
   "builds": [{
     "name": "default",
-    "css": { "minify": true },
-    "js": {
-       "minify": { "exclude": ["js/lib/*"] }
-    },
-    "html": {
-       "minify": { "exclude": ["index.html"] }
-    }
+    "preset": "es5-bundled"
   }]
 }

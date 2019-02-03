@@ -375,7 +375,7 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _escape(url) {
-    return escape(url);
+    return encodeURIComponent(url);
   }
 
   _fetchResults(config, userid, domain, runid, visible) {
