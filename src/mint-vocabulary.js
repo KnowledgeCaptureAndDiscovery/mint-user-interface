@@ -6,10 +6,10 @@ class MintVocabulary extends PolymerElement {
   static get template() {
     return html`
     <template is="dom-if" if="[[config]]">
-      <iron-ajax auto="" url="[[config.server]]/common/regions" handle-as="json" last-response="{{vocabulary.regions}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/task_types" handle-as="json" last-response="{{vocabulary.task_types}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/models" handle-as="json" last-response="{{vocabulary.models}}"></iron-ajax>
-      <iron-ajax auto="" url="[[config.server]]/common/workflows" handle-as="json" last-response="{{vocabulary.workflows}}"></iron-ajax>
+      <iron-ajax auto="" url="[[config.server]]/common/regions" handle-as="json" last-response="{{regions}}"></iron-ajax>
+      <iron-ajax auto="" url="[[config.server]]/common/task_types" handle-as="json" last-response="{{task_types}}"></iron-ajax>
+      <iron-ajax auto="" url="[[config.server]]/common/models" handle-as="json" last-response="{{models}}"></iron-ajax>
+      <iron-ajax auto="" url="[[config.server]]/common/workflows" handle-as="json" last-response="{{workflows}}"></iron-ajax>
     </template>
 `;
   }

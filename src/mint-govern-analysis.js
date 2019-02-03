@@ -714,8 +714,9 @@ class MintGovernAnalysis extends PolymerElement {
 
         // Fetch region object from vocabulary
         for(var i=0; i<vocabulary.regions.length; i++) {
-          var region = Object.assign({}, vocabulary.regions[i]);
+          var region = vocabulary.regions[i];
           if(rd.regionid == this._getLocalName(region.id)) {
+            var region = Object.assign({}, region);
             this.set("region", region);
           }
         }

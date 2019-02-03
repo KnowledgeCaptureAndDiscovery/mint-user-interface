@@ -23,6 +23,8 @@
   "extraDependencies": [
     ".htaccess",
     "node_modules/@webcomponents/webcomponentsjs/**",
+    "node_modules/mint-map/**",
+    "node_modules/mint-chart/**",
     "js/lib/**",
     "manifest.json"
   ],
