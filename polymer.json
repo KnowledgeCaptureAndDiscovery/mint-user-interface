@@ -5,9 +5,7 @@
   "sources": [
     "src/**",
     "js/gui/**",
-    "files/**",
     "images/**",
-    "manifest/**",
     "package.json"
   ],
   "fragments": [
@@ -23,13 +21,13 @@
   "extraDependencies": [
     ".htaccess",
     "node_modules/@webcomponents/webcomponentsjs/**",
-    "node_modules/mint-map/**",
-    "node_modules/mint-chart/**",
+    "node_modules/mint-map/render/**",
+    "node_modules/mint-map/*.css",
     "js/lib/**",
     "manifest.json"
   ],
   "builds": [{
     "name": "default",
-    "preset": "es5-bundled"
+    "bundle": true
   }]
 }

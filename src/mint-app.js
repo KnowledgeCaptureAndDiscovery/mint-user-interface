@@ -30,6 +30,7 @@ import './mint-wings-login.js';
 import './mint-common-styles.js';
 import './mint-data-catalog.js';
 import './mint-vocabulary.js';
+
 //import './mint-home.js';
 //import './mint-models.js';
 

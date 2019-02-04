@@ -570,6 +570,7 @@ class MintResultsPublish extends PolymerElement {
   _resetForm(dsid, compid, varid, vartype) {
     if(dsid) {
       this.set("dataset_def.name", dsid);
+      this.set("resource_def.data_url", null);
     }
     if(compid && varid) {
       this.set("dataset_def.description", varid+" output from "+ compid);

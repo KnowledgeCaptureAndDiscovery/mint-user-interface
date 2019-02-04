@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { GraphPort } from "./GraphPort.js";
 import { GraphPreviewVariableConfig } from "./config/GraphItemConfig.js";
 import { getNamespace, getLocalName } from "./common.js";

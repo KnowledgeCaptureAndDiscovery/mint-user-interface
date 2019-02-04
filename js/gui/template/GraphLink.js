@@ -1,3 +1,4 @@
+import { line } from 'd3'
 import { getNamespace, getLocalName } from "./common.js";
 
 export var GraphLink = function(parent, id,
@@ -63,7 +64,7 @@ GraphLink.prototype.create = function() {
     .attr("opacity", this.config.strokeopacity)
     .attr("marker-end", arrowid);
 
-  this.interpolation = d3.line()
+  this.interpolation = line()
     .x(function(d) {
       return d.x;
     })

@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { GraphLayout } from "./GraphLayout.js";
 import { GraphLink } from "./GraphLink.js";
 import { GraphNode } from "./GraphNode.js";

@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { getLocalName, getNamespace } from "../template/common.js";
 import { VGraphVariable } from "./graph-variable.js";
 import { VGraphLink } from "./graph-link.js";

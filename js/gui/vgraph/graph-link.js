@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { VGraphLinkConfig } from "./graph-item-config.js";
 import { getLocalName } from "../template/common.js";
 

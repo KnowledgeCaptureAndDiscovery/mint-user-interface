@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { VGraphLink } from "./graph-link.js";
 import { VGraphLinkConfig } from "./graph-item-config.js";
 

@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { GraphLink } from "./GraphLink.js";
 import { GraphVariable } from "./GraphVariable.js";
 import { getNamespace, getLocalName } from "./common.js";

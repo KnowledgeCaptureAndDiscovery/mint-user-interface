@@ -225,7 +225,6 @@ class MintPlannerResults extends PolymerElement {
   _createPlannerURL(regionid, questionid, taskid, dsid, userid, visible) {
     if(visible && userid && questionid && taskid && dsid) {
       this.set("loading", true);
-      console.log("loading..");
       return this.config.server + "/users/" + userid + "/regions/" + regionid
         + "/questions/" + questionid + "/planner/compose/" + dsid;
     }
@@ -309,10 +308,11 @@ class MintPlannerResults extends PolymerElement {
     }
 
     me.set("loading", true);
-    me._layoutTemplate(tpl, function(ntpl) {
-      // FIXME: me._addUnknownComponents(tpl, function(){})
-      me._saveTemplate(tpl, constraints, function() {
-        me._setTaskOutput(ntpl.id);
+    me._elaborateTemplate(wflow, function(elaborated) {
+      wflow.constraints = elaborated.constraints;
+      // FIXME: me._addUnknownComponents(elaborated, function(){})
+      me._saveTemplate(wflow, function() {
+        me._setTaskOutput(wflow.template.id);
       });
     });
   }
@@ -519,7 +519,7 @@ class MintPlannerResults extends PolymerElement {
       url: purl + "/workflows/layoutTemplate",
       onLoad: function(e) {
         var ntpl = JSON.parse(e.target.responseText);
-        fn(ntpl.template);
+        fn(ntpl);
       },
       onError: function() {
         console.log("Cannot layout template");
@@ -527,16 +527,36 @@ class MintPlannerResults extends PolymerElement {
     }, tpl, true);
   }
 
-  _saveTemplate(tpl, constraints, fn) {
+  _elaborateTemplate(tpl, fn) {
+    // Get url prefix for operations
+    var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
+    var data = {
+      template_id: tpl.id,
+      constraints_json: JSON.stringify(tpl.constraints),
+      json: JSON.stringify(tpl.template)
+    }
+    postFormResource({
+      url: purl + "/plan/elaborateTemplateJSON",
+      onLoad: function(e) {
+        var ntpl = JSON.parse(e.target.responseText);
+        fn(ntpl);
+      },
+      onError: function() {
+        console.log("Cannot elaborate template");
+      }
+    }, data, true);
+  }
+
+  _saveTemplate(tpl, fn) {
     //TODO: Get a MD5 Hash for template to check if it is already saved.
     // - To avoid cluttering up template library
 
     // Get url prefix for operations
     var purl = this.config.wings.server + "/users/" + this.userid + "/" + this.config.wings.domain;
     var data = {
-      template_id: tpl.id,
-      constraints_json: JSON.stringify(constraints),
-      json: JSON.stringify(tpl)
+      template_id: tpl.template.id,
+      constraints_json: JSON.stringify(tpl.constraints),
+      json: JSON.stringify(tpl.template)
     }
     postFormResource({
       url: purl + "/workflows/saveTemplateJSON",

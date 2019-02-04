@@ -1,3 +1,5 @@
+import * as d3 from 'd3'
+
 export function GraphItemConfig() {
 	// Configuration
 	// TODO: Get from config file

@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 export function VGraphLinkConfig(newitem) {
   this.strokecolor = "rgba(30,30,30,1)";
   this.strokewidth = 0.7

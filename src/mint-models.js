@@ -328,13 +328,19 @@ class MintModels extends PolymerElement {
       if(!question.models)
         question.models = [];
 
-      var modelSpecs = [];
       for(var i=0; i<modelList.length; i++) {
         var m = modelList[i];
         this.set("modelList."+i+".selected", false);
         var index = question.models.indexOf(m.id);
         if(index >= 0) {
           this.set("modelList."+i+".selected", true);
+        }
+      }
+      var modelSpecs = [];
+      for(var i=0; i<this.vocabulary.models.length; i++) {
+        var m = this.vocabulary.models[i];
+        var index = question.models.indexOf(m.id);
+        if(index >= 0) {
           modelSpecs.push(m);
         }
       }

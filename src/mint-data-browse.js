@@ -134,8 +134,8 @@ class MintDataBrowse extends PolymerElement {
       }
 
       .footer {
+        margin: 30px;
         margin-left: 10px;
-        margin-top: 30px;
         font-size: 12px;
       }
 

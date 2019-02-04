@@ -60,9 +60,6 @@ class MintGovernAnalysis extends PolymerElement {
         @apply --layout-horizontal;
         margin-bottom: 10px;
       }
-      .outer_dashboard {
-        display: flex;
-      }
       .dashboard {
         display: grid;
         grid-gap: 10px;
@@ -71,23 +68,19 @@ class MintGovernAnalysis extends PolymerElement {
       }
       .panel {
         background-color: #EEE;
-        display: flex;
-        flex-flow: column;
         border-radius: 2px;
       }
-      .panel .panel_heading {
-        padding: 5px;
-        padding-left: 10px;
+      .panel legend.panel_heading {
         font-size: 12px;
         display: flex;
         flex-flow: row;
+        text-align: center;
         text-transform: uppercase;
         /*padding-left: 15px;
         font-size: 14px;*/
       }
       .panel .title {
         left: 0;
-        float: left;
         font-weight: bold;
       }
       .panel .add_button, .panel .delete_button {
@@ -100,8 +93,8 @@ class MintGovernAnalysis extends PolymerElement {
       .delete_button {
         color: maroon;
       }
-      .panel .add_button paper-button,
-      .panel .delete_button paper-button {
+      .panel .add_button,
+      .panel .delete_button {
         padding: 0px;
       }
       .panel .buttons {
@@ -123,6 +116,7 @@ class MintGovernAnalysis extends PolymerElement {
         border-radius: 2px;
       }
       .admin_region {
+        margin-top: 10px;
         text-transform: uppercase;
         writing-mode: vertical-rl;
         text-orientation: upright;
@@ -133,6 +127,9 @@ class MintGovernAnalysis extends PolymerElement {
         background-color: #EEE;
         border: 1px solid #999;
         border-radius: 2px;
+      }
+      fieldset.panel {
+        padding: 2px;
       }
       fieldset.panel legend {
         display: flex;
@@ -171,6 +168,10 @@ class MintGovernAnalysis extends PolymerElement {
       .question .buttons a.selected {
         background-color: #c69908;
         color:white;
+      }
+      .questions_list {
+        max-height: 300px;
+        overflow:auto;
       }
       .panel .buttons a.selected {
         font-weight: bold;
@@ -220,16 +221,16 @@ class MintGovernAnalysis extends PolymerElement {
       .history .scroller {
         display: flex;
         flex-flow: row;
+        padding: 0px;
         /*background-color: white;*/
         font-size: 13px;
         overflow: scroll;
-        padding: 5px;
         max-height: 400px;
       }
 
       .left, .middle, .right {
         width: 100%;
-        padding: 5px;
+        padding: 10px;
         margin-right: 10px;
         background-color: white;
         border-radius: 5px;
@@ -330,10 +331,6 @@ class MintGovernAnalysis extends PolymerElement {
     <app-route route="[[subroute2]]" pattern="/:taskid"
       data="{{trouteData}}"></app-route>
 
-    <template is="dom-if" if="[[graphid]]">
-
-    </template>
-
     <template is="dom-if" if="[[visible]]">
       <template is="dom-if" if="[[userid]]">
         <template is="dom-if" if="[[region]]">
@@ -384,141 +381,137 @@ class MintGovernAnalysis extends PolymerElement {
     </paper-dialog>
 
     <!-- GOVERN /dashboard -->
-    <div class="outer_dashboard">
-      <div class="admin_region">
-        [[region.label]]
-      </div>
-
-      <div class="dashboard">
-        <!-- Region Exploration Panel -->
-        <fieldset class="panel region_information">
-          <legend class="panel_heading">
-            <div class="title">
-              Region Information
-            </div>
-          </legend>
-
-          <div class="content">
-            <!-- Map -->
-            <div class="map">
-              <template is="dom-if" if="[[visible]]">
-                <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui=""
-                    latitude="[[region.latitude]]" longitude="[[region.longitude]]"
-                    zoom="[[region.zoom]]" styles="[[mapStyles]]">
-                  <google-map-data-layer url="[[_createGeoJsonURL(region, visible)]]"></google-map-data-layer>
-                  <google-map-data-layer url="[[_createGeoJsonURL(questionRegion, visible)]]"></google-map-data-layer>
-                </google-map>
-              </template>
-            </div>
-            <!-- Description-->
-            <div class="description">
-              [[region.description]]
-            </div>
+    <div class="dashboard">
+      <!-- Region Exploration Panel -->
+      <fieldset class="panel region_information">
+        <legend align="center"class="panel_heading">
+          <div class="title">
+            Region Information
           </div>
-        </fieldset>
+        </legend>
 
-        <fieldset class="panel region_exploration">
-          <legend class="panel_heading">
-            <div class="title">
-              Region Exploration
-            </div>
-          </legend>
-
-          <div class="buttons">
-            <a class="button" href="data/browse/[[routeData.regionid]]">Browse data</a>
-            <a class="button" href="workflow/list/[[routeData.regionid]]/DATA_GENERATION">Generate new data</a>
-            <template is="dom-if" if="[[graphData]]">
-              <a class="button" href="govern/cag/[[routeData.regionid]]/browse">Browse CAG</a>
+        <div class="content">
+          <!-- Map -->
+          <div class="map">
+            <template is="dom-if" if="[[visible]]">
+              <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui=""
+                  latitude="[[region.latitude]]" longitude="[[region.longitude]]"
+                  zoom="[[region.zoom]]" styles="[[mapStyles]]">
+                <google-map-data-layer url="[[_createGeoJsonURL(region, visible)]]"></google-map-data-layer>
+                <google-map-data-layer url="[[_createGeoJsonURL(questionRegion, visible)]]"></google-map-data-layer>
+              </google-map>
             </template>
-            <a class="button" href="govern/loadcag/[[routeData.regionid]]">Load New CAG</a>
           </div>
-        </fieldset>
+          <!-- Description-->
+          <div class="description">
+            [[region.description]]
+          </div>
+        </div>
+      </fieldset>
 
-        <!-- Question Panel -->
-        <fieldset class="panel question">
-          <legend class="panel_heading">
-            <div class="title">
+      <fieldset class="panel region_exploration">
+        <legend align="center"class="panel_heading">
+          <div class="title">
+            Region Exploration
+          </div>
+        </legend>
+
+        <div class="buttons">
+          <a class="button" href="data/browse/[[routeData.regionid]]">Browse data</a>
+          <a class="button" href="workflow/list/[[routeData.regionid]]/DATA_GENERATION">Generate new data</a>
+          <template is="dom-if" if="[[graphData]]">
+            <a class="button" href="govern/cag/[[routeData.regionid]]/browse">Browse CAG</a>
+          </template>
+          <a class="button" href="govern/loadcag/[[routeData.regionid]]">Load New CAG</a>
+        </div>
+      </fieldset>
+
+      <!-- Question Panel -->
+      <fieldset class="panel question">
+        <legend align="center" class="panel_heading">
+          <div class="legend_buttons">
+            <span class="title">
               Questions
-            </div>
-            <div class="add_button">
-              <paper-button on-click="_openQuestionCreator">+ Add new question</paper-button>
-            </div>
+            </span>
+            <paper-button class="add_button" on-click="_openQuestionCreator">+ Add new question</paper-button>
             <template is="dom-if" if="[[questionid]]">
-              <div class="delete_button">
-                <paper-button on-click="_deleteQuestion">- Delete question</paper-button>
-              </div>
+              <paper-button class="delete_button" on-click="_deleteQuestion">- Delete question</paper-button>
             </template>
-          </legend>
+          </div>
+        </legend>
+        <div class="questions_list">
           <div class="buttons">
             <template is="dom-repeat" items="[[questions]]">
               <a class\$="[[_getQuestionClass(item, questionid)]]"
                 href="/govern/analysis/[[_getLocalName(region.id)]]/[[_getLocalName(item.id)]]">[[item.label]]</a>
             </template>
           </div>
-        </fieldset>
+        </div>
+      </fieldset>
 
-        <!-- Task Panel -->
-        <fieldset class="panel task">
-          <legend class="panel_heading">
-            <div class="title">
-              Tasks
+      <!-- Task Panel -->
+      <fieldset class="panel task">
+        <legend align="center"class="panel_heading">
+          <div class="title">
+            Tasks
+          </div>
+          <!--
+          <template is="dom-if" if="[[questionid]]">
+            <div class="add_button">
+              <paper-button on-click="_openTaskCreator">+ Add new task</paper-button>
             </div>
-            <!--
-            <template is="dom-if" if="[[questionid]]">
-              <div class="add_button">
-                <paper-button on-click="_openTaskCreator">+ Add new task</paper-button>
+            <template is="dom-if" if="[[taskid]]">
+              <div class="delete_button">
+                <paper-button on-click="_deleteTask">- Delete task</paper-button>
               </div>
-              <template is="dom-if" if="[[taskid]]">
-                <div class="delete_button">
-                  <paper-button on-click="_deleteTask">- Delete task</paper-button>
-                </div>
-              </template>
             </template>
-            -->
-          </legend>
+          </template>
+          -->
+        </legend>
+        <div class="buttons">
+          <template is="dom-if" if="[[questionid]]">
+            <template is="dom-repeat" items="[[tasks]]">
+              <a class\$="[[_getTaskClass(item, taskid)]]" href="/govern/analysis/[[_getLocalName(region.id)]]/[[questionid]]/[[_getLocalName(item.id)]]">
+                <template is="dom-if" if="[[_isTaskDone(item)]]">
+                  <iron-icon icon="check"></iron-icon>
+                </template>
+                <template is="dom-if" if="[[_isTaskPartlyDone(item)]]">
+                  <iron-icon icon="hourglass-empty"></iron-icon>
+                </template>
+                [[item.label]]
+              </a>
+            </template>
+          </template>
+        </div>
+      </fieldset>
+
+      <!-- Activity Panel -->
+      <fieldset class="panel activity">
+        <legend align="center"class="panel_heading">
+          <div class="title">
+            Activities
+          </div>
+        </legend>
+        <template is="dom-if" if="[[_notNull(task)]]">
           <div class="buttons">
             <template is="dom-if" if="[[questionid]]">
-              <template is="dom-repeat" items="[[tasks]]">
-                <a class\$="[[_getTaskClass(item, taskid)]]" href="/govern/analysis/[[_getLocalName(region.id)]]/[[questionid]]/[[_getLocalName(item.id)]]">
-                  <template is="dom-if" if="[[_isTaskDone(item)]]">
+              <template is="dom-repeat" items="[[taskActivities]]">
+                <a class\$="[[_getActivityClass(item)]]" href="[[_getActivityLink(item.link, region, questionid, taskid)]]">
+                  <template is="dom-if" if="[[_isActivityDone(item)]]">
                     <iron-icon icon="check"></iron-icon>
-                  </template>
-                  <template is="dom-if" if="[[_isTaskPartlyDone(item)]]">
-                    <iron-icon icon="hourglass-empty"></iron-icon>
                   </template>
                   [[item.label]]
                 </a>
               </template>
             </template>
           </div>
-        </fieldset>
+        </template>
+      </fieldset>
 
-        <!-- Activity Panel -->
-        <fieldset class="panel activity">
-          <legend class="panel_heading">
-            <div class="title">
-              Activities
-            </div>
-          </legend>
-          <template is="dom-if" if="[[_notNull(task)]]">
-            <div class="buttons">
-              <template is="dom-if" if="[[questionid]]">
-                <template is="dom-repeat" items="[[taskActivities]]">
-                  <a class\$="[[_getActivityClass(item)]]" href="[[_getActivityLink(item.link, region, questionid, taskid)]]">
-                    <template is="dom-if" if="[[_isActivityDone(item)]]">
-                      <iron-icon icon="check"></iron-icon>
-                    </template>
-                    [[item.label]]
-                  </a>
-                </template>
-              </template>
-            </div>
-          </template>
-        </fieldset>
-
-        <!-- Information Panel (TODO) -->
+      <!-- Information Panel (TODO) -->
+      <template is="dom-if" if="[[questionid]]">
         <fieldset class="panel history">
-          <legend class="panel_heading">
+          <legend align="center"class="panel_heading">
             <div class="title">
               Your Selections
             </div>
@@ -588,9 +581,8 @@ class MintGovernAnalysis extends PolymerElement {
               </div>
             </div>
           </div>
-        </div>
-
-      </div>
+        </fieldset>
+      </template>
     </div>
 `;
   }
@@ -698,18 +690,18 @@ class MintGovernAnalysis extends PolymerElement {
             if(state.cag) {
               this.set("graphData", state.cag);
             }
-
             // Reset history state
             window.history.pushState({}, null);
-            return;
           }
 
-          if(!this.trouteData.taskid) {
+          if(!this.subroute.path) {
+            this.set("questionid", null);
             this.set("taskid", null);
           }
-          if(!this.qrouteData.questionid) {
-            this.set("questionid", null);
+          else if(!this.subroute2.path) {
+            this.set("taskid", null);
           }
+          return;
         }
 
         // Fetch region object from vocabulary

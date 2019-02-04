@@ -83,13 +83,5 @@ class MintResults extends MintBaseRouter {
     scroll({ top: 0, behavior: 'silent' });
   }
 
-  _createGraphURL(cat, item) {
-    if(cat && item) {
-      var url = "files/" + cat + "/" + item + ".json";
-      //console.log(url);
-      return url;
-    }
-    return null;
-  }
 }
 customElements.define(MintResults.is, MintResults);

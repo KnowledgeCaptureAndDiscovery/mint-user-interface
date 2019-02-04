@@ -37,6 +37,7 @@
     "@vaadin/vaadin-date-picker": "^3.3.2",
     "@vaadin/vaadin-grid": "^5.2.6",
     "@vaadin/vaadin-text-field": "^2.1.7",
+    "d3": "^5.8.0",
     "mint-chart": "git+https://github.com/spatial-computing/mint-chart.git",
     "mint-map": "git+https://github.com/spatial-computing/mint-map.git"
   },
