@@ -26,8 +26,8 @@
     "js/lib/**",
     "manifest.json"
   ],
-  "builds": [{
-    "name": "default",
-    "bundle": true
-  }]
+  "builds": [
+    {"name": "modern", "browserCapabilities": ["es2015", "push"]},
+    {"name": "fallback"}
+  ]
 }

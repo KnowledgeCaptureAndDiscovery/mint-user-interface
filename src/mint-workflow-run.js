@@ -192,6 +192,7 @@ class MintWorkflowRun extends PolymerElement {
     if(json) {
       this.template = json.template;
       this.inputs = json.inputs;
+      this.inputs.sort(function(a,b){return a.name.localeCompare(b.name)});
       this._resetBindings();
       this._sortInputData(this.inputs);
       if(this.template.metadata)
@@ -311,7 +312,8 @@ class MintWorkflowRun extends PolymerElement {
     }, me.task)
   }
 
-  _runWorkflow() {
+  _runWorkflow(e) {
+    e.target.disabled = true;
     this._setValues();
 
     var me = this;
@@ -322,10 +324,12 @@ class MintWorkflowRun extends PolymerElement {
         me._executeWorkflow(xtpl, seed, function(runid) {
           //console.log(runid);
           me._setTaskOutput(runid);
+          e.target.disabled = false;
           alert("Workflow sent for execution.");
         });
       }
       else {
+        e.target.disabled = false;
         alert("Could not run workflow. Please see your browser console to debug");
         console.log(expansions);
       }

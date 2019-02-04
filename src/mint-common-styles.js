@@ -175,10 +175,26 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
       font-size: inherit;
     }
 
+    vaadin-grid {
+      font-size: 12px;
+      --vaadin-grid-row-height: 42px;
+      --vaadin-grid-header-row-height: 42px;
+      --vaadin-grid-row-cell: {
+        padding: 0px 10px 0px 10px !important;
+      }
+      margin:10px;
+      border: 1px solid #E3E3E3;
+    }
+
+
     @media (max-width: 767px) {
 
       header > h1 {
         font-size: 1.1em;
+      }
+
+      iron-pages {
+         padding: 0px 5px !important;
       }
 
     }

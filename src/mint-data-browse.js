@@ -117,6 +117,7 @@ class MintDataBrowse extends PolymerElement {
         display: flex;
         flex-flow: row;
         margin-left: 10px;
+        padding-bottom: 80px;
       }
       div.dataset_list {
         width: 100%;
@@ -133,10 +134,30 @@ class MintDataBrowse extends PolymerElement {
         color: #999;
       }
 
-      .footer {
-        margin: 30px;
-        margin-left: 10px;
+      .register_link {
+        margin: 15px;
+        margin-bottom: 5px;
         font-size: 12px;
+      }
+      .dataset_list ul {
+        padding-left: 16px;
+        list-style: circle;
+      }
+      .dataset_list > ul {
+        margin-left: 0px;
+        padding-left: 5px;
+        list-style: none;
+        margin-bottom: 5px;
+      }
+      .dataset_list ul b {
+        display: block;
+        margin-top: 16px;
+        margin-bottom: 8px;
+        font-size: 12px;
+        line-height: 20px;
+      }
+      iron-icon.graph-icon {
+        color: green;
       }
 
       @media (max-width: 767px) {
@@ -193,7 +214,11 @@ class MintDataBrowse extends PolymerElement {
         <vaadin-date-picker label="End Date" value="{{queryConfig.endDate}}"></vaadin-date-picker>
         <paper-button class="important" on-tap="_getDataList">Search</paper-button>
       </div>
+
       <div class="outer shifted">
+        <div class="register_link">
+          <a href="/results/publish">REGISTER NEW DATASETS</a>
+        </div>
         <div class="dataset_area">
           <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
             <div class="dataset_list">
@@ -209,36 +234,48 @@ class MintDataBrowse extends PolymerElement {
           <template is="dom-if" if="[[!_isEmpty(filesList, loading)]]">
               <div class="dataset_list">
                 <ul>
-                  <template is="dom-repeat" items="[[filesList]]">
+                  <template is="dom-repeat" items="[[filesList]]" as="type">
                     <li>
-                      <div class="datarow">
-                        <template is="dom-if" if="[[selectMode]]">
-                          <paper-checkbox on-change="_selectDataset" checked="[[item.selected]]"
-                            value="[[item]]"></paper-checkbox>
+                      <b>[[type.datatype]]</b>
+                      <ul>
+                        <template is="dom-repeat" items="[[type.datasets]]" as="dataset">
+                          <li>
+                            <div class="datarow">
+                              <template is="dom-if" if="[[selectMode]]">
+                                <paper-checkbox on-change="_selectDataset" checked="[[dataset.selected]]"
+                                  value="[[dataset]]"></paper-checkbox>
+                              </template>
+                              [[dataset.dataset_name]]
+                              <template is="dom-if" if="[[dataset.resources]]">
+                                &nbsp;
+                                <a title="Show Resources" class="mint-button" on-tap="_toggleResources">
+                                  ([[dataset.resources.length]] resources)</a>
+                              </template>
+                              <template is="dom-repeat" items="[[_getVizConfigs(dataset)]]" as="viz_config">
+                                <a title="[[viz_config.metadata.title]]" class="chartlink"
+                                  href="[[_getVisualizationLink(viz_config)]]">
+                                  <iron-icon class="graph-icon" icon="[[_getVizIcon(viz_config)]]" />
+                                </a>
+                              </template>
+                              <!--
+                              <a title="Add Visualization" href="/results/publish/edit/[[dataset.dataset_id]]">
+                                <iron-icon icon="add">
+                              </a>
+                              -->
+                            </div>
+                            <iron-collapse closed>
+                              <ul>
+                                <template is="dom-repeat" items="[[dataset.resources]]" as="res">
+                                  <li>
+                                    [[res.resource_name]]
+                                    <a title="Download" href="[[res.resource_data_url]]"><iron-icon icon="file-download" /></a>
+                                  </li>
+                                </template>
+                              </ul>
+                            </iron-collapse>
+                          </li>
                         </template>
-                        <template is="dom-if" if="[[item.resources]]">
-                          <a title="Show Resources" class="mint-button" on-tap="_toggleResources">
-                            [[item.dataset_name]] ([[item.resources.length]] resources)</a>
-                        </template>
-                        <template is="dom-if" if="[[!item.resources]]">
-                            [[item.dataset_name]] ([[item.dataset_description]])
-                        </template>
-                        <template is="dom-repeat" items="[[_getVizConfigs(item)]]" as="viz_config">
-                          <a title="View" class="chartlink"
-                            href="[[_getVisualizationLink(viz_config, item)]]"><iron-icon icon="[[_getVizIcon(viz_config)]]" /></a>
-                        </template>
-                      </div>
-
-                      <iron-collapse closed>
-                        <ul>
-                          <template is="dom-repeat" items="[[item.resources]]" as="res">
-                            <li>
-                              [[res.resource_name]]
-                              <a title="Download" href="[[res.resource_data_url]]"><iron-icon icon="file-download" /></a>
-                            </li>
-                          </template>
-                        </ul>
-                      </iron-collapse>
+                      </ul>
                     </li>
                   </template>
                 </ul>
@@ -272,10 +309,6 @@ class MintDataBrowse extends PolymerElement {
               </div>
             </template>
 
-          </div>
-
-          <div class="footer">
-            <a href="/results/publish">REGISTER NEW DATASETS</a>
           </div>
 
         </template>
@@ -369,14 +402,13 @@ class MintDataBrowse extends PolymerElement {
     var configs = [];
     if(!dataset)
       return configs;
-    if(dataset.resources && dataset.resources.length > 0) {
-      var meta = dataset.resources[0].dataset_metadata;
-      for(var key in meta) {
-        if(key.match(/^viz_config/)) {
-          var viz_config = meta[key];
-          if(viz_config.viz_type && viz_config.visualized)
-            configs.push(viz_config);
-        }
+
+    var meta = dataset.metadata;
+    for(var key in meta) {
+      if(key.match(/^viz_config/)) {
+        var viz_config = meta[key];
+        if(viz_config.viz_type && viz_config.visualized && viz_config.id)
+          configs.push(viz_config);
       }
     }
     //console.log(configs);
@@ -401,7 +433,7 @@ class MintDataBrowse extends PolymerElement {
     return false;
   }
 
-  _getVisualizationLink(viz_config, dataset) {
+  _getVisualizationLink(viz_config) {
     var id = viz_config.id;
     return "/visualizations/"+id+"/"+viz_config.viz_type;
   }
@@ -662,13 +694,49 @@ class MintDataBrowse extends PolymerElement {
             }
           }
           for(var i=0; i<bindings.length; i++) {
+            bindings[i] = me._setExtraMetadata(bindings[i]);
             var dsid = bindings[i].dataset_id;
             bindings[i].selected = selected[dsid];
           }
+
+          bindings = me._groupByDatatype(bindings);
+          // TODO: Sort Bindings by
           me.set("filesList", bindings);
         }
       });
     }
+  }
+
+  _setExtraMetadata(binding) {
+    for(var i=0; i<binding.resources.length; i++) {
+      binding.metadata = binding.resources[i].dataset_metadata;
+      delete binding.resources[i].dataset_metadata;
+    }
+    return binding;
+  }
+
+  _groupByDatatype(bindings) {
+    var typemap = {};
+    for(var i=0; i<bindings.length; i++) {
+      var datatype = "Unknown Type";
+      var b = bindings[i];
+      if(b.metadata && b.metadata.datatype) {
+        datatype = b.metadata.datatype;
+      }
+      var typeBindings = typemap[datatype];
+      if(!typeBindings)
+        typeBindings = [];
+      typeBindings.push(b);
+      typemap[datatype] = typeBindings;
+    }
+    var types = [];
+    for(var typeid in typemap) {
+      types.push({
+        datatype: typeid,
+        datasets: typemap[typeid]
+      });
+    }
+    return types;
   }
 
   _submitDataSpecification() {

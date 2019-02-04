@@ -21,6 +21,7 @@ import '@danielturner/google-map/google-map.js';
 import './google-map-data-layer.js';
 import './mint-common-styles.js';
 import './mint-button.js';
+import './mint-icons.js';
 import './mint-simple-question-creator.js';
 import './mint-task-creator.js';
 import { deleteResource, postJSONResource } from './mint-requests.js';
@@ -35,12 +36,12 @@ class MintGovernAnalysis extends PolymerElement {
     return html`
     <style include="mint-common-styles">
       #map {
-        width:150px;
-        height:150px;
+        width:140px;
+        height:140px;
       }
       .map {
-        width: 150px;
-        height: 150px;
+        width: 140px;
+        height: 140px;
         margin-left: 10px;
         border: 1px solid #638a40;
         border-radius: 2px;
@@ -53,7 +54,7 @@ class MintGovernAnalysis extends PolymerElement {
         margin: 0px;
         margin-left: 15px;
         vertical-align: top;
-        height: 150px;
+        height: 140px;
         overflow: auto;
       }
       .content {
@@ -220,17 +221,19 @@ class MintGovernAnalysis extends PolymerElement {
       }
       .history .scroller {
         display: flex;
+        align-content: stretch;
         flex-flow: row;
         padding: 0px;
         /*background-color: white;*/
         font-size: 13px;
-        overflow: scroll;
+        overflow-y: scroll;
         max-height: 400px;
+        word-break: break-word;
       }
 
       .left, .middle, .right {
-        width: 100%;
         padding: 10px;
+        width: calc(100% - 30px);
         margin-right: 10px;
         background-color: white;
         border-radius: 5px;
@@ -313,10 +316,25 @@ class MintGovernAnalysis extends PolymerElement {
           display: block;
         }
         .panel {
+          margin: 0px;
           margin-bottom: 10px;
+          padding: 0 5px;
         }
         .admin_region {
           display: none;
+        }
+        .history .scroller {
+          display: flex;
+          flex-flow: column;
+          align-items: stretch;
+          padding: 5px;
+        }
+        .history .scroller div {
+          margin-bottom: 5px;
+        }
+        .left, .middle, .right {
+          margin-right: 0px;
+          width: calc(100% - 20px);
         }
       }
     </style>
@@ -429,15 +447,13 @@ class MintGovernAnalysis extends PolymerElement {
       <!-- Question Panel -->
       <fieldset class="panel question">
         <legend align="center" class="panel_heading">
-          <div class="legend_buttons">
-            <span class="title">
-              Questions
-            </span>
-            <paper-button class="add_button" on-click="_openQuestionCreator">+ Add new question</paper-button>
-            <template is="dom-if" if="[[questionid]]">
-              <paper-button class="delete_button" on-click="_deleteQuestion">- Delete question</paper-button>
-            </template>
-          </div>
+          <span class="title">
+            Questions
+          </span>
+          <paper-button class="add_button" on-click="_openQuestionCreator">+ Add new question</paper-button>
+          <template is="dom-if" if="[[questionid]]">
+            <paper-button class="delete_button" on-click="_deleteQuestion">- Delete question</paper-button>
+          </template>
         </legend>
         <div class="questions_list">
           <div class="buttons">
@@ -515,6 +531,9 @@ class MintGovernAnalysis extends PolymerElement {
             <div class="title">
               Your Selections
             </div>
+            <a target="_blank" class="mint-button"
+              href="[[config.server]]/users/[[userid]]/regions/[[routeData.regionid]]/questions/[[qrouteData.questionid]]/selections">
+              <iron-icon icon="file-download"></iron-icon> Download</a>
           </legend>
           <div>
             <div class="scroller">

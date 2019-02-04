@@ -46,17 +46,6 @@ class MintResultsList extends PolymerElement {
         margin: 32px 0;
       }
 
-      vaadin-grid {
-        font-size: 12px;
-        --vaadin-grid-row-height: 42px;
-        --vaadin-grid-header-row-height: 42px;
-        --vaadin-grid-row-cell: {
-          padding: 0px 10px 0px 10px !important;
-        }
-        margin:10px;
-        border: 1px solid #E3E3E3;
-      }
-
       @media (max-width: 767px) {
         h2 {
           margin: 24px 0;

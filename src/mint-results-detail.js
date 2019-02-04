@@ -132,7 +132,7 @@ class MintResultsDetail extends PolymerElement {
     <div id="content">
       <template is="dom-if" if="[[_isDefined(userid)]]">
         <div class="detail" has-content$="[[_isRunDefined(runDetail)]]">
-          <h1>Ran the workflow '[[_localName(runDetail.execution.seededTemplateId)]]'
+          <h1>Ran the workflow '[[_localName(runDetail.execution.originalTemplateId)]]'
             [[_formatTime(runDetail.execution.runtimeInfo.startTime)]] ago</h1>
           <!--h4>Run Id: [[runid]]</h4-->
           <template is="dom-if" if="[[_isSuccessful(runDetail.execution.runtimeInfo.status)]]">

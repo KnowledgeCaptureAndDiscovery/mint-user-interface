@@ -106,6 +106,11 @@ class MintModels extends PolymerElement {
         margin-bottom: 10px;
         margin-left: 12px;
       }
+      .explorer_link {
+        margin: 15px;
+        margin-bottom: 5px;
+        font-size: 12px;
+      }
       @media (max-width: 767px) {
         div.searchToolbar {
           flex-flow: column;
@@ -149,6 +154,9 @@ class MintModels extends PolymerElement {
       </div>
       <div class="outer shifted">
         <div class="model_list">
+          <div class="explorer_link">
+            <a href="http://ontosoft.isi.edu:8081/" target="_blank">MODEL CATALOG EXPLORER</a>
+          </div>
           <ul>
             <template is="dom-repeat" items="[[modelList]]" as="model">
               <li>

@@ -976,6 +976,7 @@ class MintResultsPublish extends PolymerElement {
         vars_to_register.push(variables[i].standard_name.name);
     }
 
+    e.target.disabled = true;
     var me = this;
     this._registerStandardNames(vars_to_register, function(varmap) {
       variables = me._getDatasetVariablesAfterUpdate();
@@ -984,12 +985,15 @@ class MintResultsPublish extends PolymerElement {
           me._registerResource(provid, dataset_id, varids, function(resource_def) {
             me._kickoffTransformation(dataset_id, dataset_def, resource_def, function(response) {
               alert("Successfully Registered");
+              e.target.disabled = false;
               console.log(response);
+              return;
             });
           });
         });
       });
     });
+    e.target.disabled = false;
   }
 
   _kickoffTransformation(dataset_id, dataset_def, resource_def, fn) {

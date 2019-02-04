@@ -7,24 +7,69 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
-
-import './mint-common-styles.js';
-import './mint-image.js';
-
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '../node_modules/@polymer/polymer/polymer-element.js';
+
+import './mint-button.js';
+import './mint-image.js';
+import './mint-common-styles.js';
 
 class MintHome extends PolymerElement {
   static get template() {
     return html`
     <style include="mint-common-styles">
 
+      .image-link {
+        outline: none;
+      }
+
+      .image-link > mint-image::after {
+        display: block;
+        content: '';
+        position: absolute;
+        transition-property: opacity;
+        transition-duration: 0s;
+        transition-delay: 90ms;
+        pointer-events: none;
+        opacity: 0;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        outline: #2196F3 auto 5px;
+        outline: -moz-mac-focusring auto 5px;
+        outline: -webkit-focus-ring-color auto 5px;
+      }
+
+      .image-link:focus > mint-image::after {
+        opacity: 1;
+      }
+
       .item {
         display: block;
         text-decoration: none;
         text-align: center;
-        margin-bottom: 0px;
+        position: relative;
+        /*margin-bottom: 40px;*/
       }
+
+      .item mint-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.6;
+      }
+
+      .item mint-button:hover {
+        opacity: 1;
+      }
+
+      /*.item:nth-of-type(2),
+      .item:nth-of-type(3) {
+        display: inline-block;
+        width: 50%;
+      }*/
 
       mint-image {
         position: relative;
@@ -47,41 +92,41 @@ class MintHome extends PolymerElement {
         margin: 32px 0;
       }
 
-      /*.detail {
-        width: 95%;
-        max-width: 1440px;
-        margin:0 auto;
-        transition: opacity 0.4s;
+      /*.item:nth-of-type(2) > h2,
+      .item:nth-of-type(3) > h2 {
+        font-size: 1.1em;
       }*/
-
-      .footer {
-        margin-top: 50px;
-        bottom: 0px;
-      }
-      .footerbg {
-        padding-top: 5px;
-        font-size: 8px;
-        text-align: right;
-      }
 
       @media (max-width: 767px) {
         mint-image {
-          height: 240px;
+          height: 200px;
         }
 
         h2 {
           margin: 24px 0;
         }
 
-        /*.detail {
-          margin: 16px 16px;
-        }*/
+        .item:nth-of-type(2),
+        .item:nth-of-type(3) {
+          display: block;
+          width: 100%;
+        }
+
+        .item:nth-of-type(2) > mint-button > a,
+        .item:nth-of-type(3) > mint-button > a {
+          padding: 8px 24px;
+        }
       }
 
     </style>
 
     <div class="item">
-      <mint-image src="images/south_sudan.jpg" alt="MINT"></mint-image>
+      <a class="image-link" href\$="[[_getLink('south_sudan')]]">
+        <mint-image src="images/south_sudan.jpg" alt="South Sudan"></mint-image>
+      </a>
+      <mint-button>
+        <a aria-label\$="[[South Sudan]] Browse CAGs" href\$="[[_getLink('south_sudan')]]">South Sudan</a>
+      </mint-button>
     </div>
     <div class="detail" has-content="">
       <h1>Welcome to MINT</h1>
@@ -92,9 +137,9 @@ class MintHome extends PolymerElement {
         heterogeneous models from separate disciplines, including geosciences, agriculture,
         economics, and social sciences. Model integration requires resolving semantic,
         spatio-temporal, and execution mismatches, which are largely done by hand today
-        and may take more than two years. The Model INTegration (MINT) project will develop
-        a modeling environment which will significantly reduce the time needed to develop
-        new integrated models, while ensuring their utility and accuracy.</p>
+        and may take more than two years. The Model INTegration (MINT) project is developing a
+        modeling environment to significantly reduce the time needed to develop new integrated models
+        while ensuring their utility and accuracy.</p>
     </div>
     <div class="footer">
       <div class="footerbg">
@@ -119,6 +164,9 @@ class MintHome extends PolymerElement {
         bubbles: true, composed: true, detail: {title: 'Home'}}));
     }
   }
-}
 
+  _getLink(regionid) {
+    return "govern/analysis/" + regionid.substring(regionid.lastIndexOf("/")+1);
+  }
+}
 customElements.define(MintHome.is, MintHome);
