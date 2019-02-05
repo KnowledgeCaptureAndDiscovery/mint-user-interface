@@ -212,9 +212,11 @@ class MintResultsDetail extends PolymerElement {
                         <a title="Download"
                           href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                           ><iron-icon icon="file-download"></iron-icon></a>
-                        <a title="Publish"
-                          href="/results/publish/[[routeData.domain]]/[[runid]]/[[item.component]]/[[item.variable]]/[[item.vartype]]/[[_localName(binding.id)]]"
-                          ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                        <template is="dom-if" if="[[!_isEqual(iobinding.type, 'Inputs')]]">
+                          <a title="Publish"
+                            href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
+                            ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                        </template>
                       </template>
                     </div>
                   </template>
@@ -288,20 +290,22 @@ class MintResultsDetail extends PolymerElement {
     return hash;
   }
 
+  _isEqual(a, b) { return a == b; }
+
   _getAllVariableBindings(variables, tpl) {
     if(variables && tpl) {
       return [
         {
-          type: "Inputs",
-          varbindings: this._getVariableBindings(variables.input, tpl)
+          type: "Output Files",
+          varbindings: this._getVariableBindings(variables.output, tpl)
         },
         {
           type: "Intermediate Files",
           varbindings: this._getVariableBindings(variables.intermediate, tpl)
         },
         {
-          type: "Output Files",
-          varbindings: this._getVariableBindings(variables.output, tpl)
+          type: "Inputs",
+          varbindings: this._getVariableBindings(variables.input, tpl)
         }
       ];
     }
