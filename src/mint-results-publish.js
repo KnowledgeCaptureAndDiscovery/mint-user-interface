@@ -31,6 +31,7 @@ import './mint-icons.js';
 import './mint-csv-input.js';
 import './mint-image.js';
 import './mint-common-styles.js';
+import './loading-screen.js';
 
 class MintResultsPublish extends PolymerElement {
   static get template() {
@@ -129,6 +130,9 @@ class MintResultsPublish extends PolymerElement {
     <app-route route="[[subroute]]"
       pattern="/:runid/:compid/:varid/:vartype/:dsid"
       data="{{subrouteData}}"></app-route>
+
+    <app-route route="[[route]]"
+      pattern="/edit/:dsid"></app-route>
 
     <iron-ajax auto last-response="{{viz_type}}"
       url="[[config.visualization.server]]/viz_type"></iron-ajax>
@@ -262,7 +266,10 @@ class MintResultsPublish extends PolymerElement {
       </fieldset>
     </div>
 
-    <paper-button class="important" on-tap="_publishDataset">Register</paper-button>
+    <paper-button class="important" on-tap="_publishDataset">
+      <loading-screen loading="[[loading]]"></loading-screen>
+      Register
+    </paper-button>
 `;
   }
 
@@ -329,6 +336,8 @@ class MintResultsPublish extends PolymerElement {
       subroute: Object,
       routeData: Object,
       subrouteData: Object,
+
+      loading: Boolean,
 
       britishLocale: {
         type: Boolean,
@@ -957,7 +966,7 @@ class MintResultsPublish extends PolymerElement {
     );
   }
 
-  _publishDataset() {
+  _publishDataset(e) {
     // Simple Validation (Nothing empty)
     if(
       !this._validateDataset() ||
@@ -976,7 +985,11 @@ class MintResultsPublish extends PolymerElement {
         vars_to_register.push(variables[i].standard_name.name);
     }
 
-    e.target.disabled = true;
+    var btn = e.target;
+
+    btn.disabled = true;
+    this.set("loading", true);
+
     var me = this;
     this._registerStandardNames(vars_to_register, function(varmap) {
       variables = me._getDatasetVariablesAfterUpdate();
@@ -985,7 +998,8 @@ class MintResultsPublish extends PolymerElement {
           me._registerResource(provid, dataset_id, varids, function(resource_def) {
             me._kickoffTransformation(dataset_id, dataset_def, resource_def, function(response) {
               alert("Successfully Registered");
-              e.target.disabled = false;
+              btn.disabled = false;
+              me.set("loading", false);
               console.log(response);
               return;
             });
@@ -993,7 +1007,9 @@ class MintResultsPublish extends PolymerElement {
         });
       });
     });
-    e.target.disabled = false;
+    alert("There was some problem registering");
+    me.set("loading", false);
+    btn.disabled = false;
   }
 
   _kickoffTransformation(dataset_id, dataset_def, resource_def, fn) {

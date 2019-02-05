@@ -47,6 +47,9 @@ class MintPlannerResults extends PolymerElement {
         --paper-toggle-button-unchecked-button-color:  var(--app-accent-color);
         --paper-toggle-button-label-color:  white;
       }
+      paper-button.important_inv {
+        margin:0px;
+      }
       paper-item {
         min-height: 32px;
         padding-left:6px;
@@ -103,15 +106,17 @@ class MintPlannerResults extends PolymerElement {
         <paper-button on-click="zoomIn">+</paper-button>
         <paper-button on-click="zoomOut">-</paper-button>
         <paper-button class="important_inv" on-tap="_selectWorkflow">DONE</paper-button>
-      </template>
-      <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
-        style$="[[_getVisibilityStyle(selectedWorkflow)]]"
-        on-checked-changed="toggleView">WORKFLOW</paper-toggle-button>
-      <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
-        <paper-button noink>SELECT MODEL COMPOSITION</paper-button>
+
+        <div class="grow"><paper-button>&nbsp;</paper-button></div>
+        <paper-button>MODEL GRAPH</paper-button>
+        <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
+          style$="[[_getVisibilityStyle(selectedWorkflow)]]">WORKFLOW</paper-toggle-button>
       </template>
 
-      <div class="grow">&nbsp;</div>
+      <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
+        <paper-button noink>SELECT MODEL COMPOSITION</paper-button>
+        <div class="grow"><paper-button>&nbsp;</paper-button></div>
+      </template>
 
     </div>
 
@@ -189,7 +194,11 @@ class MintPlannerResults extends PolymerElement {
       selectedScenarioIndex: String,
       scenarios: Array,
       subRegion: String,
-      showWorkflows: Boolean
+      showWorkflows: {
+        type: Boolean,
+        value: false,
+        observer: 'toggleView'
+      }
     }
   }
 
@@ -198,7 +207,6 @@ class MintPlannerResults extends PolymerElement {
     this.$.workflow_listbox.selected = null;
     this.$.list_section.show();
     this.$.workflow_section.hide();
-    this.$.toggler.checked = false;
     this.set("showWorkflows", false);
     this.set("workflows", null);
     this.set("selectedWorkflow", null);
@@ -328,7 +336,7 @@ class MintPlannerResults extends PolymerElement {
   _getWorkflowView(w) {
     if(!w)
       return;
-    if(this.$.toggler.checked)
+    if(this.showWorkflows)
       return w.wingsWorkflow;
     else
       return w.modelGraph;
@@ -342,10 +350,10 @@ class MintPlannerResults extends PolymerElement {
     this.$.workflow.zoomOut();
   }
 
-  toggleView(d) {
+  toggleView(showWorkflows) {
     if(!this.selectedWorkflow)
       return;
-    if(this.$.toggler.checked)
+    if(showWorkflows)
       this.$.workflow.set("data", this.selectedWorkflow.wingsWorkflow.template);
     else
       this.$.workflow.set("data", this.selectedWorkflow.modelGraph);
@@ -543,6 +551,8 @@ class MintPlannerResults extends PolymerElement {
       },
       onError: function() {
         console.log("Cannot elaborate template");
+        // Try to save anyway
+        fn(tpl);
       }
     }, data, true);
   }

@@ -273,6 +273,9 @@ class MintApp extends MintBaseRouter {
               <mint-tab name="data"><a href="data/browse">Data</a></mint-tab>
               <mint-tab name="models"><a href="models/browse">Models</a></mint-tab>
               <mint-tab name="results"><a href="results/home">Results</a></mint-tab>
+              <mint-tab nam,e="userguide">
+                <a href="https://mintproject.github.io/MINT_USERGUIDE/QuickStart">User Guide</a>
+              </mint-tab>
               <!--mint-tab name="visualizations"><a href="visualizations">Visualizations</a></mint-tab-->
             </mint-tabs>
           </template>
@@ -290,6 +293,7 @@ class MintApp extends MintBaseRouter {
           <a name="data" href="data/browse">Data</a>
           <a name="models" href="models/browse">Models</a>
           <a name="results" href="results/home">Results</a>
+          <a name="userguid" href="https://mintproject.github.io/MINT_USERGUIDE/QuickStart">User Guide</a>
           <!--a name="visualizations" href="visualizations">Visualizations</a-->
         </iron-selector>
       </app-drawer>

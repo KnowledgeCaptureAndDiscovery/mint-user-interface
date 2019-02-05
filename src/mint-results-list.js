@@ -25,10 +25,9 @@ class MintResultsList extends PolymerElement {
 
   static get template() {
     return html`
-    <style>
+    <style include="mint-common-styles">
       .detail {
-        margin: 10px;
-        margin-top: 0px;
+        margin: 0px;
         transition: opacity 0.4s;
         opacity: 1;
       }
@@ -44,6 +43,10 @@ class MintResultsList extends PolymerElement {
         font-size: 1.3em;
         font-weight: 500;
         margin: 32px 0;
+      }
+
+      vaadin-grid {
+        margin: 0px;
       }
 
       @media (max-width: 767px) {
@@ -66,33 +69,43 @@ class MintResultsList extends PolymerElement {
     <mint-ajax id="runlistAjax"
       url="[[_getRunListURL(config.wings.server, userid, routeData.domain)]]"></mint-ajax>
 
-    <vaadin-grid id="results" items="[[filteredRunList]]" class="detail" active-item="{{activeItem}}" >
-      <vaadin-grid-selection-column hidden auto-select></vaadin-grid-selection-column>
-      <vaadin-grid-column path="id" hidden></vaadin-grid-column>
-      <vaadin-grid-column flex-grow="0" width="50px">
-        <template>
-          <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'SUCCESS')]]">
-            <iron-icon icon="check" style="color:green" />
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>Workflow Executions</paper-button>
+    </div>
+    <div id="form" class="outer">
+      <vaadin-grid id="results" items="[[filteredRunList]]" class="detail" active-item="{{activeItem}}" >
+        <vaadin-grid-selection-column hidden auto-select></vaadin-grid-selection-column>
+        <vaadin-grid-column path="id" hidden></vaadin-grid-column>
+        <vaadin-grid-column flex-grow="0" width="50px">
+          <template>
+            <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'SUCCESS')]]">
+              <iron-icon icon="check" style="color:green" />
+            </template>
+            <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'FAILURE')]]">
+              <iron-icon icon="close" style="color:red" />
+            </template>
+            <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'ONGOING')]]">
+              <iron-icon icon="hourglass-empty" style="color:grey" />
+            </template>
           </template>
-          <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'FAILURE')]]">
-            <iron-icon icon="close" style="color:red" />
-          </template>
-          <template is="dom-if" if="[[_isEqual(item.runtimeInfo.status, 'ONGOING')]]">
-            <iron-icon icon="hourglass-empty" style="color:grey" />
-          </template>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column header="Workflow Run" flex-grow="1">
-        <template><b>[[_getLocalName(item.template_id)]]</b></template>
-      </vaadin-grid-column>
-      <vaadin-grid-column header="Start Time" flex-grow="0" width="200px">
-        <template>[[_getTime(item.runtimeInfo.startTime)]]</template>
-      </vaadin-grid-column>
-      <vaadin-grid-column header="End Time" flex-grow="0" width="200px">
-        <template>[[_getTime(item.runtimeInfo.endTime)]]</template>
-      </vaadin-grid-column>
-      <vaadin-grid-column header="Progress" flex-grow="0" width="200px"></vaadin-grid-column>
-    </vaadin-grid>
+        </vaadin-grid-column>
+        <vaadin-grid-column header="Workflow Run" flex-grow="1">
+          <template><b>[[_getLocalName(item.template_id)]]</b></template>
+        </vaadin-grid-column>
+        <vaadin-grid-column header="Start Time" flex-grow="0" width="200px">
+          <template>[[_getTime(item.runtimeInfo.startTime)]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column header="End Time" flex-grow="0" width="200px">
+          <template>[[_getTime(item.runtimeInfo.endTime)]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column header="Progress" flex-grow="0" width="200px"></vaadin-grid-column>
+      </vaadin-grid>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
 `;
   }
 

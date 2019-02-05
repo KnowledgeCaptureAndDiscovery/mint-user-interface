@@ -24,7 +24,7 @@ import './mint-button.js';
 import './mint-icons.js';
 import './mint-simple-question-creator.js';
 import './mint-task-creator.js';
-import { deleteResource, postJSONResource } from './mint-requests.js';
+import { deleteResource, putJSONResource, postJSONResource } from './mint-requests.js';
 
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
@@ -91,10 +91,8 @@ class MintGovernAnalysis extends PolymerElement {
       .panel .add_button {
         margin-left: 10px;
       }
-      .delete_button {
-        color: maroon;
-      }
       .panel .add_button,
+      .panel .edit_button,
       .panel .delete_button {
         padding: 0px;
       }
@@ -174,6 +172,31 @@ class MintGovernAnalysis extends PolymerElement {
         max-height: 300px;
         overflow:auto;
       }
+      .question a div {
+        white-space: nowrap;
+      }
+      .question paper-icon-button {
+        flex-shrink: 0;
+        flex-grow: 0;
+        margin-left: 5px;
+        --paper-icon-button: {
+          height:16px;
+          width:16px;
+        }
+        --paper-icon-button-hover: {
+          color: var(--app-accent-color);
+        }
+      }
+      .question paper-icon-button.delete_button {
+        --paper-icon-button-hover: {
+          color: maroon;
+        }
+      }
+      .question .buttons a {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+      }
       .panel .buttons a.selected {
         font-weight: bold;
       }
@@ -248,6 +271,10 @@ class MintGovernAnalysis extends PolymerElement {
       }
 
       a.button iron-icon {
+        width: 16px;
+        height: 16px;
+      }
+      .add_button iron-icon {
         width: 16px;
         height: 16px;
       }
@@ -382,7 +409,7 @@ class MintGovernAnalysis extends PolymerElement {
         region="[[region]]" userid="[[userid]]" config="[[config]]"
         vocabulary="[[vocabulary]]"></mint-simple-question-creator>
 
-      <paper-button class="important" disabled="[[_isNull(newQuestion)]]" on-tap="_addQuestion">OK</paper-button>
+      <paper-button class="important" on-tap="_addQuestion">OK</paper-button>
     </paper-dialog>
 
     <!-- New Task Creator -->
@@ -450,16 +477,20 @@ class MintGovernAnalysis extends PolymerElement {
           <span class="title">
             Questions
           </span>
-          <paper-button class="add_button" on-click="_openQuestionCreator">+ Add new question</paper-button>
-          <template is="dom-if" if="[[questionid]]">
-            <paper-button class="delete_button" on-click="_deleteQuestion">- Delete question</paper-button>
-          </template>
+          <paper-button class="add_button" on-click="_openQuestionCreator">
+            <iron-icon icon="add"></iron-icon> Add new question
+          </paper-button>
         </legend>
         <div class="questions_list">
           <div class="buttons">
             <template is="dom-repeat" items="[[questions]]">
               <a class\$="[[_getQuestionClass(item, questionid)]]"
-                href="/govern/analysis/[[_getLocalName(region.id)]]/[[_getLocalName(item.id)]]">[[item.label]]</a>
+                href="/govern/analysis/[[_getLocalName(region.id)]]/[[_getLocalName(item.id)]]">[[item.label]]
+                <div>
+                  <paper-icon-button class="edit_button" on-tap="_editQuestion" icon="edit"></paper-icon-button>
+                  <paper-icon-button class="delete_button" on-tap="_deleteQuestion" icon="cancel"></paper-icon-button>
+                </div>
+              </a>
             </template>
           </div>
         </div>
@@ -792,6 +823,13 @@ class MintGovernAnalysis extends PolymerElement {
     return item == null;
   }
 
+  _isEmptyQuestion(question) {
+    console.log(question);
+    if(!question || !question.label || !question.region)
+      return true;
+    return false;
+  }
+
   _getVariableDetail(varid, graphData) {
     if(varid && graphData) {
       var v = this._getGraphVariable(varid, graphData);
@@ -854,21 +892,38 @@ class MintGovernAnalysis extends PolymerElement {
 
   _addQuestion() {
     var me = this;
-    var newQuestion = this.newQuestion;
-    console.log(newQuestion);
-    postJSONResource({
-      url: me.config.server + "/users/" + me.userid +
-        "/regions/" + me.routeData.regionid + "/questions",
-      onLoad: function(e) {
-        var id = e.target.responseText;
-        newQuestion.id = id;
-        me.push("questions", newQuestion);
-        me.$.question_creator_dialog.close();
-      },
-      onError: function() {
-        console.log("Cannot add question");
-      }
-    }, newQuestion);
+    if(this.newQuestion.id) {
+      // Editing existing Question
+      var nq = JSON.parse(JSON.stringify(this.newQuestion));
+      putJSONResource({
+        url: nq.id,
+        onLoad: function(e) {
+          me._updateQuestionList(nq);
+          me.$.question_creator_dialog.close();
+        },
+        onError: function() {
+          console.log("Cannot update question");
+        }
+      }, nq);
+    }
+    else {
+      // Adding new Question
+      var nq = me.$.question_creator.createNewQuestion();
+      console.log(nq);
+      postJSONResource({
+        url: me.config.server + "/users/" + me.userid +
+          "/regions/" + me.routeData.regionid + "/questions",
+        onLoad: function(e) {
+          var id = e.target.responseText;
+          nq.id = id;
+          me.push("questions", nq);
+          me.$.question_creator_dialog.close();
+        },
+        onError: function() {
+          console.log("Cannot add question");
+        }
+      }, nq);
+    }
   }
 
   _removeQuestionFromList(questionid) {
@@ -880,24 +935,34 @@ class MintGovernAnalysis extends PolymerElement {
     }
   }
 
-  _deleteQuestion() {
+  _editQuestion(evnt) {
+    var question = evnt.model.get('item');
+    this._openQuestionCreator();
+    this.set("newQuestion", question);
+  }
+
+  _deleteQuestion(evnt) {
+    var question = evnt.model.get('item');
     var me = this;
-    deleteResource({
-      url: me.config.server + "/users/" + me.userid + "/regions/" + me.routeData.regionid + "/questions/" + me.questionid,
-      onLoad: function(e) {
-        me._removeQuestionFromList(me.questionid);
-        me.set("question", null);
-        me.set("questionid", null);
-        me.set("taskid", null);
-        me.set("tasks", null);
-        me.set("taskActivities", null);
-        var new_path = '/govern/analysis/' + me._getLocalName(me.region.id);
-        window.history.pushState({}, null, new_path)
-      },
-      onError: function() {
-        console.log("Cannot remove question");
-      }
-    });
+    var ok = confirm("Are you sure you want to delete the question: '" + question.label + "' ?");
+    if(ok) {
+      deleteResource({
+        url: question.id,
+        onLoad: function(e) {
+          me._removeQuestionFromList(me.questionid);
+          me.set("question", null);
+          me.set("questionid", null);
+          me.set("taskid", null);
+          me.set("tasks", null);
+          me.set("taskActivities", null);
+          var new_path = '/govern/analysis/' + me._getLocalName(me.region.id);
+          window.history.pushState({}, null, new_path)
+        },
+        onError: function() {
+          console.log("Cannot remove question");
+        }
+      });
+    }
   }
 
   _addTask() {
@@ -1086,6 +1151,7 @@ class MintGovernAnalysis extends PolymerElement {
 
   _openQuestionCreator() {
     this.$.question_creator.reset();
+    this.set("newQuestion", {});
     this.$.question_creator_dialog.open();
   }
   _closeQuestionCreator() {

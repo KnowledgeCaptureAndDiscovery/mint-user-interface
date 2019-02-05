@@ -22,6 +22,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 
 import './wings-workflow.js';
 import './mint-common-styles.js';
+import './loading-screen.js';
 import { getResource, postJSONResource, postFormResource, putJSONResource } from './mint-requests.js';
 
 class MintWorkflowRun extends PolymerElement {
@@ -115,7 +116,8 @@ class MintWorkflowRun extends PolymerElement {
                 </paper-dropdown>
               </template>
               <template is="dom-if" if="[[!_isMultiInput(input)]]">
-                <paper-dropdown id="[[input.id]]" no-animations label="[[input.name]]">
+                <paper-dropdown id="[[input.id]]" value="[[input.binding]]"
+                    no-animations label="[[input.name]]">
                   <template is="dom-repeat" items="[[input.options]]" as="fileid">
                     <paper-item value$="[[fileid]]">[[_localName(fileid)]]</paper-item>
                   </template>
@@ -124,7 +126,10 @@ class MintWorkflowRun extends PolymerElement {
             </template>
           </template>
         </div>
-        <paper-button class="important" on-tap="_runWorkflow">Run Workflow</paper-button>
+        <paper-button class="important" on-tap="_runWorkflow">
+          <loading-screen loading="[[loading]]"></loading-screen>
+          Run Workflow
+        </paper-button>
         <wings-workflow id="workflow" data="[[template]]"></wings-workflow>
       </template>
     </div>
@@ -164,6 +169,7 @@ class MintWorkflowRun extends PolymerElement {
         type: Object,
         value: {}
       },
+      loading: Boolean,
       question: Object,
       task: Object,
       route: Object,
@@ -211,7 +217,7 @@ class MintWorkflowRun extends PolymerElement {
 
   _getInputType(input) {
     var dtype = input.dtype;
-    if(dtype.match(/#int/))
+    if(dtype && dtype.match(/#int/))
       return "number";
     return "";
   }
@@ -313,7 +319,9 @@ class MintWorkflowRun extends PolymerElement {
   }
 
   _runWorkflow(e) {
-    e.target.disabled = true;
+    this.set("loading", true);
+    var btn = e.target;
+    btn.disabled = true;
     this._setValues();
 
     var me = this;
@@ -324,12 +332,14 @@ class MintWorkflowRun extends PolymerElement {
         me._executeWorkflow(xtpl, seed, function(runid) {
           //console.log(runid);
           me._setTaskOutput(runid);
-          e.target.disabled = false;
+          btn.disabled = false;
+          me.set("loading", false);
           alert("Workflow sent for execution.");
         });
       }
       else {
-        e.target.disabled = false;
+        me.set("loading", false);
+        btn.disabled = false;
         alert("Could not run workflow. Please see your browser console to debug");
         console.log(expansions);
       }

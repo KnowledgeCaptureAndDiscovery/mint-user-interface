@@ -49,14 +49,14 @@ class MintSimpleQuestionCreator extends PolymerElement {
       }
     </style>
 
-    <paper-textarea label="Question" value="{{text}}"></paper-textarea>
+    <paper-textarea label="Question" value="{{question.label}}"></paper-textarea>
 
     <!-- Select sub region -->
     <paper-dropdown-menu no-animations="" hotizontal-align="left" label="Select Sub-Region">
-      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{subregion}}">
-        <paper-item value="[[region]]">[[region.label]]</paper-item>
+      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{question.region}}">
+        <paper-item value="[[region.id]]">[[region.label]]</paper-item>
         <template is="dom-repeat" items="[[_getAllSubRegions(region)]]">
-          <paper-item value="[[item]]">[[item.label]]</paper-item>
+          <paper-item value="[[item.id]]">[[item.label]]</paper-item>
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
@@ -85,36 +85,37 @@ class MintSimpleQuestionCreator extends PolymerElement {
       graphData: Object,
       config: Object,
       userid: String,
-
       question: {
         type: Object,
+        value: {},
         notify: true
       },
-      text: String,
-      subregion: Object,
       timePeriod: Object
     };
   }
 
   static get observers() {
     return [
-      '_createQuestion(text, subregion)'
+      //'_createQuestion(question.label, question.region)'
     ]
   }
 
-  _createQuestion(text) {
-    if(text && this.region) {
-      var regionid = this.subregion ? this.subregion.id : this.region.id;
+  createNewQuestion() {
+    var subregion = this.question.region;
+    var text = this.question.label;
+    if(text && subregion && this.region) {
+      var regionid = subregion ? subregion : this.region.id;
       var graphid = this.config.server + "/users/" + this.userid +
         "/regions/" + getLocalName(this.region.id) + "/cag";
-
-      this.set("question", {
-        label: text,
-        region: regionid,
-        graph: graphid,
-        type: "DIAGNOSTIC" // FIXME: Hardcoding this right now
-      });
+      var newquestion = Object.assign({}, this.question);
+      newquestion.label = text;
+      newquestion.region = regionid;
+      newquestion.graph = graphid;
+      newquestion.type = "DIAGNOSTIC";
+      console.log(newquestion);
+      return newquestion;
     }
+    return null;
   }
 
   _notNull(item) {

@@ -80,6 +80,8 @@ class MintWorkflowList extends PolymerElement {
   }
 
   _getWorkflows(vocabulary, type) {
+    if(!vocabulary)
+      return;
     var workflows = [];
     for(var i=0; i<vocabulary.workflows.length; i++) {
       var wflow = vocabulary.workflows[i];

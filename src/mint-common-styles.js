@@ -181,8 +181,10 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
       --vaadin-grid-header-row-height: 42px;
       --vaadin-grid-row-cell: {
         padding: 0px 10px 0px 10px !important;
+        background-color: transparent !important;
       }
       margin:10px;
+      background-color: transparent !important;
       border: 1px solid #E3E3E3;
     }
 

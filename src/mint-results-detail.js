@@ -15,6 +15,13 @@ import { scroll } from '@polymer/app-layout/helpers/helpers.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 
+import '@vaadin/vaadin-grid/theme/material/vaadin-grid.js';
+import '@vaadin/vaadin-grid/theme/material/vaadin-grid-column.js';
+import '@vaadin/vaadin-grid/theme/material/vaadin-grid-tree-column.js';
+import '@vaadin/vaadin-grid/theme/material/vaadin-grid-selection-column.js';
+import '@vaadin/vaadin-tabs/vaadin-tab.js';
+import '@vaadin/vaadin-tabs/vaadin-tabs.js';
+
 class MintResultsDetail extends PolymerElement {
   static get template() {
     return html`
@@ -82,12 +89,56 @@ class MintResultsDetail extends PolymerElement {
         opacity: 0;
       }
 
-      .grid iron-icon {
+      iron-icon {
         height: 20px;
       }
 
-      .grid iron-icon.upload {
+      iron-icon.upload {
         color: green;
+      }
+
+      h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 5px;
+        margin-bottom:0px;
+      }
+
+      h3 {
+        background-color: var(--app-primary-color);
+        color: #DDD;
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 5px;
+        margin-bottom:0px;
+      }
+
+      .scroller {
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      .varbindings {
+        display: grid;
+        grid-template-columns: 0.3fr 1fr;
+        border: 1px solid #DDD;
+        border-top: 0px;
+        font-size: 12px;
+      }
+      .varbindings > div {
+        padding: 5px;
+      }
+      .varbindings .variable {
+        background-color: #DDD;
+        border-bottom: 1px solid #CCC;
+      }
+      .varbindings .binding {
+        display: flex;
+        flex-flow: column;
+        border-bottom: 1px solid #DDD;
+      }
+      .varbindings > div.binding:last-child {
+        border-bottom: 0px;
       }
 
       @media (max-width: 767px) {
@@ -129,71 +180,63 @@ class MintResultsDetail extends PolymerElement {
 
     <mint-ajax auto result="{{seededTemplate}}" url="[[_getOriginalTemplateURL(runDetail)]]"></mint-ajax>
 
-    <div id="content">
-      <template is="dom-if" if="[[_isDefined(userid)]]">
-        <div class="detail" has-content$="[[_isRunDefined(runDetail)]]">
-          <h1>Ran the workflow '[[_localName(runDetail.execution.originalTemplateId)]]'
-            [[_formatTime(runDetail.execution.runtimeInfo.startTime)]] ago</h1>
-          <!--h4>Run Id: [[runid]]</h4-->
-          <template is="dom-if" if="[[_isSuccessful(runDetail.execution.runtimeInfo.status)]]">
-            <h2>The workflow produced the following data:</h2>
-            <div class="section">
-              <template is="dom-repeat"
-              items="[[_getVariableBindings(runDetail.variables.output, hashedTemplate)]]" as="varbinding">
-                <div class="head">[[varbinding.variable]]</div>
-                <div class="grid">
-                    <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
-                      <span>
-                        <template is="dom-if" if="[[binding.value]]">
-                          [[binding.value]]
-                        </template>
-                        <template is="dom-if" if="[[binding.id]]">
-                          [[_localName(binding.id)]]
-                          <a title="Download"
-                            href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
-                            ><iron-icon icon="file-download"></iron-icon></a>
-                          <a title="Publish"
-                            href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
-                            ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
-                        </template>
-                      </span>
-                    </template>
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>Workflow Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
+    </div>
+    <div id="form" class="outer">
+      <vaadin-tabs selected="{{page}}" theme="small">
+        <vaadin-tab>Data</vaadin-tab>
+        <vaadin-tab>Run Log</vaadin-tab>
+      </vaadin-tabs>
+
+      <iron-pages selected="[[page]]">
+        <page>
+          <i>In order to visualize a result or save it beyond this session,
+          please click on the cloud icon <iron-icon class="upload" icon="cloud-upload"></iron-icon> to archive it in the Data Catalog</i>
+          <!-- Data Section -->
+          <template is="dom-repeat"
+            items="[[_getAllVariableBindings(runDetail.variables, hashedTemplate)]]" as="iobinding">
+            <h3>[[iobinding.type]]</h3>
+            <div class="varbindings">
+              <template is="dom-repeat" items="[[iobinding.varbindings]]" as="varbinding">
+                <div class="variable">[[varbinding.variable]]</div>
+                <div class="binding">
+                  <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
+                    <div class="bindingitem">
+                      <template is="dom-if" if="[[binding.value]]">
+                        [[binding.value]]
+                      </template>
+                      <template is="dom-if" if="[[binding.id]]">
+                        [[_localName(binding.id)]]
+                        <a title="Download"
+                          href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
+                          ><iron-icon icon="file-download"></iron-icon></a>
+                        <a title="Publish"
+                          href="/results/publish/[[routeData.domain]]/[[runid]]/[[item.component]]/[[item.variable]]/[[item.vartype]]/[[_localName(binding.id)]]"
+                          ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                      </template>
+                    </div>
+                  </template>
                 </div>
               </template>
             </div>
           </template>
-          <template is="dom-if" if="[[_isFailed(runDetail.execution.runtimeInfo.status)]]">
-            <h2>The workflow failed</h2>
-          </template>
-          <template is="dom-if" if="[[_isRunning(runDetail.execution.runtimeInfo.status)]]">
-            <h2>The workflow is still running</h2>
-          </template>
-          <h2>The workflow used these inputs:</h2>
-          <div class="section">
-            <template is="dom-repeat"
-            items="[[_getVariableBindings(runDetail.variables.input, hashedTemplate)]]" as="varbinding">
-              <div class="head">[[varbinding.variable]]</div>
-              <div class="grid">
-                <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
-                  <span>
-                    <template is="dom-if" if="[[binding.value]]">
-                      [[binding.value]]
-                    </template>
-                    <template is="dom-if" if="[[binding.id]]">
-                      [[_localName(binding.id)]]
-                      <a title="Download"
-                        href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]">
-                        <iron-icon icon="file-download"></iron-icon>
-                      </a>
-                    </template>
-                  </span>
-                </template>
-              </div>
-            </template>
+        </page>
+
+        <page>
+          <!-- Run Log -->
+          <div class="scroller">
+            <pre>[[_getRunLog(runDetail.execution)]]</pre>
           </div>
-        </div>
-      </template>
-    </div>`;
+        </page>
+      </iron-pages>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+    `;
   }
 
   static get is() { return 'mint-results-detail'; }
@@ -243,6 +286,25 @@ class MintResultsDetail extends PolymerElement {
       hash[id] = gitems[i];
     }
     return hash;
+  }
+
+  _getAllVariableBindings(variables, tpl) {
+    if(variables && tpl) {
+      return [
+        {
+          type: "Inputs",
+          varbindings: this._getVariableBindings(variables.input, tpl)
+        },
+        {
+          type: "Intermediate Files",
+          varbindings: this._getVariableBindings(variables.intermediate, tpl)
+        },
+        {
+          type: "Output Files",
+          varbindings: this._getVariableBindings(variables.output, tpl)
+        }
+      ];
+    }
   }
 
   _getVariableBindings(bindings, tpl) {
@@ -344,6 +406,39 @@ class MintResultsDetail extends PolymerElement {
         return interval + " minutes";
     }
     return Math.floor(seconds) + " seconds";
+  }
+
+  _getRunLog(exec) {
+    if(!exec)
+      return;
+    var log = "";
+    exec.queue.steps.sort(function(a, b) {
+      if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
+        return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
+      } else if (a.runtimeInfo.endTime == null)
+        return 1;
+      else if (b.runtimeInfo.endTime == null)
+        return -1;
+      else return a.runtimeInfo.endTime > b.runtimeInfo.endTime ? 1 :
+        a.runtimeInfo.endTime < b.runtimeInfo.endTime ? -1 : 0;
+    });
+    for (var i = 0; i < exec.queue.steps.length; i++) {
+      var step = exec.queue.steps[i];
+      if (step.runtimeInfo.status != 'WAITING' &&
+        step.runtimeInfo.status != 'QUEUED') {
+        log += "=====================================\n";
+        log += "[ JOB: " + this._localName(step.id) + " ]";
+        log += "\n[ STARTED: " + new Date(step.runtimeInfo.startTime * 1000) + " ]";
+        if (step.runtimeInfo.endTime) {
+          log += "\n[ ENDED: " + new Date(step.runtimeInfo.endTime * 1000) + " ]";
+        }
+        log += "\n[ STATUS: " + step.runtimeInfo.status + " ]\n";
+        log += "=====================================\n";
+        log += step.runtimeInfo.log + "\n";
+      }
+    }
+    log += exec.runtimeInfo.log;
+    return log;
   }
 
   _localName(url) {
