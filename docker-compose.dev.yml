@@ -1,0 +1,7 @@
+#Environment dev
+version: '3'
+services:
+  wings:
+    image: "mint-project/ui:dev"
+    ports:
+      - 7010:8080
