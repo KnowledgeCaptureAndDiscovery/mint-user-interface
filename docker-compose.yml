@@ -1,15 +1,7 @@
 version: '3'
 services:
-  wings:
-    image: "kcapd/wings-base:latest"
+  mintui:
+    image: "mint-project/ui:latest"
     build:
       context: .
-      dockerfile: wings-docker/docker/default/Dockerfile
-    environment:
-      WINGS_MODE: dind
-    volumes:
-      - wings_data:/opt/wings
-      - /var/run/docker.sock:/var/run/docker.sock
-
-volumes:
-  wings_data:
+      dockerfile: Dockerfile
