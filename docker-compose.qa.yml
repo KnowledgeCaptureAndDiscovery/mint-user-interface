@@ -1,7 +1,7 @@
 #Environment dev
 version: '3'
 services:
-  wings:
+  mintui:
     image: "mint-project/ui:latest"
     ports:
       - 7012:8080

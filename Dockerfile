@@ -13,6 +13,7 @@ EXPOSE 8080
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-COPY . .
+COPY --chown=node:node . .
+USER node
 
 CMD ["polymer", "serve"]
