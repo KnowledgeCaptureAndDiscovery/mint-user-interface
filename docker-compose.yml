@@ -5,5 +5,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-  environment:
-    - NODE_OPTIONS='--max-old-space-size=4096      
+    environment:
+      - NODE_OPTIONS='--max-old-space-size=4096      
