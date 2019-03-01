@@ -12,4 +12,4 @@ COPY --chown=node:node . .
 RUN npm install && npm run build:dev
 USER node
 EXPOSE 8081
-CMD ["polymer", "serve", "-H", "0.0.0.0", "-p", "8080"]
+CMD ["polymer", "serve", "build/default", "-H", "0.0.0.0", "-p", "8080"]
