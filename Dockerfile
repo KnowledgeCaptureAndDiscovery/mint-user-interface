@@ -9,7 +9,7 @@ RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 RUN npm install -g polymer-cli --unsafe-perm
 COPY . .
 COPY --chown=node:node . .
-RUN npm install && npm build:dev
+RUN npm install && npm run build:dev
 USER node
 EXPOSE 8081
 CMD ["polymer", "serve", "-H", "0.0.0.0", "-p", "8080"]
