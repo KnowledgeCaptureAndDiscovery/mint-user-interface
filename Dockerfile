@@ -5,15 +5,12 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 	   git \
 	&& rm -rf /var/lib/apt/lists/*
-
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 RUN npm install -g polymer-cli --unsafe-perm
-
-EXPOSE 8080
-
-# Create app directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+COPY . .
 COPY --chown=node:node . .
 USER node
-
-CMD ["polymer", "serve"]
+EXPOSE 8081
+CMD ["polymer", "serve", "-H", "0.0.0.0", "-p", "8080"]

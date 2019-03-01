@@ -1,6 +1,12 @@
 {
   "name": "@mint/mint-ui",
   "description": "Model Integration",
+  "scripts":{
+    "build:prod":"NODE_OPTIONS='--max-old-space-size=4096' polymer build",
+    "build:dev":"NODE_OPTIONS='--max-old-space-size=4096' polymer build",
+    "postbuild:dev":"sed -i localhost:9090/mint-server mint-server:9090/mint-server  build/default/index.html" 
+  },
+
   "dependencies": {
     "@danielturner/google-map": "^3.0.0-pre.64",
     "@polymer/app-layout": "^3.0.0",
@@ -47,6 +53,7 @@
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
+    "replace-in-file": "^3.4.3",
     "wct-mocha": "^1.0.0"
   }
 }
