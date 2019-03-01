@@ -7,10 +7,9 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 RUN npm install -g polymer-cli --unsafe-perm
-COPY package*.json ./
-RUN npm install
 COPY . .
 COPY --chown=node:node . .
+RUN npm install && npm build:dev
 USER node
 EXPOSE 8081
 CMD ["polymer", "serve", "-H", "0.0.0.0", "-p", "8080"]
