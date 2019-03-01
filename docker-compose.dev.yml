@@ -3,5 +3,7 @@ version: '3'
 services:
   mintui:
     image: "mint-project/ui:dev"
+    external_links:
+      mint-server_mint-server_1:mint-server
     ports:
       - 7010:8080
