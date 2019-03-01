@@ -4,7 +4,7 @@
   "scripts":{
     "build:prod":"NODE_OPTIONS='--max-old-space-size=4096' polymer build",
     "build:dev":"NODE_OPTIONS='--max-old-space-size=4096' polymer build",
-    "postbuild:dev":"replace-in-file localhost:9090/mint-server mint-server:9090/mint-server  build/default/index.html" 
+    "postbuild:dev":"replace-in-file localhost:9090/mint-server mint.isi.server:7000/mint-server  build/default/index.html" 
   },
 
   "dependencies": {
