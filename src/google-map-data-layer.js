@@ -13,6 +13,13 @@ Polymer({
         strokeColor: '#1990d5',
         strokeWeight: 1
       });
+
+      // Remove existing layers
+      var map = this.map;
+      map.data.forEach(function(feature) {
+        map.data.remove(feature);
+      });
+      
       this.map.data.loadGeoJson(this.url);
     }
   },
