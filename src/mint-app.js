@@ -125,30 +125,6 @@ class MintApp extends MintBaseRouter {
         height: 50px;
       }
 
-      mint-tabs, mint-tab {
-        --mint-tab-overlay: {
-          border-bottom: 2px solid var(--app-accent-color);
-        };
-      }
-
-      mint-tabs {
-        height: 100%;
-      }
-
-      mint-tab {
-        margin: 0 10px;
-      }
-
-      mint-tab a {
-        display: inline-block;
-        outline: none;
-        padding: 9px 5px;
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        color: var(--app-primary-color);
-      }
-
       .drawer-list {
         margin: 0 20px;
       }
@@ -309,7 +285,7 @@ class MintApp extends MintBaseRouter {
     <!-- Loading screen -->
     <loading-screen loading="true" id="pageLoading"></loading-screen>
 
-    <template is="dom-if" if="[[userid]]">
+    <template is="dom-if" if="[[_loaded(userid, vocabulary)]]">
       <!-- Different Views of hte app -->
       <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
         <!-- home view -->
@@ -349,6 +325,10 @@ class MintApp extends MintBaseRouter {
     </template>
     <template is="dom-if" if="[[_isNull(userid)]]">
       <center><h2>Please log in !</h2></center>
+    </template>
+
+    <template is="dom-if" if="[[!_loaded(userid, vocabulary)]]">
+      <center><h2>Loading vocabulary..</h2></center>
     </template>
 
     <!-- a11y announcer -->
@@ -420,6 +400,12 @@ class MintApp extends MintBaseRouter {
       window.addEventListener('online', (e)=>this._notifyNetworkStatus(e));
       window.addEventListener('offline', (e)=>this._notifyNetworkStatus(e));
     });
+  }
+
+  _loaded(userid, vocabulary) {
+    if(userid && vocabulary)
+      return true;
+    return false;
   }
 
   _isNull(item) {

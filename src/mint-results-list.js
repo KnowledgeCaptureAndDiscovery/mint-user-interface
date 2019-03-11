@@ -47,6 +47,7 @@ class MintResultsList extends PolymerElement {
 
       vaadin-grid {
         margin: 0px;
+        height: 650px;
       }
 
       @media (max-width: 767px) {

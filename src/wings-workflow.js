@@ -49,21 +49,22 @@ class WingsWorkflow extends PolymerElement {
 
   static get properties() {
     return {
-     data: {
-       type: Object
-     },
-     width: {
-       type: Number,
-       value: 1280
-     },
-     height: {
-       type: Number,
-       value: 800
-     },
-     selected: {
-       type: Array,
-       notify: true
-     }
+      data: {
+        type: Object
+      },
+      width: {
+        type: Number,
+        value: 1280
+      },
+      height: {
+        type: Number,
+        value: 800
+      },
+      selected: {
+        type: Array,
+        notify: true
+      },
+      visible: Boolean
     };
   }
 
@@ -72,7 +73,7 @@ class WingsWorkflow extends PolymerElement {
      // Observer method name, followed by a list of dependencies, in parenthesis
      //'_variablesAddedOrRemoved(data.variables.splices)',
      //'_linksAddedOrRemoved(data.links.splices)',
-     '_dataChanged(data)'
+     '_dataChanged(data, visible)'
    ]
   }
 
@@ -81,29 +82,30 @@ class WingsWorkflow extends PolymerElement {
    this.id = null;
   }
 
-  _dataChanged(data, old) {
-   if (!data)
-     return;
-   this.$.loader.loading = true;
+  _dataChanged(data, visible) {
+    if (!data || !visible)
+      return;
 
-   var me = this;
-   this.id = data.id;
-   this.template = new Template(this.id, this.data, this);
-   this.template.events.dispatch.on("select", function(items) {
-     var graph_variables = [];
-     for(var itemid in items) {
-       if(items[itemid].extra) {
-         graph_variables = graph_variables.concat(items[itemid].extra.graph_variables);
-       }
-       else {
-         graph_variables.push(itemid);
-       }
-     }
-     me.set("selected", graph_variables);
-   });
-   this.template.setEditable(false);
-   this.template.draw(this.$.canvas);
-   this.layout();
+    this.$.loader.loading = true;
+    this.data = data;
+
+    var me = this;
+    this.id = data.id;
+    this.template = new Template(this.id, this.data, this);
+    this.template.events.dispatch.on("select", function(items) {
+      var graph_variables = [];
+      for (var itemid in items) {
+        if (items[itemid].extra) {
+          graph_variables = graph_variables.concat(items[itemid].extra.graph_variables);
+        } else {
+          graph_variables.push(itemid);
+        }
+      }
+      me.set("selected", graph_variables);
+    });
+    this.template.setEditable(false);
+    this.template.draw(this.$.canvas);
+    this.layout();
   }
 
   zoomIn() {
@@ -116,6 +118,13 @@ class WingsWorkflow extends PolymerElement {
 
   layout(animate) {
    this.template.layout(animate, this.$.loader);
+  }
+
+  setDetailLevel(level) {
+    this.$.loader.loading = true;
+    this.template.setData(this.data, parseInt(level));
+    this.template.draw(this.$.canvas);
+    this.layout();
   }
 }
 

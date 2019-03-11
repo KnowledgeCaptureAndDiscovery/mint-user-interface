@@ -544,7 +544,7 @@ class MintDataBrowse extends PolymerElement {
             var varnames = [];
             if(variables) {
               for(var i=0; i<variables.length; i++) {
-                varnames.push(variables[i].name);
+                varnames.push(variables[i].standard_variable_name);
               }
             }
             dataset.variables = varnames;

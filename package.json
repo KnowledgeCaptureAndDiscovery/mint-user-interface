@@ -29,6 +29,7 @@
     "@polymer/paper-listbox": "^3.0.0",
     "@polymer/paper-radio-button": "^3.0.0",
     "@polymer/paper-radio-group": "^3.0.0",
+    "@polymer/paper-slider": "^3.0.1",
     "@polymer/paper-spinner": "^3.0.0",
     "@polymer/paper-toggle-button": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
@@ -40,7 +41,7 @@
     "@vaadin/vaadin-text-field": "^2.1.7",
     "d3": "^5.8.0",
     "mint-chart": "git+https://github.com/spatial-computing/mint-chart.git",
-    "mint-map": "git+https://github.com/spatial-computing/mint-map.git"
+    "mint-map": "git+https://git@github.com/spatial-computing/mint-map.git"
   },
   "devDependencies": {
     "@polymer/test-fixture": "^4.0.2",

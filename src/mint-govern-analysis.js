@@ -895,6 +895,10 @@ class MintGovernAnalysis extends PolymerElement {
     if(this.newQuestion.id) {
       // Editing existing Question
       var nq = JSON.parse(JSON.stringify(this.newQuestion));
+      if(this._isEmptyQuestion(nq)) {
+        alert("Please fill in all values");
+        return;
+      }
       putJSONResource({
         url: nq.id,
         onLoad: function(e) {
@@ -909,7 +913,10 @@ class MintGovernAnalysis extends PolymerElement {
     else {
       // Adding new Question
       var nq = me.$.question_creator.createNewQuestion();
-      console.log(nq);
+      if(this._isEmptyQuestion(nq)) {
+        alert("Please fill in all values");
+        return;
+      }
       postJSONResource({
         url: me.config.server + "/users/" + me.userid +
           "/regions/" + me.routeData.regionid + "/questions",
