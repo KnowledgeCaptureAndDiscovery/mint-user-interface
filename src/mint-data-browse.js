@@ -282,20 +282,36 @@ class MintDataBrowse extends PolymerElement {
                             </div>
                             <iron-collapse closed>
                               <ul>
-                                <template is="dom-repeat" items="[[dataset.resources]]" as="res">
-                                  <li>
-                                    [[res.resource_name]]
-                                    <ul>
-                                      <li><a title="Download" href="[[res.resource_data_url]]">Download <iron-icon icon="file-download" /></a></li>
-                                      <template is="dom-if" if="[[_hasSpatialCoverage(res)]]">
-                                        <li><a class="mint-button" on-tap="_showSpatialCoverage">Spatial Coverage</a></li>
-                                      </template>
-                                      <template is="dom-if" if="[[_hasTemporalCoverage(res)]]">
-                                        <li>Time period: [[_getTemporalCoverage(res)]]</li>
-                                      </template>
-                                    </ul>
-                                  </li>
-                                </template>
+                                <li>
+                                  <strong>Variables:</strong>
+                                  <a title="Show Variables" class="mint-button" on-tap="_fetchVariables">(Show/Hide)</a>
+                                  <iron-collapse closed class="variables">
+                                    <span></span>
+                                    <template is="dom-repeat" items="[[dataset.variables]]" as="vitem" index-as="vindex">
+                                      <template is="dom-if" if="[[vindex]]">,</template>
+                                      [[vitem]]
+                                    </template>
+                                  </iron-collapse>
+                                </li>
+                                <li>
+                                  <strong>Resources</strong>
+                                  <ul>
+                                    <template is="dom-repeat" items="[[dataset.resources]]" as="res">
+                                      <li>
+                                        [[res.resource_name]]
+                                        <ul>
+                                          <li><a title="Download" href="[[res.resource_data_url]]">Download <iron-icon icon="file-download" /></a></li>
+                                          <template is="dom-if" if="[[_hasSpatialCoverage(res)]]">
+                                            <li><a class="mint-button" on-tap="_showSpatialCoverage">Spatial Coverage</a></li>
+                                          </template>
+                                          <template is="dom-if" if="[[_hasTemporalCoverage(res)]]">
+                                            <li>Time period: [[_getTemporalCoverage(res)]]</li>
+                                          </template>
+                                        </ul>
+                                      </li>
+                                    </template>
+                                  </ul>
+                                </li>
                               </ul>
                             </iron-collapse>
                           </li>
@@ -433,6 +449,42 @@ class MintDataBrowse extends PolymerElement {
       return this.region.subRegions;
     if(vocabulary)
       return vocabulary.regions;
+  }
+
+  _fetchVariables(e) {
+    var dataset = e.model.get('dataset');
+    var collapseNode = e.target.parentNode.parentNode.querySelector("iron-collapse")
+    collapseNode.toggle();
+    if(!dataset.variables) {
+      collapseNode.querySelector("span").innerHTML = "Loading..";
+      // Fetch dataset variables if they don't already exist
+      var me =this;
+      this.dataCatalog.getDatasetVariables(dataset.dataset_id, function(variables) {
+        var varnames = [];
+        if(variables) {
+          for(var i=0; i<variables.length; i++) {
+            varnames.push(variables[i].standard_variable_name);
+          }
+        }
+        for(var i=0; i<me.filesList.length; i++) {
+          var ftype = me.filesList[i];
+          var found = false;
+          for(var j=0; j<ftype.datasets.length; j++) {
+            var ds = ftype.datasets[j];
+            if(ds.dataset_id == dataset.dataset_id) {
+              me.set("filesList."+i+".datasets."+j+".variables", varnames);
+              found = true;
+              break;
+            }
+          }
+          if(found) {
+            console.log(ftype);
+            collapseNode.querySelector("span").innerHTML = "";
+            break;
+          }
+        }
+      });
+    }
   }
 
   _hasSpatialCoverage(res) {
