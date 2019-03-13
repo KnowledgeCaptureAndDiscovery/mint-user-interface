@@ -125,15 +125,19 @@ class MintResultsPublish extends PolymerElement {
     </style>
 
     <app-route route="[[route]]" pattern="/:domain"
-      data="{{routeData}}" tail="{{subroute}}"></app-route>
+      data="{{routeData}}" 
+      tail="{{subroute}}"
+      query-params="{{queryParams}}">
+    </app-route>
 
     <app-route route="[[subroute]]"
       pattern="/:runid/:compid/:varid/:vartype/:dsid"
-      data="{{subrouteData}}"></app-route>
+      data="{{subrouteData}}">
+    </app-route>
 
     <app-route route="[[route]]"
       pattern="/edit/:dsid"></app-route>
-
+    
     <iron-ajax auto last-response="{{viz_type}}"
       url="[[config.visualization.server]]/viz_type"></iron-ajax>
 
@@ -336,7 +340,7 @@ class MintResultsPublish extends PolymerElement {
       subroute: Object,
       routeData: Object,
       subrouteData: Object,
-
+      queryParams: Object,
       loading: Boolean,
 
       britishLocale: {
@@ -348,6 +352,7 @@ class MintResultsPublish extends PolymerElement {
 
   static get observers() {
     return [
+      '_updateURL(queryParams)',
       '_fetchGSNStandardVariables()',
       '_resetForm(subrouteData.dsid, subrouteData.compid, subrouteData.varid, subrouteData.vartype)',
       '_fetchMetadata(config, userid, vocabulary, routeData.domain, subrouteData.runid, subrouteData.compid, subrouteData.varid, subrouteData.vartype, subrouteData.dsid)'
@@ -1112,6 +1117,13 @@ class MintResultsPublish extends PolymerElement {
     }
     return variables;
   }
+  _updateURL(queryParams) {
+    if ("remoteURL" in queryParams){
+      this.set("resource_def.data_url", queryParams["remoteURL"]);
+    }
+  }
 }
+
+
 
 customElements.define(MintResultsPublish.is, MintResultsPublish);
