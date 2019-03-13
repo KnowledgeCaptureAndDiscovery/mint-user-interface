@@ -111,11 +111,7 @@ class MintPlannerResults extends PolymerElement {
         <paper-button on-click="zoomIn">+</paper-button>
         <paper-button on-click="zoomOut">-</paper-button>
         <paper-button class="important_inv" on-tap="_selectWorkflow">DONE</paper-button>
-
         <div class="grow"><paper-button>&nbsp;</paper-button></div>
-        <paper-button>MODEL GRAPH</paper-button>
-        <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
-          style$="[[_getVisibilityStyle(selectedWorkflow)]]">WORKFLOW</paper-toggle-button>
       </template>
 
       <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
@@ -158,6 +154,14 @@ class MintPlannerResults extends PolymerElement {
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
         <paper-button>DETAIL:</paper-button>
         <paper-slider value="1" min="1" max="3" on-value-changed="_changedDetailLevel"></paper-slider>
+
+        <div class="grow"><paper-button>&nbsp;</paper-button></div>
+
+        <paper-button>MODEL GRAPH</paper-button>
+        <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
+          style$="[[_getVisibilityStyle(selectedWorkflow)]]">WORKFLOW</paper-toggle-button>
+
+        <paper-button>&nbsp;</paper-button>
       </template>
     </div>
 

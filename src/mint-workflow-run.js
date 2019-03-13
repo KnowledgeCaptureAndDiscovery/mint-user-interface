@@ -94,7 +94,7 @@ class MintWorkflowRun extends PolymerElement {
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>Run Workflow</paper-button>
+      <paper-button>Complete Data Selection</paper-button>
     </div>
     <div id="form" class="outer">
       <h3>[[_localName(template.id)]]</h3>
@@ -128,7 +128,7 @@ class MintWorkflowRun extends PolymerElement {
         </div>
         <paper-button class="important" on-tap="_runWorkflow">
           <loading-screen loading="[[loading]]"></loading-screen>
-          Run Workflow
+          Submit for Execution
         </paper-button>
         <wings-workflow id="workflow" data="[[template]]"></wings-workflow>
       </template>

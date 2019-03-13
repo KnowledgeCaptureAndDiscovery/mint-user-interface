@@ -35,7 +35,7 @@ class MintResultsHome extends PolymerElement {
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>[[routeData.type]] Workflows</paper-button>
+      <paper-button>[[routeData.type]] Runs</paper-button>
     </div>
     <div id="form" class="outer">
       <ul>

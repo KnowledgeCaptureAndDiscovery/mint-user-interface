@@ -478,7 +478,7 @@ class MintDataBrowse extends PolymerElement {
             }
           }
           if(found) {
-            console.log(ftype);
+            //console.log(ftype);
             collapseNode.querySelector("span").innerHTML = "";
             break;
           }
