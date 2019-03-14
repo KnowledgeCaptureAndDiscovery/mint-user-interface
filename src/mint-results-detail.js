@@ -5,6 +5,7 @@ import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/iron-ajax/iron-ajax.js';
 
 
 import './mint-icons.js';
@@ -182,10 +183,17 @@ class MintResultsDetail extends PolymerElement {
     <mint-ajax id="rundetailAjax" method="POST"
       result="{{runDetail}}"></mint-ajax>
       
-    
+    <mint-ajax id="runpublishAjax" method="POST"
+    result="{{runPublisher}}"></mint-ajax>
+
+    <iron-ajax 
+    id="getRemoteURL" 
+    url="[[getProvenanceQuery]]"
+    handle-as="json"
+    last-response="{{endpointData}}">
+    </iron-ajax>
 
     <mint-ajax auto result="{{seededTemplate}}" url="[[_getOriginalTemplateURL(runDetail)]]"></mint-ajax>
-
     <!-- Top toolbar -->
     <div class="toolbar">
       <paper-button>Workflow Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
@@ -224,19 +232,19 @@ class MintResultsDetail extends PolymerElement {
                           href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                           ><iron-icon icon="file-download"></iron-icon></a>
                         <template is="dom-if" if="[[!_isEqual(iobinding.type, 'Inputs')]]">
-                        <a title="Publish" href="javascript:void(0)" icon="upload"  on-click="checkProvenanceTrace"><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                        <a value=[[_escape(binding.id)]] title="Publish" href="javascript:void(0)" icon="upload"  on-click="checkProvenanceTrace"><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                             <paper-dialog id="actions1">
                                 <p>Registering the dataset will automatically register the provenance trace. Are you sure?</p>
                             <div class="buttons">
-                             <a href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"> <paper-button on-click="registerDataset" autofocus>Yes</paper-button></a>
-                              <paper-button dialog-dismiss>N0</paper-button>
+                            <paper-button on-click="registerDataset" autofocus ">Yes</paper-button></a>
+                            <paper-button dialog-dismiss>N0</paper-button>
                             </div>
                             </paper-dialog>
                       
-                          <!--<a title="Publish"-->
-                            <!--href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"-->
-                            <!--&gt;-->
-                            <!--<iron-icon class="upload" icon="cloud-upload"></iron-icon></a>-->
+                          <a title="Publish"
+                            href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
+                            &gt;
+                            <iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                         </template>
                       </template>
                     </div>
@@ -248,8 +256,6 @@ class MintResultsDetail extends PolymerElement {
         </page>
 
         <page>
-        
-         
 </paper-dialog>
         
           <!-- Run Log -->
@@ -274,14 +280,35 @@ class MintResultsDetail extends PolymerElement {
             userid: String,
             runid: String,
             route: Object,
+            dataid: String,
             routeData: Object,
             failure: Boolean,
             seededTemplate: Object,
+            provenanceServer: {
+              type: String,
+              value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
+            },
+            endpointFuseki: {
+              type: String,
+              value: "http://ontosoft.isi.edu:3030/provenance/query"
+            },
+            getProvenanceQuery: {
+              type: String,
+              value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+            },
             hashedTemplate: {
                 type: Object,
                 computed: '_hashTemplate(seededTemplate)'
             },
+            endpointData: {
+              type: Object,
+              observer: '_redirectUpload'
+            },            
             runDetail: Object,
+            runPublisher: {
+              type: Object,
+              observer: '_publishReady'
+            },
             visible: {
                 type: Boolean,
                 observer: '_checkVisibility'
@@ -292,7 +319,7 @@ class MintResultsDetail extends PolymerElement {
     static get observers() {
         return [
             '_fetchResults(config, userid, routeData.domain, runid, visible)',
-            '_routePageChanged(routeData.runid)'
+            '_routePageChanged(routeData.runid)',
         ];
     }
 
@@ -551,8 +578,39 @@ class MintResultsDetail extends PolymerElement {
         return server + "/export/users/" + userid +  "/" + domain + "/executions/"
             + runid + ".owl#" + runid;
     }
-    checkProvenanceTrace(){
+    
+    //open modal and get the daid
+    checkProvenanceTrace(e){
+        this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
         this.shadowRoot.querySelector('#actions1').open()
+    }
+    //go to grlc and query the remote url
+    //todo: get provencanceServer and endponintFuseki from config
+    _publishReady(){
+      var fileURI = this.provenanceServer + this.runid + '_' + this.dataid
+      var params = {exec: fileURI, endpoint: this.endpointFuseki};
+      this.$.getRemoteURL.params = params
+      this.$.getRemoteURL.generateRequest();
+    }
+
+    //When we get the information about the remote url, redirect
+    _redirectUpload(){
+      var url = window.location.href.replace('results/detail/','results/publish/')
+      if (this.endpointData["results"]["bindings"] == 0 ){
+        window.location.replace(url);
+      }
+      var value = this.endpointData["results"]["bindings"][0]["result"].value
+      url = url + "?remoteURL=" + value
+      window.location.replace(url);
+    }
+
+    //Run the method publish run of WINGS
+    registerDataset(){
+      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.domain) + "publishRun";
+      this.$.runpublishAjax.url = runurl;
+      this.$.runpublishAjax.method = "GET"
+      this.$.runpublishAjax.raw = true
+      this.$.runpublishAjax.fetch();
     }
 }
 
