@@ -188,7 +188,7 @@ class MintResultsDetail extends PolymerElement {
 
     <iron-ajax 
     id="getRemoteURL" 
-    url="http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+    url="[[getProvenanceQuery]]"
     handle-as="json"
     last-response="{{endpointData}}">
     </iron-ajax>
@@ -284,6 +284,18 @@ class MintResultsDetail extends PolymerElement {
             routeData: Object,
             failure: Boolean,
             seededTemplate: Object,
+            provenanceServer: {
+              type: String,
+              value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
+            },
+            endpointFuseki: {
+              type: String,
+              value: "http://ontosoft.isi.edu:3030/provenance/query"
+            },
+            getProvenanceQuery: {
+              type: String,
+              value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+            },
             hashedTemplate: {
                 type: Object,
                 computed: '_hashTemplate(seededTemplate)'
@@ -575,10 +587,8 @@ class MintResultsDetail extends PolymerElement {
     //go to grlc and query the remote url
     //todo: get provencanceServer and endponintFuseki from config
     _publishReady(){
-      var provenanceServer = "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
-      var fileURI = provenanceServer + this.runid + '_' + this.dataid
-      var endpointFuseki = "http://ontosoft.isi.edu:3030/provenance/query"
-      var params = {exec: fileURI, endpoint: endpointFuseki};
+      var fileURI = this.provenanceServer + this.runid + '_' + this.dataid
+      var params = {exec: fileURI, endpoint: this.endpointFuseki};
       this.$.getRemoteURL.params = params
       this.$.getRemoteURL.generateRequest();
     }
