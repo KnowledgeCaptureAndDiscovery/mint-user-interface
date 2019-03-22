@@ -155,7 +155,7 @@ class MintModels extends PolymerElement {
       <div class="outer shifted">
         <div class="model_list">
           <div class="explorer_link">
-            <a href="http://ontosoft.isi.edu:8081/" target="_blank">MODEL CATALOG EXPLORER</a>
+            <a href="https://model.mint.isi.edu" target="_blank">MODEL CATALOG EXPLORER</a>
           </div>
           <ul>
             <template is="dom-repeat" items="[[modelList]]" as="model">
