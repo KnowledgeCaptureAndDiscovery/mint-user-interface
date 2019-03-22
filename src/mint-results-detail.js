@@ -190,7 +190,7 @@ class MintResultsDetail extends PolymerElement {
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>Workflow Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
+      <paper-button>Model Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
     </div>
     <div class="outer">
       <loading-screen loading="[[loading]]"></loading-screen>
