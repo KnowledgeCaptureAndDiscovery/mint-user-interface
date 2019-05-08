@@ -8,7 +8,9 @@ import '@polymer/iron-icon/iron-icon.js';
 import './mint-icons.js';
 import './mint-ajax.js';
 import './loading-screen.js';
-import './variable-graph.js';
+import './wings-workflow.js';
+import './mint-tabs.js';
+import './mint-tab.js';
 import './mint-common-styles.js';
 
 import { scroll } from '@polymer/app-layout/helpers/helpers.js';
@@ -19,8 +21,6 @@ import '@vaadin/vaadin-grid/theme/material/vaadin-grid.js';
 import '@vaadin/vaadin-grid/theme/material/vaadin-grid-column.js';
 import '@vaadin/vaadin-grid/theme/material/vaadin-grid-tree-column.js';
 import '@vaadin/vaadin-grid/theme/material/vaadin-grid-selection-column.js';
-import '@vaadin/vaadin-tabs/vaadin-tab.js';
-import '@vaadin/vaadin-tabs/vaadin-tabs.js';
 
 class MintResultsDetail extends PolymerElement {
   static get template() {
@@ -90,11 +90,13 @@ class MintResultsDetail extends PolymerElement {
       }
 
       iron-icon {
-        height: 20px;
+        height: 18px;
+        width: 18px;
       }
 
       iron-icon.upload {
-        color: green;
+        color: #339900;
+        margin-right: 5px;
       }
 
       h2 {
@@ -110,12 +112,14 @@ class MintResultsDetail extends PolymerElement {
         font-size: 12px;
         text-transform: uppercase;
         padding: 5px;
-        margin-bottom:0px;
+        margin:0px;
       }
 
       .scroller {
         padding: 10px;
         font-size: 12px;
+        overflow: auto;
+        height: 650px;
       }
 
       .varbindings {
@@ -140,6 +144,7 @@ class MintResultsDetail extends PolymerElement {
       .varbindings > div.binding:last-child {
         border-bottom: 0px;
       }
+
 
       @media (max-width: 767px) {
         #content {
@@ -178,21 +183,29 @@ class MintResultsDetail extends PolymerElement {
     <mint-ajax id="rundetailAjax" method="POST"
       result="{{runDetail}}"></mint-ajax>
 
-    <mint-ajax auto result="{{seededTemplate}}" url="[[_getOriginalTemplateURL(runDetail)]]"></mint-ajax>
+    <mint-ajax auto result="{{seededTemplate}}"
+      url="[[_getSeededTemplateURL(runDetail)]]"></mint-ajax>
+    <mint-ajax auto result="{{expandedTemplate}}"
+      url="[[_getExpandedTemplateURL(runDetail)]]"></mint-ajax>
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>Workflow Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
+      <paper-button>Model Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
     </div>
-    <div id="form" class="outer">
-      <vaadin-tabs selected="{{page}}" theme="small">
-        <vaadin-tab>Data</vaadin-tab>
-        <vaadin-tab>Run Log</vaadin-tab>
-      </vaadin-tabs>
+    <div class="outer">
+      <loading-screen loading="[[loading]]"></loading-screen>
 
-      <iron-pages selected="[[page]]">
+      <mint-tabs selected="{{section}}">
+        <mint-tab><a>Data</a></mint-tab>
+        <mint-tab><a>Run Log</a></mint-tab>
+        <mint-tab><a>Template</a></mint-tab>
+        <mint-tab><a>Executable Workflow</a></mint-tab>
+      </mint-tabs>
+
+      <iron-pages id="sections" selected="[[section]]">
+
         <page>
-          <i>In order to visualize a result or save it beyond this session,
+          <i><br />&nbsp;In order to visualize a result or save it beyond this session,
           please click on the cloud icon <iron-icon class="upload" icon="cloud-upload"></iron-icon> to archive it in the Data Catalog</i>
           <!-- Data Section -->
           <template is="dom-repeat"
@@ -208,7 +221,6 @@ class MintResultsDetail extends PolymerElement {
                         [[binding.value]]
                       </template>
                       <template is="dom-if" if="[[binding.id]]">
-                        [[_localName(binding.id)]]
                         <a title="Download"
                           href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                           ><iron-icon icon="file-download"></iron-icon></a>
@@ -217,6 +229,7 @@ class MintResultsDetail extends PolymerElement {
                             href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
                             ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                         </template>
+                        [[_localName(binding.id)]]
                       </template>
                     </div>
                   </template>
@@ -231,6 +244,20 @@ class MintResultsDetail extends PolymerElement {
           <div class="scroller">
             <pre>[[_getRunLog(runDetail.execution)]]</pre>
           </div>
+        </page>
+
+        <page>
+          <br />
+          <!-- Original Template -->
+          <wings-workflow
+            data="[[seededTemplate.template]]"></wings-workflow>
+        </page>
+
+        <page>
+          <br />
+          <!-- Expanded Template -->
+          <wings-workflow
+            data="[[expandedTemplate.template]]"></wings-workflow>
         </page>
       </iron-pages>
     </div>
@@ -252,14 +279,23 @@ class MintResultsDetail extends PolymerElement {
       routeData: Object,
       failure: Boolean,
       seededTemplate: Object,
+      expandedTemplate: Object,
       hashedTemplate: {
         type: Object,
         computed: '_hashTemplate(seededTemplate)'
       },
-      runDetail: Object,
+      loading: Boolean,
+      runDetail: {
+        type: Object,
+        observer: '_runDetailSet'
+      },
       visible: {
         type: Boolean,
         observer: '_checkVisibility'
+      },
+      section: {
+        type: Number,
+        observer: '_setSection'
       }
     }
   }
@@ -271,23 +307,62 @@ class MintResultsDetail extends PolymerElement {
     ];
   }
 
-  _getOriginalTemplateURL(run) {
+  _getSeededTemplateURL(run) {
     if(run && run.execution) {
-      var turl = run.execution.seededTemplateId;
-      turl = turl.replace(/#.+$/, '');
-      turl = turl.replace(this.config.wings.internal_server, this.config.wings.server);
-      return turl + "?format=json";
+      var turl = run.execution.originalTemplateId;
+      var surl = this.config.wings.server + "/users/" + this.userid +
+        "/" + this.routeData.domain + "/workflows/getEditorJSON";
+      return surl + "?template_id=" + encodeURIComponent(turl);
     }
   }
 
-  _hashTemplate(tpl) {
-    var hash = {};
-    var gitems = tpl["@graph"];
-    for(var i=0; i<gitems.length; i++) {
-      var id = gitems[i]["@id"];
-      hash[id] = gitems[i];
+  _getExpandedTemplateURL(run) {
+    if(run && run.execution) {
+      var turl = run.execution.expandedTemplateId;
+      var surl = this.config.wings.server + "/users/" + this.userid +
+        "/" + this.routeData.domain + "/workflows/getEditorJSON";
+      return surl + "?template_id=" + encodeURIComponent(turl);
     }
-    return hash;
+  }
+
+  _setSection(sectionid) {
+    if(sectionid >= 0) {
+      var sections = this.$.sections.querySelectorAll("page");
+      var wflow = sections[sectionid].querySelector("wings-workflow");
+      if(wflow)
+        wflow.set("visible", true);
+    }
+  }
+
+  _runDetailSet() {
+    this.set("loading", false);
+    this.set("section", 0);
+  }
+
+  _hashTemplate(tpl) {
+    var producers = {};
+    for(var lid in tpl.template.Links) {
+      var link = tpl.template.Links[lid];
+      if(link.fromNode) {
+        var vname = this._localName(link.variable.id);
+        var node = tpl.template.Nodes[link.fromNode.id];
+        var producer_name = this._localName(node.componentVariable.binding.id);
+        producers[vname] = producer_name;
+      }
+    }
+
+    var types = {};
+    for(var i=0; i<tpl.constraints.length; i++) {
+      var cons = tpl.constraints[i];
+      if(cons.predicate.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+        types[this._localName(cons.subject.id)] = this._localName(cons.object.id);
+      }
+    }
+
+    return {
+      producers: producers,
+      types: types
+    };
   }
 
   _isEqual(a, b) { return a == b; }
@@ -332,56 +407,22 @@ class MintResultsDetail extends PolymerElement {
       }
     }
 
-    var nbindings = [];
+    var ndetails = [];
     for(var varname in bhash) {
-      nbindings.push({
+      ndetails.push({
         variable: varname,
-        vartype: this._getVariableType(tpl, varname),
-        component: this._getVariableProducer(tpl, varname),
+        vartype: tpl.types[varname],
+        component: tpl.producers[varname],
         bindings: bhash[varname]
       })
     }
 
-    nbindings.sort(function(a, b) {
+    ndetails.sort(function(a, b) {
       if(b.bindings.length != a.bindings.length)
         return b.bindings.length - a.bindings.length;
       return b.bindings[0].id ? 1 : -1;
     });
-    return nbindings;
-  }
-
-  _getVariableProducer(tpl, varname) {
-    var onodeid = null;
-    for(var id in tpl) {
-      if(tpl[id]["hasVariable"] == "#" + varname) {
-        onodeid = tpl[id]["hasOriginNode"];
-      }
-    }
-    if(onodeid) {
-      var cvarid = tpl[onodeid]["hasComponent"];
-      if(cvarid) {
-        var cid = tpl[cvarid]["hasComponentBinding"];
-        return cid.replace(/^.+#/, '');
-      }
-    }
-    return null;
-  }
-
-  _getVariableType(tpl, varname) {
-    var varitem = tpl["#"+varname];
-    if(varitem) {
-      var type = varitem["@type"];
-      if(Array.isArray(type)) {
-        for(var i=0; i<type.length; i++) {
-          if(!type[i].match(/(Data|Parameter)Variable/)) {
-            type = type[i];
-            break;
-          }
-        }
-      }
-      return type.replace(/^.+#/, '');
-    }
-    return null;
+    return ndetails;
   }
 
   _formatTime(ts) {
@@ -480,6 +521,7 @@ class MintResultsDetail extends PolymerElement {
   _fetchResults(config, userid, domain, runid, visible) {
     //this.runDetail = null;
     if(config && userid && domain && runid && visible) {
+      this.set("loading", true);
       var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
       this.$.rundetailAjax.data = "run_id=" + escape(runurl);
       this.$.rundetailAjax.url= this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";

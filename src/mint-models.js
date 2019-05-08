@@ -100,7 +100,7 @@ class MintModels extends PolymerElement {
         font-size: 12px;
       }
       div.description {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: normal;
         font-style: italic;
         margin-bottom: 10px;
@@ -155,7 +155,7 @@ class MintModels extends PolymerElement {
       <div class="outer shifted">
         <div class="model_list">
           <div class="explorer_link">
-            <a href="http://ontosoft.isi.edu:8081/" target="_blank">MODEL CATALOG EXPLORER</a>
+            <a href="https://model.mint.isi.edu" target="_blank">MODEL CATALOG EXPLORER</a>
           </div>
           <ul>
             <template is="dom-repeat" items="[[modelList]]" as="model">
@@ -170,6 +170,7 @@ class MintModels extends PolymerElement {
                 </div>
                 <iron-collapse closed>
                   <div class='description'>[[model.type.description]]</div>
+                  <div class='bold'>Link: <a href="[[model.id]]" target="_blank">[[_getLocalName(model.id)]]</a></div>
                   <div class='bold'>Category: [[model.type.category]]</div>
                   <div class='bold'>Inputs:</div>
                   <ul>

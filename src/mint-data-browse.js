@@ -8,7 +8,12 @@ import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
+import '@polymer/paper-dialog/paper-dialog.js';
+
 import '@vaadin/vaadin-date-picker/theme/material/vaadin-date-picker.js';
+
+import '@danielturner/google-map/google-map.js';
+import './google-map-bounding-box.js';
 
 import './loading-screen.js';
 import './mint-icons.js';
@@ -160,9 +165,21 @@ class MintDataBrowse extends PolymerElement {
         color: green;
       }
 
+      paper-dialog {
+        width: 800px;
+        height: 600px;
+      }
+
+      google-map {
+        margin-top: 0px ! important;
+      }
+
       @media (max-width: 767px) {
         div.searchToolbar {
           flex-flow: column;
+        }
+        paper-dialog {
+          width: 95%;
         }
       }
     </style>
@@ -265,12 +282,36 @@ class MintDataBrowse extends PolymerElement {
                             </div>
                             <iron-collapse closed>
                               <ul>
-                                <template is="dom-repeat" items="[[dataset.resources]]" as="res">
-                                  <li>
-                                    [[res.resource_name]]
-                                    <a title="Download" href="[[res.resource_data_url]]"><iron-icon icon="file-download" /></a>
-                                  </li>
-                                </template>
+                                <li>
+                                  <strong>Variables:</strong>
+                                  <a title="Show Variables" class="mint-button" on-tap="_fetchVariables">(Show/Hide)</a>
+                                  <iron-collapse closed class="variables">
+                                    <span></span>
+                                    <template is="dom-repeat" items="[[dataset.variables]]" as="vitem" index-as="vindex">
+                                      <template is="dom-if" if="[[vindex]]">,</template>
+                                      [[vitem]]
+                                    </template>
+                                  </iron-collapse>
+                                </li>
+                                <li>
+                                  <strong>Resources</strong>
+                                  <ul>
+                                    <template is="dom-repeat" items="[[dataset.resources]]" as="res">
+                                      <li>
+                                        [[res.resource_name]]
+                                        <ul>
+                                          <li><a title="Download" href="[[res.resource_data_url]]">Download <iron-icon icon="file-download" /></a></li>
+                                          <template is="dom-if" if="[[_hasSpatialCoverage(res)]]">
+                                            <li><a class="mint-button" on-tap="_showSpatialCoverage">Spatial Coverage</a></li>
+                                          </template>
+                                          <template is="dom-if" if="[[_hasTemporalCoverage(res)]]">
+                                            <li>Time period: [[_getTemporalCoverage(res)]]</li>
+                                          </template>
+                                        </ul>
+                                      </li>
+                                    </template>
+                                  </ul>
+                                </li>
                               </ul>
                             </iron-collapse>
                           </li>
@@ -318,6 +359,18 @@ class MintDataBrowse extends PolymerElement {
     <div class="toolbar bottom">
       <paper-button>&nbsp;</paper-button>
     </div>
+
+    <!-- New Question Dialog -->
+    <paper-dialog id="spatial_map_dialog">
+      <div class="heading">
+        <div>Spatial Coverage</div>
+        <div class="grow">&nbsp;</div>
+        <paper-icon-button icon="close" on-click="_closeSpatialMap"></paper-icon-button>
+      </div>
+      <google-map id="spatial_map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui>
+        <google-map-bounding-box id="spatial_bounding_box"></google-map-bounding-box>
+      </google-map>
+    </paper-dialog>
 `;
   }
 
@@ -396,6 +449,100 @@ class MintDataBrowse extends PolymerElement {
       return this.region.subRegions;
     if(vocabulary)
       return vocabulary.regions;
+  }
+
+  _fetchVariables(e) {
+    var dataset = e.model.get('dataset');
+    var collapseNode = e.target.parentNode.parentNode.querySelector("iron-collapse")
+    collapseNode.toggle();
+    if(!dataset.variables) {
+      collapseNode.querySelector("span").innerHTML = "Loading..";
+      // Fetch dataset variables if they don't already exist
+      var me =this;
+      this.dataCatalog.getDatasetVariables(dataset.dataset_id, function(variables) {
+        var varnames = [];
+        if(variables) {
+          for(var i=0; i<variables.length; i++) {
+            varnames.push(variables[i].standard_variable_name);
+          }
+        }
+        for(var i=0; i<me.filesList.length; i++) {
+          var ftype = me.filesList[i];
+          var found = false;
+          for(var j=0; j<ftype.datasets.length; j++) {
+            var ds = ftype.datasets[j];
+            if(ds.dataset_id == dataset.dataset_id) {
+              me.set("filesList."+i+".datasets."+j+".variables", varnames);
+              found = true;
+              break;
+            }
+          }
+          if(found) {
+            //console.log(ftype);
+            collapseNode.querySelector("span").innerHTML = "";
+            break;
+          }
+        }
+      });
+    }
+  }
+
+  _hasSpatialCoverage(res) {
+    return res.resource_metadata && res.resource_metadata.spatial_coverage;
+  }
+
+  _showSpatialCoverage(e) {
+    var res = e.model.get('res');
+    var meta = res.resource_metadata;
+    if(meta.spatial_coverage) {
+      this.$.spatial_map_dialog.open();
+
+      var map = this.$.spatial_map;
+      var bbox = meta.spatial_coverage.value;
+      bbox.xmin = parseFloat(bbox.xmin);
+      bbox.xmax = parseFloat(bbox.xmax);
+      bbox.ymin = parseFloat(bbox.ymin);
+      bbox.ymax = parseFloat(bbox.ymax);
+
+      var width = bbox.xmax - bbox.xmin;
+      var height = bbox.ymax - bbox.ymin;
+      map.set("longitude", bbox.xmin + width/2);
+      map.set("latitude", bbox.ymin + height/2);
+      var zoom = 1;
+      if(width < 50) {
+        if(width > 10) {
+          zoom = 6 - width/10;
+        }
+        else if (width > 5) {
+          zoom = 6;
+        }
+        else if (width > 3) {
+          zoom = 7;
+        }
+        else if (width > 1) {
+          zoom = 8;
+        }
+        else {
+          zoom = 9;
+        }
+      }
+      map.set("zoom", zoom);
+
+      this.$.spatial_bounding_box.set("boundingBox", bbox);
+    }
+  }
+
+  _closeSpatialMap() {
+    this.$.spatial_map_dialog.close();
+  }
+
+  _hasTemporalCoverage(res) {
+    return res.resource_metadata && res.resource_metadata.temporal_coverage;
+  }
+
+  _getTemporalCoverage(res) {
+    var cover = res.resource_metadata.temporal_coverage;
+    return cover.start_time.replace(/T.*$/, '') + " to " + cover.end_time.replace(/T.*$/, '');
   }
 
   _getVizConfigs(dataset) {
@@ -544,7 +691,7 @@ class MintDataBrowse extends PolymerElement {
             var varnames = [];
             if(variables) {
               for(var i=0; i<variables.length; i++) {
-                varnames.push(variables[i].name);
+                varnames.push(variables[i].standard_variable_name);
               }
             }
             dataset.variables = varnames;
