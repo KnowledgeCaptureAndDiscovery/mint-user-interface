@@ -233,8 +233,6 @@ class MintGovernCag extends PolymerElement {
   }
 
   _getVariableDetail(varid, graphData) {
-    console.log(varid);
-    console.log(graphData);
     if(varid && graphData) {
       var v = this._getGraphVariable(varid, graphData);
       if(v) {

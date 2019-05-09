@@ -47,6 +47,7 @@ class MintResultsList extends PolymerElement {
 
       vaadin-grid {
         margin: 0px;
+        height: 650px;
       }
 
       @media (max-width: 767px) {
@@ -71,7 +72,7 @@ class MintResultsList extends PolymerElement {
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>Workflow Executions</paper-button>
+      <paper-button>Runs</paper-button>
     </div>
     <div id="form" class="outer">
       <vaadin-grid id="results" items="[[filteredRunList]]" class="detail" active-item="{{activeItem}}" >
@@ -90,7 +91,7 @@ class MintResultsList extends PolymerElement {
             </template>
           </template>
         </vaadin-grid-column>
-        <vaadin-grid-column header="Workflow Run" flex-grow="1">
+        <vaadin-grid-column header="Run" flex-grow="1">
           <template><b>[[_getLocalName(item.template_id)]]</b></template>
         </vaadin-grid-column>
         <vaadin-grid-column header="Start Time" flex-grow="0" width="200px">

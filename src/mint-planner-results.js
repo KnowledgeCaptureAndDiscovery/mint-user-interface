@@ -13,6 +13,7 @@ import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/iron-ajax/iron-ajax.js';
+import '@polymer/paper-slider/paper-slider.js';
 
 import './mint-icons.js';
 import './loading-screen.js';
@@ -76,6 +77,10 @@ class MintPlannerResults extends PolymerElement {
         display: inline;
         cursor: pointer;
       }
+      paper-slider {
+        --paper-slider-knob-color: white;
+        --paper-slider-active-color: white;
+      }
 
       @media (max-width: 767px) {
         .toolbar {
@@ -106,11 +111,7 @@ class MintPlannerResults extends PolymerElement {
         <paper-button on-click="zoomIn">+</paper-button>
         <paper-button on-click="zoomOut">-</paper-button>
         <paper-button class="important_inv" on-tap="_selectWorkflow">DONE</paper-button>
-
         <div class="grow"><paper-button>&nbsp;</paper-button></div>
-        <paper-button>MODEL GRAPH</paper-button>
-        <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
-          style$="[[_getVisibilityStyle(selectedWorkflow)]]">WORKFLOW</paper-toggle-button>
       </template>
 
       <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
@@ -144,13 +145,24 @@ class MintPlannerResults extends PolymerElement {
       </iron-collapse>
       <iron-collapse id="workflow_section" no-animation="">
         <wings-workflow id="workflow" data="[[_getWorkflowView(selectedWorkflow)]]"
-          selected="{{selectedItems}}"></wings-workflow>
+          selected="{{selectedItems}}" visible="[[visible]]"></wings-workflow>
       </iron-collapse>
     </div>
 
     <!-- Bottom toolbar -->
     <div class="toolbar bottom">
-      <paper-button>&nbsp;</paper-button>
+      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
+        <paper-button>DETAIL:</paper-button>
+        <paper-slider value="1" min="1" max="3" on-value-changed="_changedDetailLevel"></paper-slider>
+
+        <div class="grow"><paper-button>&nbsp;</paper-button></div>
+
+        <paper-button>MODEL GRAPH</paper-button>
+        <paper-toggle-button id="toggler" checked="{{showWorkflows}}"
+          style$="[[_getVisibilityStyle(selectedWorkflow)]]">WORKFLOW</paper-toggle-button>
+
+        <paper-button>&nbsp;</paper-button>
+      </template>
     </div>
 
 `;
@@ -229,6 +241,10 @@ class MintPlannerResults extends PolymerElement {
     return getLocalName(id);
   }
 
+  _changedDetailLevel(e) {
+    var value = e.detail.value;
+    this.$.workflow.setDetailLevel(value);
+  }
 
   _createPlannerURL(regionid, questionid, taskid, dsid, userid, visible) {
     if(visible && userid && questionid && taskid && dsid) {
@@ -269,6 +285,9 @@ class MintPlannerResults extends PolymerElement {
         if(n.category && n.category != "none")
           wnodes.push(n);
       }
+      wnodes.sort(function(a,b) {
+        return a.id.localeCompare(b.id);
+      });
       return wnodes;
     }
   }

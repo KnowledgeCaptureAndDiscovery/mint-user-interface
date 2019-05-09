@@ -102,24 +102,52 @@ Template.prototype.resizeSVG = function(animate) {
     this.setSVGSize(w, h, animate);
 };
 
-Template.prototype.setData = function(store) {
-  this.store = store;
+Template.prototype.removeIrrelevantPorts = function(pmap, maxRelevance) {
+  var portmap = cloneObj(pmap);
+  var portids = Object.keys(portmap);
+  for(var i=0; i<portids.length; i++) {
+    var portid = portids[i];
+    // FIXME: Hack
+    if(portmap[portid].role.roleid == "crop_fertilizer~nitrogen__yield_elasticity")
+      continue;
+    if(portmap[portid].role.relevance > maxRelevance)
+      delete portmap[portid];
+  }
+  return portmap;
+};
+
+Template.prototype.setData = function(store, maxRelevance) {
+  this.store = cloneObj(store);
   this.graph.id = getLocalName(store.id);
   this.graph.node().innerHTML = "";
+
+  if(!maxRelevance)
+    maxRelevance = 1;
 
   this.nodes = {};
   this.variables = {};
   this.links = {};
+  // console.log(store);
 
   // Create nodes
   for (var nodeid in store.Nodes) {
-    var nodedata = store.Nodes[nodeid];
+    var nodedata = cloneObj(store.Nodes[nodeid]);
+    // Remove ports that are not relevant enough
+    nodedata.inputPorts = this.removeIrrelevantPorts(nodedata.inputPorts, maxRelevance);
+    nodedata.outputPorts = this.removeIrrelevantPorts(nodedata.outputPorts, maxRelevance);
+
+    // Remove nodes that have no ports
+    if(Object.keys(nodedata.inputPorts) == 0 && Object.keys(nodedata.outputPorts) == 0)
+      continue;
+
+    // Create node in graph
     var gnode = new GraphNode(this.graph, nodedata,
       new GraphNodeConfig(nodedata.category));
     gnode.setCoords(this.getItemCoordinates(nodedata));
     this.nodes[nodeid] = gnode;
   }
   // Create variables
+  /*
   for (var varid in store.Variables) {
     var vardata = store.Variables[varid];
     var gvar = new GraphVariable(this.graph, vardata,
@@ -127,6 +155,7 @@ Template.prototype.setData = function(store) {
     gvar.setCoords(this.getItemCoordinates(vardata));
     this.variables[varid] = gvar;
   }
+  */
   // Create Links
   for (var linkid in store.Links) {
     var linkdata = store.Links[linkid];
@@ -138,13 +167,30 @@ Template.prototype.setData = function(store) {
 
     if (linkdata.fromNode) {
       fromNode = this.nodes[linkdata.fromNode.id];
+      if(!fromNode)
+        continue;
       fromPort = fromNode.outputPorts[linkdata.fromPort.id];
+      if(!fromPort)
+        continue;
     }
     if (linkdata.toNode) {
       toNode = this.nodes[linkdata.toNode.id];
+      if(!toNode)
+        continue;
       toPort = toNode.inputPorts[linkdata.toPort.id];
+      if(!toPort)
+        continue;
     }
     variable = this.variables[linkdata.variable.id];
+    if(!variable) {
+      // Create variable
+      var varid = linkdata.variable.id;
+      var vardata = store.Variables[varid];
+      variable = new GraphVariable(this.graph, vardata,
+        new GraphVariableConfig(vardata.category));
+      variable.setCoords(this.getItemCoordinates(vardata));
+      this.variables[varid] = variable;
+    }
 
     var glink = new GraphLink(this.graph, linkdata.id,
       fromNode, fromPort, toNode, toPort, variable,
@@ -169,6 +215,21 @@ Template.prototype.setData = function(store) {
 
   // Set appropriate dimensionality
   this.forwardSweep();
+};
+
+// Remove unused variables and ports (check unused links)
+Template.prototype.pruneOrphans = function() {
+  var variables = {};
+  for (var lid in this.links) {
+    var l = this.links[lid];
+    if (l.preview != "remove")
+      variables[l.variable.id] = true;
+  }
+  for (var vid in this.variables) {
+    if (!variables[vid]) {
+      this.variables[vid].setPreview("remove");
+    }
+  }
 };
 
 Template.prototype.layout = function(animate, loader) {
@@ -307,6 +368,7 @@ Template.prototype.getItemCoordinates = function(item) {
 };
 
 Template.prototype.forwardSweep = function() {
+  //console.log("forward sweeping");
   var links = [];
   var doneLinks = {};
   for (var lid in this.links) {
@@ -1308,7 +1370,7 @@ Template.prototype.setVariableType = function(v, value) {
 };
 
 function cloneObj(o) {
-  return Ext.clone(o);
+  return Object.assign({}, o);
   // return jQuery.extend(true, {}, o);
 }
 

@@ -9,7 +9,7 @@ First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polyme
 ## Viewing Your Application
 
 ```
-$ polymer serve
+$ NODE_OPTIONS="--max-old-space-size=4096" polymer serve
 ```
 
 ## Building Your Application

@@ -1,0 +1,7 @@
+#Environment staging
+version: '3'
+services:
+  wings:
+    image: "mint-project/ui:staging"
+    ports:
+      - 7011:8080

@@ -188,6 +188,26 @@ $_documentContainer.innerHTML = `<dom-module id="mint-common-styles">
       border: 1px solid #E3E3E3;
     }
 
+    mint-tabs, mint-tab {
+      --mint-tab-overlay: {
+        border-bottom: 2px solid var(--app-accent-color);
+      };
+    }
+
+    mint-tab {
+      margin: 0 10px;
+    }
+
+    mint-tab a {
+      display: inline-block;
+      cursor: pointer;
+      outline: none;
+      padding: 9px 5px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--app-primary-color);
+    }
 
     @media (max-width: 767px) {
 
