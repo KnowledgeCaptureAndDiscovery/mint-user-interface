@@ -338,14 +338,6 @@ class MintResultsDetail extends PolymerElement {
               type: Object,
               observer: '_publishReady'
             },          
-/*
-      varun: commit
-      runDetail: {
-        type: Object,
-        observer: '_runDetailSet'
-      },
- */
-
             visible: {
                 type: Boolean,
                 observer: '_checkVisibility'
@@ -443,21 +435,6 @@ class MintResultsDetail extends PolymerElement {
       ];
     }
   
-
-
-/*
-has template: publish
-    _hashTemplate(tpl) {
-        var hash = {};
-        var gitems = tpl["@graph"];
-        for(var i=0; i<gitems.length; i++) {
-            var id = gitems[i]["@id"];
-            hash[id] = gitems[i];
-        }
-        return hash;
-    }
-
-*/
 
     _getVariableBindings(bindings, tpl) {
         if(!bindings || !tpl)
