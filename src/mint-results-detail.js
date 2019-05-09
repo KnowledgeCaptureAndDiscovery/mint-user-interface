@@ -4,6 +4,9 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/iron-ajax/iron-ajax.js';
+
 
 import './mint-icons.js';
 import './mint-ajax.js';
@@ -23,8 +26,8 @@ import '@vaadin/vaadin-grid/theme/material/vaadin-grid-tree-column.js';
 import '@vaadin/vaadin-grid/theme/material/vaadin-grid-selection-column.js';
 
 class MintResultsDetail extends PolymerElement {
-  static get template() {
-    return html`
+    static get template() {
+        return html`
     <style include="mint-common-styles">
       :host {
         display: block;
@@ -170,6 +173,8 @@ class MintResultsDetail extends PolymerElement {
           flex-basis: calc(100% - 5px);
           max-width: calc(100% - 5px);
         }
+        
+  
 
       }
 
@@ -182,6 +187,16 @@ class MintResultsDetail extends PolymerElement {
 
     <mint-ajax id="rundetailAjax" method="POST"
       result="{{runDetail}}"></mint-ajax>
+      
+    <mint-ajax id="runpublishAjax" method="POST"
+    result="{{runPublisher}}"></mint-ajax>
+
+    <iron-ajax 
+    id="getRemoteURL" 
+    url="[[getProvenanceQuery]]"
+    handle-as="json"
+    last-response="{{endpointData}}">
+    </iron-ajax>
 
     <mint-ajax auto result="{{seededTemplate}}"
       url="[[_getSeededTemplateURL(runDetail)]]"></mint-ajax>
@@ -191,7 +206,11 @@ class MintResultsDetail extends PolymerElement {
     <!-- Top toolbar -->
     <div class="toolbar">
       <paper-button>Model Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
+      <paper-button>Register Provenance Trace</paper-button>
     </div>
+    
+     
+   
     <div class="outer">
       <loading-screen loading="[[loading]]"></loading-screen>
 
@@ -225,9 +244,19 @@ class MintResultsDetail extends PolymerElement {
                           href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                           ><iron-icon icon="file-download"></iron-icon></a>
                         <template is="dom-if" if="[[!_isEqual(iobinding.type, 'Inputs')]]">
+                        <a value=[[_escape(binding.id)]] title="Publish" href="javascript:void(0)" icon="upload"  on-click="checkProvenanceTrace"><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                            <paper-dialog id="actions1">
+                                <p>Registering the dataset will automatically register the provenance trace. Are you sure?</p>
+                            <div class="buttons">
+                            <paper-button on-click="registerDataset" autofocus ">Yes</paper-button></a>
+                            <paper-button dialog-dismiss>N0</paper-button>
+                            </div>
+                            </paper-dialog>
+                      
                           <a title="Publish"
                             href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
-                            ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                            &gt;
+                            <iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                         </template>
                         [[_localName(binding.id)]]
                       </template>
@@ -240,6 +269,8 @@ class MintResultsDetail extends PolymerElement {
         </page>
 
         <page>
+</paper-dialog>
+        
           <!-- Run Log -->
           <div class="scroller">
             <pre>[[_getRunLog(runDetail.execution)]]</pre>
@@ -266,55 +297,82 @@ class MintResultsDetail extends PolymerElement {
       <paper-button>&nbsp;</paper-button>
     </div>
     `;
-  }
+    }
 
-  static get is() { return 'mint-results-detail'; }
+    static get is() { return 'mint-results-detail'; }
 
-  static get properties() {
-    return {
-      config: Object,
-      userid: String,
-      runid: String,
-      route: Object,
-      routeData: Object,
-      failure: Boolean,
-      seededTemplate: Object,
-      expandedTemplate: Object,
-      hashedTemplate: {
-        type: Object,
-        computed: '_hashTemplate(seededTemplate)'
-      },
-      loading: Boolean,
+    static get properties() {
+        return {
+            config: Object,
+            userid: String,
+            runid: String,
+            route: Object,
+            dataid: String,
+            routeData: Object,
+            failure: Boolean,
+            seededTemplate: Object,
+            provenanceServer: {
+              type: String,
+              value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
+            },
+            endpointFuseki: {
+              type: String,
+              value: "http://ontosoft.isi.edu:3030/provenance/query"
+            },
+            getProvenanceQuery: {
+              type: String,
+              value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+            },
+            expandedTemplate: Object,
+            hashedTemplate: {
+                type: Object,
+                computed: '_hashTemplate(seededTemplate)'
+            },
+            endpointData: {
+              type: Object,
+              observer: '_redirectUpload'
+            },
+            loading: Boolean,
+            runDetail: Object,
+            runPublisher: {
+              type: Object,
+              observer: '_publishReady'
+            },          
+/*
+      varun: commit
       runDetail: {
         type: Object,
         observer: '_runDetailSet'
       },
-      visible: {
-        type: Boolean,
-        observer: '_checkVisibility'
-      },
-      section: {
-        type: Number,
-        observer: '_setSection'
+ */
+
+            visible: {
+                type: Boolean,
+                observer: '_checkVisibility'
+            },
+            section: {
+              type: Number,
+              observer: '_setSection'
+            }          
+        }
+    }
+
+    static get observers() {
+        return [
+            '_fetchResults(config, userid, routeData.domain, runid, visible)',
+            '_routePageChanged(routeData.runid)',
+        ];
+    }
+  
+  
+    _getSeededTemplateURL(run) {
+      if(run && run.execution) {
+        var turl = run.execution.originalTemplateId;
+        var surl = this.config.wings.server + "/users/" + this.userid +
+          "/" + this.routeData.domain + "/workflows/getEditorJSON";
+        return surl + "?template_id=" + encodeURIComponent(turl);
       }
-    }
-  }
-
-  static get observers() {
-    return [
-      '_fetchResults(config, userid, routeData.domain, runid, visible)',
-      '_routePageChanged(routeData.runid)'
-    ];
-  }
-
-  _getSeededTemplateURL(run) {
-    if(run && run.execution) {
-      var turl = run.execution.originalTemplateId;
-      var surl = this.config.wings.server + "/users/" + this.userid +
-        "/" + this.routeData.domain + "/workflows/getEditorJSON";
-      return surl + "?template_id=" + encodeURIComponent(turl);
-    }
-  }
+    }  
 
   _getExpandedTemplateURL(run) {
     if(run && run.execution) {
@@ -324,7 +382,7 @@ class MintResultsDetail extends PolymerElement {
       return surl + "?template_id=" + encodeURIComponent(turl);
     }
   }
-
+  
   _setSection(sectionid) {
     if(sectionid >= 0) {
       var sections = this.$.sections.querySelectorAll("page");
@@ -337,8 +395,8 @@ class MintResultsDetail extends PolymerElement {
   _runDetailSet() {
     this.set("loading", false);
     this.set("section", 0);
-  }
-
+  }  
+  
   _hashTemplate(tpl) {
     var producers = {};
     for(var lid in tpl.template.Links) {
@@ -363,10 +421,10 @@ class MintResultsDetail extends PolymerElement {
       producers: producers,
       types: types
     };
-  }
-
+  }  
+  
   _isEqual(a, b) { return a == b; }
-
+  
   _getAllVariableBindings(variables, tpl) {
     if(variables && tpl) {
       return [
@@ -384,190 +442,278 @@ class MintResultsDetail extends PolymerElement {
         }
       ];
     }
-  }
+  
 
-  _getVariableBindings(bindings, tpl) {
-    if(!bindings || !tpl)
-      return bindings;
 
-    var bhash = {}
-    var regex = /.+_(\d{4})/;
-    for(var i=0; i<bindings.length; i++) {
-      var binding = bindings[i];
-      var varname = this._localName(binding.derivedFrom);
-      var tvarname = this._localName(binding.id);
-      var matches;
-      if(matches = regex.exec(tvarname)) {
-        if(!bhash[varname])
-          bhash[varname] = [];
-        bhash[varname][parseInt(matches[1])-1] = binding.binding;
-      }
-      else {
-        bhash[varname] = [binding.binding];
-      }
-    }
-
-    var ndetails = [];
-    for(var varname in bhash) {
-      ndetails.push({
-        variable: varname,
-        vartype: tpl.types[varname],
-        component: tpl.producers[varname],
-        bindings: bhash[varname]
-      })
-    }
-
-    ndetails.sort(function(a, b) {
-      if(b.bindings.length != a.bindings.length)
-        return b.bindings.length - a.bindings.length;
-      return b.bindings[0].id ? 1 : -1;
-    });
-    return ndetails;
-  }
-
-  _formatTime(ts) {
-    var date = new Date(ts*1000); //.toISOString().slice(0,19).replace('T', ' ');
-    var seconds = Math.floor((new Date() - date) / 1000);
-
-    var interval = Math.floor(seconds / 31536000);
-
-    if (interval > 1) {
-        return interval + " years";
-    }
-    interval = Math.floor(seconds / 2592000);
-    if (interval > 1) {
-        return interval + " months";
-    }
-    interval = Math.floor(seconds / 86400);
-    if (interval > 1) {
-        return interval + " days";
-    }
-    interval = Math.floor(seconds / 3600);
-    if (interval > 1) {
-        return interval + " hours";
-    }
-    interval = Math.floor(seconds / 60);
-    if (interval > 1) {
-        return interval + " minutes";
-    }
-    return Math.floor(seconds) + " seconds";
-  }
-
-  _getRunLog(exec) {
-    if(!exec)
-      return;
-    var log = "";
-    exec.queue.steps.sort(function(a, b) {
-      if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
-        return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
-      } else if (a.runtimeInfo.endTime == null)
-        return 1;
-      else if (b.runtimeInfo.endTime == null)
-        return -1;
-      else return a.runtimeInfo.endTime > b.runtimeInfo.endTime ? 1 :
-        a.runtimeInfo.endTime < b.runtimeInfo.endTime ? -1 : 0;
-    });
-    for (var i = 0; i < exec.queue.steps.length; i++) {
-      var step = exec.queue.steps[i];
-      if (step.runtimeInfo.status != 'WAITING' &&
-        step.runtimeInfo.status != 'QUEUED') {
-        log += "=====================================\n";
-        log += "[ JOB: " + this._localName(step.id) + " ]";
-        log += "\n[ STARTED: " + new Date(step.runtimeInfo.startTime * 1000) + " ]";
-        if (step.runtimeInfo.endTime) {
-          log += "\n[ ENDED: " + new Date(step.runtimeInfo.endTime * 1000) + " ]";
+/*
+has template: publish
+    _hashTemplate(tpl) {
+        var hash = {};
+        var gitems = tpl["@graph"];
+        for(var i=0; i<gitems.length; i++) {
+            var id = gitems[i]["@id"];
+            hash[id] = gitems[i];
         }
-        log += "\n[ STATUS: " + step.runtimeInfo.status + " ]\n";
-        log += "=====================================\n";
-        log += step.runtimeInfo.log + "\n";
+        return hash;
+    }
+
+*/
+
+    _getVariableBindings(bindings, tpl) {
+        if(!bindings || !tpl)
+            return bindings;
+
+        var bhash = {}
+        var regex = /.+_(\d{4})/;
+        for(var i=0; i<bindings.length; i++) {
+            var binding = bindings[i];
+            var varname = this._localName(binding.derivedFrom);
+            var tvarname = this._localName(binding.id);
+            var matches;
+            if(matches = regex.exec(tvarname)) {
+                if(!bhash[varname])
+                    bhash[varname] = [];
+                bhash[varname][parseInt(matches[1])-1] = binding.binding;
+            }
+            else {
+                bhash[varname] = [binding.binding];
+            }
+        }
+
+        //varun:
+        //var nbindings = [];
+          var ndetails = [];
+
+      
+      
+        for(var varname in bhash) {
+            ndetails.push({
+                variable: varname,
+                vartype: tpl.types[varname],
+                component: tpl.producers[varname],
+                bindings: bhash[varname]
+            })
+        }
+
+          ndetails.sort(function(a, b) {
+            if(b.bindings.length != a.bindings.length)
+                return b.bindings.length - a.bindings.length;
+            return b.bindings[0].id ? 1 : -1;
+        });
+        return ndetails;
+    }
+
+    _getVariableProducer(tpl, varname) {
+        var onodeid = null;
+        for(var id in tpl) {
+            if(tpl[id]["hasVariable"] == "#" + varname) {
+                onodeid = tpl[id]["hasOriginNode"];
+            }
+        }
+        if(onodeid) {
+            var cvarid = tpl[onodeid]["hasComponent"];
+            if(cvarid) {
+                var cid = tpl[cvarid]["hasComponentBinding"];
+                return cid.replace(/^.+#/, '');
+            }
+        }
+        return null;
+    }
+
+    _getVariableType(tpl, varname) {
+        var varitem = tpl["#"+varname];
+        if(varitem) {
+            var type = varitem["@type"];
+            if(Array.isArray(type)) {
+                for(var i=0; i<type.length; i++) {
+                    if(!type[i].match(/(Data|Parameter)Variable/)) {
+                        type = type[i];
+                        break;
+                    }
+                }
+            }
+            return type.replace(/^.+#/, '');
+        }
+        return null;
+    }
+
+
+    _formatTime(ts) {
+        var date = new Date(ts*1000); //.toISOString().slice(0,19).replace('T', ' ');
+        var seconds = Math.floor((new Date() - date) / 1000);
+
+        var interval = Math.floor(seconds / 31536000);
+
+        if (interval > 1) {
+            return interval + " years";
+        }
+        interval = Math.floor(seconds / 2592000);
+        if (interval > 1) {
+            return interval + " months";
+        }
+        interval = Math.floor(seconds / 86400);
+        if (interval > 1) {
+            return interval + " days";
+        }
+        interval = Math.floor(seconds / 3600);
+        if (interval > 1) {
+            return interval + " hours";
+        }
+        interval = Math.floor(seconds / 60);
+        if (interval > 1) {
+            return interval + " minutes";
+        }
+        return Math.floor(seconds) + " seconds";
+    }
+
+    _getRunLog(exec) {
+        if(!exec)
+            return;
+        var log = "";
+        exec.queue.steps.sort(function(a, b) {
+            if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
+                return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
+            } else if (a.runtimeInfo.endTime == null)
+                return 1;
+            else if (b.runtimeInfo.endTime == null)
+                return -1;
+            else return a.runtimeInfo.endTime > b.runtimeInfo.endTime ? 1 :
+                    a.runtimeInfo.endTime < b.runtimeInfo.endTime ? -1 : 0;
+        });
+        for (var i = 0; i < exec.queue.steps.length; i++) {
+            var step = exec.queue.steps[i];
+            if (step.runtimeInfo.status != 'WAITING' &&
+                step.runtimeInfo.status != 'QUEUED') {
+                log += "=====================================\n";
+                log += "[ JOB: " + this._localName(step.id) + " ]";
+                log += "\n[ STARTED: " + new Date(step.runtimeInfo.startTime * 1000) + " ]";
+                if (step.runtimeInfo.endTime) {
+                    log += "\n[ ENDED: " + new Date(step.runtimeInfo.endTime * 1000) + " ]";
+                }
+                log += "\n[ STATUS: " + step.runtimeInfo.status + " ]\n";
+                log += "=====================================\n";
+                log += step.runtimeInfo.log + "\n";
+            }
+        }
+        log += exec.runtimeInfo.log;
+        return log;
+    }
+
+    _localName(url) {
+        return url.replace(/^.*#/, '');
+    }
+
+    _routePageChanged(page) {
+        if(page) {
+            this.runid = page;
+            scroll({ top: 0, behavior: 'silent' });
+        }
+    }
+
+    _isSuccessful(status) {
+        return (status == 'SUCCESS');
+    }
+
+    _isFailed(status) {
+        return (status == 'FAILURE');
+    }
+
+    _isRunning(status) {
+        return (status == 'RUNNING');
+    }
+
+    _checkVisibility(visible) {
+        /*if (!visible)
+          this.runDetail = null;*/
+    }
+
+    _escape(url) {
+        return encodeURIComponent(url);
+    }
+
+    _fetchResults(config, userid, domain, runid, visible) {
+        //this.runDetail = null;
+        if(config && userid && domain && runid && visible) {
+            var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
+            this.$.rundetailAjax.data = "run_id=" + escape(runurl);
+            this.$.rundetailAjax.url= this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
+            this.$.rundetailAjax.fetch();
+            this._setupReloadTimer();
+        }
+        else {
+            this.runDetail = {};
+        }
+    }
+
+    _setupReloadTimer() {
+        var me = this;
+        window.setTimeout(function() {
+            if(me.userid && me.visible &&
+                (!me.runDetail ||
+                    (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
+                )) {
+                //console.log("Refreshing run details");
+                me.$.rundetailAjax.refresh();
+                me._setupReloadTimer();
+            }
+        }, 30000);
+    }
+
+    _localName(url) {
+        if(url != null)
+            return url.replace(/^.*#/, '');
+    }
+
+    _isRunDefined(run) {
+        return run && run.execution && run.execution.seededTemplateId != null;
+    }
+    
+    _isDefined(item) {
+        return item != null;
+    }
+
+    _getRequestUrl(server, userid, domain) {
+        return server + "/users/" + userid +  "/" + domain + "/executions/";
+    }
+
+    _getExportUrl(server, userid, domain, runid) {
+        return server + "/export/users/" + userid +  "/" + domain + "/executions/"
+            + runid + ".owl#" + runid;
+    }
+    
+    //open modal and get the daid
+    checkProvenanceTrace(e){
+        this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
+        this.shadowRoot.querySelector('#actions1').open()
+    }
+    //go to grlc and query the remote url
+    //todo: get provencanceServer and endponintFuseki from config
+    _publishReady(){
+      var fileURI = this.provenanceServer + this.runid + '_' + this.dataid
+      var params = {exec: fileURI, endpoint: this.endpointFuseki};
+      this.$.getRemoteURL.params = params
+      this.$.getRemoteURL.generateRequest();
+    }
+
+    //When we get the information about the remote url, redirect
+    _redirectUpload(){
+      var url = window.location.href.replace('results/detail/','results/publish/')
+      if (this.endpointData["results"]["bindings"] == 0 ){
+        window.location.replace(url);
       }
+      var value = this.endpointData["results"]["bindings"][0]["result"].value
+      url = url + "?remoteURL=" + value
+      window.location.replace(url);
     }
-    log += exec.runtimeInfo.log;
-    return log;
-  }
 
-  _localName(url) {
-    return url.replace(/^.*#/, '');
-  }
-
-  _routePageChanged(page) {
-    if(page) {
-      this.runid = page;
-      scroll({ top: 0, behavior: 'silent' });
+    //Run the method publish run of WINGS
+    registerDataset(){
+      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.domain) + "publishRun";
+      this.$.runpublishAjax.url = runurl;
+      this.$.runpublishAjax.method = "GET"
+      this.$.runpublishAjax.raw = true
+      this.$.runpublishAjax.fetch();
     }
-  }
-
-  _isSuccessful(status) {
-     return (status == 'SUCCESS');
-  }
-
-  _isFailed(status) {
-     return (status == 'FAILURE');
-  }
-
-  _isRunning(status) {
-     return (status == 'RUNNING');
-  }
-
-  _checkVisibility(visible) {
-    /*if (!visible)
-      this.runDetail = null;*/
-  }
-
-  _escape(url) {
-    return encodeURIComponent(url);
-  }
-
-  _fetchResults(config, userid, domain, runid, visible) {
-    //this.runDetail = null;
-    if(config && userid && domain && runid && visible) {
-      this.set("loading", true);
-      var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
-      this.$.rundetailAjax.data = "run_id=" + escape(runurl);
-      this.$.rundetailAjax.url= this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
-      this.$.rundetailAjax.fetch();
-      this._setupReloadTimer();
-    }
-    else {
-      this.runDetail = {};
-    }
-  }
-
-  _setupReloadTimer() {
-    var me = this;
-    window.setTimeout(function() {
-      if(me.userid && me.visible &&
-          (!me.runDetail ||
-            (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
-          )) {
-        //console.log("Refreshing run details");
-        me.$.rundetailAjax.refresh();
-        me._setupReloadTimer();
-      }
-    }, 30000);
-  }
-
-  _localName(url) {
-    if(url != null)
-      return url.replace(/^.*#/, '');
-  }
-
-  _isRunDefined(run) {
-    return run && run.execution && run.execution.seededTemplateId != null;
-  }
-
-  _isDefined(item) {
-    return item != null;
-  }
-
-  _getRequestUrl(server, userid, domain) {
-    return server + "/users/" + userid +  "/" + domain + "/executions/";
-  }
-
-  _getExportUrl(server, userid, domain, runid) {
-    return server + "/export/users/" + userid +  "/" + domain + "/executions/"
-      + runid + ".owl#" + runid;
-  }
 }
 
 customElements.define(MintResultsDetail.is, MintResultsDetail);
