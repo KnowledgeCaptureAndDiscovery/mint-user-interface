@@ -597,19 +597,25 @@ class MintResultsDetail extends PolymerElement {
     _redirectUpload(){
       var url = window.location.href.replace('results/detail/','results/publish/')
       if (this.endpointData["results"]["bindings"] == 0 ){
+        url = url + "?remoteURL=" + "https://fake.link.com"
         window.location.replace(url);
       }
-      var value = this.endpointData["results"]["bindings"][0]["result"].value
-      url = url + "?remoteURL=" + value
-      window.location.replace(url);
+      else {
+        var value = this.endpointData["results"]["bindings"][0]["result"].value
+        url = url + "?remoteURL=" + value
+        window.location.replace(url);
+      }
     }
 
     //Run the method publish run of WINGS
     registerDataset(){
-      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.domain) + "publishRun";
+      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
+      var run_id = this._getExportUrl(this.config.wings.server, this.userid, this.routeData.domain, this.runid)
+
       this.$.runpublishAjax.url = runurl;
-      this.$.runpublishAjax.method = "GET"
-      this.$.runpublishAjax.raw = true
+      this.$.runpublishAjax.method = "POST";
+      this.$.runpublishAjax.data = "run_id=" + run_id
+      this.$.runpublishAjax.raw = true;
       this.$.runpublishAjax.fetch();
     }
 }
