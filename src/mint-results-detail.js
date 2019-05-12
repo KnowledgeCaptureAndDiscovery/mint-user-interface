@@ -232,10 +232,10 @@ class MintResultsDetail extends PolymerElement {
             <h3>[[iobinding.type]]</h3>
             <div class="varbindings">
               <template is="dom-repeat" items="[[iobinding.varbindings]]" as="varbinding">
-                <div class="variable">[[varbinding.variable]]</div>
-                <div class="binding">
+                <div class="variable" id=[[varbinding.variable]]>[[varbinding.variable]]</div>
+                <div class="binding" id=[[varbinding.variable]]>
                   <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
-                    <div class="bindingitem">
+                    <div class="bindingitem"  id=[[varbinding.variable]]>
                       <template is="dom-if" if="[[binding.value]]">
                         [[binding.value]]
                       </template>
@@ -308,6 +308,7 @@ class MintResultsDetail extends PolymerElement {
             runid: String,
             route: Object,
             dataid: String,
+            dataname: String,
             routeData: Object,
             failure: Boolean,
             seededTemplate: Object,
@@ -434,6 +435,7 @@ class MintResultsDetail extends PolymerElement {
         }
       ];
     }
+  }
   
 
     _getVariableBindings(bindings, tpl) {
@@ -660,13 +662,14 @@ class MintResultsDetail extends PolymerElement {
     
     //open modal and get the daid
     checkProvenanceTrace(e){
+        this.dataname = e.currentTarget.parentElement.id
         this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
         this.shadowRoot.querySelector('#actions1').open()
     }
     //go to grlc and query the remote url
     //todo: get provencanceServer and endponintFuseki from config
     _publishReady(){
-      var fileURI = this.provenanceServer + this.runid + '_' + this.dataid
+      var fileURI = this.provenanceServer + this.runid + '_' + this.dataname
       var params = {exec: fileURI, endpoint: this.endpointFuseki};
       this.$.getRemoteURL.params = params
       this.$.getRemoteURL.generateRequest();
@@ -678,17 +681,21 @@ class MintResultsDetail extends PolymerElement {
       if (this.endpointData["results"]["bindings"] == 0 ){
         window.location.replace(url);
       }
-      var value = this.endpointData["results"]["bindings"][0]["result"].value
-      url = url + "?remoteURL=" + value
-      window.location.replace(url);
+      else {
+        var value = this.endpointData["results"]["bindings"][0]["result"].value
+        url = url + "?remoteURL=" + value
+        window.location.replace(url);
+      }
     }
 
     //Run the method publish run of WINGS
     registerDataset(){
-      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.domain) + "publishRun";
+      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
+      var run_id = this._getExportUrl(this.config.wings.internal_server, this.userid, this.routeData.domain, this.runid)
       this.$.runpublishAjax.url = runurl;
-      this.$.runpublishAjax.method = "GET"
-      this.$.runpublishAjax.raw = true
+      this.$.runpublishAjax.method = "POST";
+      this.$.runpublishAjax.data = "run_id=" + encodeURIComponent(run_id)
+      this.$.runpublishAjax.raw = true;
       this.$.runpublishAjax.fetch();
     }
 }
