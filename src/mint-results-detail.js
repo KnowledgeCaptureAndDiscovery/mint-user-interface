@@ -26,8 +26,8 @@ import '@vaadin/vaadin-grid/theme/material/vaadin-grid-tree-column.js';
 import '@vaadin/vaadin-grid/theme/material/vaadin-grid-selection-column.js';
 
 class MintResultsDetail extends PolymerElement {
-    static get template() {
-        return html`
+  static get template() {
+    return html`
     <style include="mint-common-styles">
       :host {
         display: block;
@@ -293,94 +293,94 @@ class MintResultsDetail extends PolymerElement {
       <paper-button>&nbsp;</paper-button>
     </div>
     `;
-    }
+  }
 
-    static get is() { return 'mint-results-detail'; }
+  static get is() { return 'mint-results-detail'; }
 
-    static get properties() {
-        return {
-            config: Object,
-            userid: String,
-            runid: String,
-            route: Object,
-            dataid: String,
-            dataname: String,
-            routeData: Object,
-            failure: Boolean,
-            seededTemplate: Object,
-            provenanceServer: {
-              type: String,
-              value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
-            },
-            endpointFuseki: {
-              type: String,
-              value: "http://ontosoft.isi.edu:3030/provenance/query"
-            },
-            getProvenanceQuery: {
-              type: String,
-              value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
-            },
-            expandedTemplate: Object,
-            hashedTemplate: {
-                type: Object,
-                computed: '_hashTemplate(seededTemplate)'
-            },
-            endpointData: {
-              type: Object,
-              observer: '_redirectUpload'
-            },
-            loading: Boolean,
-            runDetail: {
-              type: Object,
-              observer: '_runDetailSet'
-            },
-            runPublisher: {
-              type: Object,
-              observer: '_publishReady'
-            },          
-            visible: {
-                type: Boolean,
-                observer: '_checkVisibility'
-            },
-            section: {
-              type: Number,
-              observer: '_setSection'
-            },      
-            selectedVar: Object,
-        }
+  static get properties() {
+    return {
+      config: Object,
+      userid: String,
+      runid: String,
+      route: Object,
+      dataid: String,
+      dataname: String,
+      routeData: Object,
+      failure: Boolean,
+      seededTemplate: Object,
+      provenanceServer: {
+        type: String,
+        value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
+      },
+      endpointFuseki: {
+        type: String,
+        value: "http://ontosoft.isi.edu:3030/provenance/query"
+      },
+      getProvenanceQuery: {
+        type: String,
+        value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+      },
+      expandedTemplate: Object,
+      hashedTemplate: {
+        type: Object,
+        computed: '_hashTemplate(seededTemplate)'
+      },
+      endpointData: {
+        type: Object,
+        observer: '_redirectUpload'
+      },
+      loading: Boolean,
+      runDetail: {
+        type: Object,
+        observer: '_runDetailSet'
+      },
+      runPublisher: {
+        type: Object,
+        observer: '_publishReady'
+      },
+      visible: {
+        type: Boolean,
+        observer: '_checkVisibility'
+      },
+      section: {
+        type: Number,
+        observer: '_setSection'
+      },
+      selectedVar: Object,
     }
+  }
 
-    static get observers() {
-        return [
-            '_fetchResults(config, userid, routeData.domain, runid, visible)',
-            '_routePageChanged(routeData.runid)',
-        ];
+  static get observers() {
+    return [
+      '_fetchResults(config, userid, routeData.domain, runid, visible)',
+      '_routePageChanged(routeData.runid)',
+    ];
+  }
+
+
+  _getSeededTemplateURL(run) {
+    if (run && run.execution) {
+      var turl = run.execution.originalTemplateId;
+      var surl = this.config.wings.server + "/users/" + this.userid +
+        "/" + this.routeData.domain + "/workflows/getEditorJSON";
+      return surl + "?template_id=" + encodeURIComponent(turl);
     }
-  
-  
-    _getSeededTemplateURL(run) {
-      if(run && run.execution) {
-        var turl = run.execution.originalTemplateId;
-        var surl = this.config.wings.server + "/users/" + this.userid +
-          "/" + this.routeData.domain + "/workflows/getEditorJSON";
-        return surl + "?template_id=" + encodeURIComponent(turl);
-      }
-    }  
+  }
 
   _getExpandedTemplateURL(run) {
-    if(run && run.execution) {
+    if (run && run.execution) {
       var turl = run.execution.expandedTemplateId;
       var surl = this.config.wings.server + "/users/" + this.userid +
         "/" + this.routeData.domain + "/workflows/getEditorJSON";
       return surl + "?template_id=" + encodeURIComponent(turl);
     }
   }
-  
+
   _setSection(sectionid) {
-    if(sectionid >= 0) {
+    if (sectionid >= 0) {
       var sections = this.$.sections.querySelectorAll("page");
       var wflow = sections[sectionid].querySelector("wings-workflow");
-      if(wflow)
+      if (wflow)
         wflow.set("visible", true);
     }
   }
@@ -388,13 +388,13 @@ class MintResultsDetail extends PolymerElement {
   _runDetailSet() {
     this.set("loading", false);
     this.set("section", 0);
-  }  
-  
+  }
+
   _hashTemplate(tpl) {
     var producers = {};
-    for(var lid in tpl.template.Links) {
+    for (var lid in tpl.template.Links) {
       var link = tpl.template.Links[lid];
-      if(link.fromNode) {
+      if (link.fromNode) {
         var vname = this._localName(link.variable.id);
         var node = tpl.template.Nodes[link.fromNode.id];
         var producer_name = this._localName(node.componentVariable.binding.id);
@@ -403,9 +403,9 @@ class MintResultsDetail extends PolymerElement {
     }
 
     var types = {};
-    for(var i=0; i<tpl.constraints.length; i++) {
+    for (var i = 0; i < tpl.constraints.length; i++) {
       var cons = tpl.constraints[i];
-      if(cons.predicate.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+      if (cons.predicate.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
         types[this._localName(cons.subject.id)] = this._localName(cons.object.id);
       }
     }
@@ -414,12 +414,12 @@ class MintResultsDetail extends PolymerElement {
       producers: producers,
       types: types
     };
-  }  
-  
+  }
+
   _isEqual(a, b) { return a == b; }
-  
+
   _getAllVariableBindings(variables, tpl) {
-    if(variables && tpl) {
+    if (variables && tpl) {
       return [
         {
           type: "Output Files",
@@ -436,274 +436,274 @@ class MintResultsDetail extends PolymerElement {
       ];
     }
   }
-  
-
-    _getVariableBindings(bindings, tpl) {
-        if(!bindings || !tpl)
-            return bindings;
-
-        var bhash = {}
-        var regex = /.+_(\d{4})/;
-        for(var i=0; i<bindings.length; i++) {
-            var binding = bindings[i];
-            var varname = this._localName(binding.derivedFrom);
-            var tvarname = this._localName(binding.id);
-            var matches;
-            if(matches = regex.exec(tvarname)) {
-                if(!bhash[varname])
-                    bhash[varname] = [];
-                bhash[varname][parseInt(matches[1])-1] = binding.binding;
-            }
-            else {
-                bhash[varname] = [binding.binding];
-            }
-        }
-
-        //varun:
-        //var nbindings = [];
-          var ndetails = [];
-
-      
-      
-        for(var varname in bhash) {
-            ndetails.push({
-                variable: varname,
-                vartype: tpl.types[varname],
-                component: tpl.producers[varname],
-                bindings: bhash[varname]
-            })
-        }
-
-          ndetails.sort(function(a, b) {
-            if(b.bindings.length != a.bindings.length)
-                return b.bindings.length - a.bindings.length;
-            return b.bindings[0].id ? 1 : -1;
-        });
-        return ndetails;
-    }
-
-    _getVariableProducer(tpl, varname) {
-        var onodeid = null;
-        for(var id in tpl) {
-            if(tpl[id]["hasVariable"] == "#" + varname) {
-                onodeid = tpl[id]["hasOriginNode"];
-            }
-        }
-        if(onodeid) {
-            var cvarid = tpl[onodeid]["hasComponent"];
-            if(cvarid) {
-                var cid = tpl[cvarid]["hasComponentBinding"];
-                return cid.replace(/^.+#/, '');
-            }
-        }
-        return null;
-    }
-
-    _getVariableType(tpl, varname) {
-        var varitem = tpl["#"+varname];
-        if(varitem) {
-            var type = varitem["@type"];
-            if(Array.isArray(type)) {
-                for(var i=0; i<type.length; i++) {
-                    if(!type[i].match(/(Data|Parameter)Variable/)) {
-                        type = type[i];
-                        break;
-                    }
-                }
-            }
-            return type.replace(/^.+#/, '');
-        }
-        return null;
-    }
 
 
-    _formatTime(ts) {
-        var date = new Date(ts*1000); //.toISOString().slice(0,19).replace('T', ' ');
-        var seconds = Math.floor((new Date() - date) / 1000);
+  _getVariableBindings(bindings, tpl) {
+    if (!bindings || !tpl)
+      return bindings;
 
-        var interval = Math.floor(seconds / 31536000);
-
-        if (interval > 1) {
-            return interval + " years";
-        }
-        interval = Math.floor(seconds / 2592000);
-        if (interval > 1) {
-            return interval + " months";
-        }
-        interval = Math.floor(seconds / 86400);
-        if (interval > 1) {
-            return interval + " days";
-        }
-        interval = Math.floor(seconds / 3600);
-        if (interval > 1) {
-            return interval + " hours";
-        }
-        interval = Math.floor(seconds / 60);
-        if (interval > 1) {
-            return interval + " minutes";
-        }
-        return Math.floor(seconds) + " seconds";
-    }
-
-    _getRunLog(exec) {
-        if(!exec)
-            return;
-        var log = "";
-        exec.queue.steps.sort(function(a, b) {
-            if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
-                return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
-            } else if (a.runtimeInfo.endTime == null)
-                return 1;
-            else if (b.runtimeInfo.endTime == null)
-                return -1;
-            else return a.runtimeInfo.endTime > b.runtimeInfo.endTime ? 1 :
-                    a.runtimeInfo.endTime < b.runtimeInfo.endTime ? -1 : 0;
-        });
-        for (var i = 0; i < exec.queue.steps.length; i++) {
-            var step = exec.queue.steps[i];
-            if (step.runtimeInfo.status != 'WAITING' &&
-                step.runtimeInfo.status != 'QUEUED') {
-                log += "=====================================\n";
-                log += "[ JOB: " + this._localName(step.id) + " ]";
-                log += "\n[ STARTED: " + new Date(step.runtimeInfo.startTime * 1000) + " ]";
-                if (step.runtimeInfo.endTime) {
-                    log += "\n[ ENDED: " + new Date(step.runtimeInfo.endTime * 1000) + " ]";
-                }
-                log += "\n[ STATUS: " + step.runtimeInfo.status + " ]\n";
-                log += "=====================================\n";
-                log += step.runtimeInfo.log + "\n";
-            }
-        }
-        log += exec.runtimeInfo.log;
-        return log;
-    }
-
-    _localName(url) {
-        return url.replace(/^.*#/, '');
-    }
-
-    _routePageChanged(page) {
-        if(page) {
-            this.runid = page;
-            scroll({ top: 0, behavior: 'silent' });
-        }
-    }
-
-    _isSuccessful(status) {
-        return (status == 'SUCCESS');
-    }
-
-    _isFailed(status) {
-        return (status == 'FAILURE');
-    }
-
-    _isRunning(status) {
-        return (status == 'RUNNING');
-    }
-
-    _checkVisibility(visible) {
-        /*if (!visible)
-          this.runDetail = null;*/
-    }
-
-    _escape(url) {
-        return encodeURIComponent(url);
-    }
-
-    _fetchResults(config, userid, domain, runid, visible) {
-        //this.runDetail = null;
-        if(config && userid && domain && runid && visible) {
-            var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
-            this.$.rundetailAjax.data = "run_id=" + escape(runurl);
-            this.$.rundetailAjax.url= this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
-            this.$.rundetailAjax.fetch();
-            this._setupReloadTimer();
-        }
-        else {
-            this.runDetail = {};
-        }
-    }
-
-    _setupReloadTimer() {
-        var me = this;
-        window.setTimeout(function() {
-            if(me.userid && me.visible &&
-                (!me.runDetail ||
-                    (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
-                )) {
-                //console.log("Refreshing run details");
-                me.$.rundetailAjax.refresh();
-                me._setupReloadTimer();
-            }
-        }, 30000);
-    }
-
-    _localName(url) {
-        if(url != null)
-            return url.replace(/^.*#/, '');
-    }
-
-    _isRunDefined(run) {
-        return run && run.execution && run.execution.seededTemplateId != null;
-    }
-    
-    _isDefined(item) {
-        return item != null;
-    }
-
-    _getRequestUrl(server, userid, domain) {
-        return server + "/users/" + userid +  "/" + domain + "/executions/";
-    }
-
-    _getExportUrl(server, userid, domain, runid) {
-        return server + "/export/users/" + userid +  "/" + domain + "/executions/"
-            + runid + ".owl#" + runid;
-    }
-    
-    //open modal and get the daid
-    checkProvenanceTrace(e){
-        this.selectedVar = e.model.varbinding
-        this.dataname = e.currentTarget.parentElement.id
-        this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
-        this.shadowRoot.querySelector('#publishModal').open()
-    }
-    //go to grlc and query the remote url
-    //todo: get provencanceServer and endponintFuseki from config
-    _publishReady(){
-      var fileURI = this.provenanceServer + this.runid + '_' + this.dataname
-      var params = {exec: fileURI, endpoint: this.endpointFuseki};
-      this.$.getRemoteURL.params = params
-      this.$.getRemoteURL.generateRequest();
-    }
-
-    //When we get the information about the remote url, redirect
-    _redirectUpload(){
-      var url = window.location.href.replace('results/detail/','results/publish/')
-
-      url += '/' + this.selectedVar.component + '/' + this.selectedVar.variable + '/' + this.selectedVar.vartype + '/' + this.dataid;
-
-      if (this.endpointData["results"]["bindings"] == 0 ){
-        window.location.replace(url);
+    var bhash = {}
+    var regex = /.+_(\d{4})/;
+    for (var i = 0; i < bindings.length; i++) {
+      var binding = bindings[i];
+      var varname = this._localName(binding.derivedFrom);
+      var tvarname = this._localName(binding.id);
+      var matches;
+      if (matches = regex.exec(tvarname)) {
+        if (!bhash[varname])
+          bhash[varname] = [];
+        bhash[varname][parseInt(matches[1]) - 1] = binding.binding;
       }
       else {
-        var value = this.endpointData["results"]["bindings"][0]["result"].value
-        url = url + "?remoteURL=" + value
-        window.location.replace(url);
+        bhash[varname] = [binding.binding];
       }
     }
 
-    //Run the method publish run of WINGS
-    registerDataset(){
-      this.set("loading", true);
-      var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
-      var run_id = this._getExportUrl(this.config.wings.internal_server, this.userid, this.routeData.domain, this.runid)
-      this.$.runpublishAjax.url = runurl;
-      this.$.runpublishAjax.method = "POST";
-      this.$.runpublishAjax.data = "run_id=" + encodeURIComponent(run_id)
-      this.$.runpublishAjax.raw = true;
-      this.$.runpublishAjax.fetch();
+    //varun:
+    //var nbindings = [];
+    var ndetails = [];
+
+
+
+    for (var varname in bhash) {
+      ndetails.push({
+        variable: varname,
+        vartype: tpl.types[varname],
+        component: tpl.producers[varname],
+        bindings: bhash[varname]
+      })
+    }
+
+    ndetails.sort(function (a, b) {
+      if (b.bindings.length != a.bindings.length)
+        return b.bindings.length - a.bindings.length;
+      return b.bindings[0].id ? 1 : -1;
+    });
+    return ndetails;
+  }
+
+  _getVariableProducer(tpl, varname) {
+    var onodeid = null;
+    for (var id in tpl) {
+      if (tpl[id]["hasVariable"] == "#" + varname) {
+        onodeid = tpl[id]["hasOriginNode"];
       }
     }
+    if (onodeid) {
+      var cvarid = tpl[onodeid]["hasComponent"];
+      if (cvarid) {
+        var cid = tpl[cvarid]["hasComponentBinding"];
+        return cid.replace(/^.+#/, '');
+      }
+    }
+    return null;
+  }
+
+  _getVariableType(tpl, varname) {
+    var varitem = tpl["#" + varname];
+    if (varitem) {
+      var type = varitem["@type"];
+      if (Array.isArray(type)) {
+        for (var i = 0; i < type.length; i++) {
+          if (!type[i].match(/(Data|Parameter)Variable/)) {
+            type = type[i];
+            break;
+          }
+        }
+      }
+      return type.replace(/^.+#/, '');
+    }
+    return null;
+  }
+
+
+  _formatTime(ts) {
+    var date = new Date(ts * 1000); //.toISOString().slice(0,19).replace('T', ' ');
+    var seconds = Math.floor((new Date() - date) / 1000);
+
+    var interval = Math.floor(seconds / 31536000);
+
+    if (interval > 1) {
+      return interval + " years";
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) {
+      return interval + " months";
+    }
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) {
+      return interval + " days";
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) {
+      return interval + " hours";
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+      return interval + " minutes";
+    }
+    return Math.floor(seconds) + " seconds";
+  }
+
+  _getRunLog(exec) {
+    if (!exec)
+      return;
+    var log = "";
+    exec.queue.steps.sort(function (a, b) {
+      if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
+        return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
+      } else if (a.runtimeInfo.endTime == null)
+        return 1;
+      else if (b.runtimeInfo.endTime == null)
+        return -1;
+      else return a.runtimeInfo.endTime > b.runtimeInfo.endTime ? 1 :
+        a.runtimeInfo.endTime < b.runtimeInfo.endTime ? -1 : 0;
+    });
+    for (var i = 0; i < exec.queue.steps.length; i++) {
+      var step = exec.queue.steps[i];
+      if (step.runtimeInfo.status != 'WAITING' &&
+        step.runtimeInfo.status != 'QUEUED') {
+        log += "=====================================\n";
+        log += "[ JOB: " + this._localName(step.id) + " ]";
+        log += "\n[ STARTED: " + new Date(step.runtimeInfo.startTime * 1000) + " ]";
+        if (step.runtimeInfo.endTime) {
+          log += "\n[ ENDED: " + new Date(step.runtimeInfo.endTime * 1000) + " ]";
+        }
+        log += "\n[ STATUS: " + step.runtimeInfo.status + " ]\n";
+        log += "=====================================\n";
+        log += step.runtimeInfo.log + "\n";
+      }
+    }
+    log += exec.runtimeInfo.log;
+    return log;
+  }
+
+  _localName(url) {
+    return url.replace(/^.*#/, '');
+  }
+
+  _routePageChanged(page) {
+    if (page) {
+      this.runid = page;
+      scroll({ top: 0, behavior: 'silent' });
+    }
+  }
+
+  _isSuccessful(status) {
+    return (status == 'SUCCESS');
+  }
+
+  _isFailed(status) {
+    return (status == 'FAILURE');
+  }
+
+  _isRunning(status) {
+    return (status == 'RUNNING');
+  }
+
+  _checkVisibility(visible) {
+    /*if (!visible)
+      this.runDetail = null;*/
+  }
+
+  _escape(url) {
+    return encodeURIComponent(url);
+  }
+
+  _fetchResults(config, userid, domain, runid, visible) {
+    //this.runDetail = null;
+    if (config && userid && domain && runid && visible) {
+      var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
+      this.$.rundetailAjax.data = "run_id=" + escape(runurl);
+      this.$.rundetailAjax.url = this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
+      this.$.rundetailAjax.fetch();
+      this._setupReloadTimer();
+    }
+    else {
+      this.runDetail = {};
+    }
+  }
+
+  _setupReloadTimer() {
+    var me = this;
+    window.setTimeout(function () {
+      if (me.userid && me.visible &&
+        (!me.runDetail ||
+          (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
+        )) {
+        //console.log("Refreshing run details");
+        me.$.rundetailAjax.refresh();
+        me._setupReloadTimer();
+      }
+    }, 30000);
+  }
+
+  _localName(url) {
+    if (url != null)
+      return url.replace(/^.*#/, '');
+  }
+
+  _isRunDefined(run) {
+    return run && run.execution && run.execution.seededTemplateId != null;
+  }
+
+  _isDefined(item) {
+    return item != null;
+  }
+
+  _getRequestUrl(server, userid, domain) {
+    return server + "/users/" + userid + "/" + domain + "/executions/";
+  }
+
+  _getExportUrl(server, userid, domain, runid) {
+    return server + "/export/users/" + userid + "/" + domain + "/executions/"
+      + runid + ".owl#" + runid;
+  }
+
+  //open modal and get the daid
+  checkProvenanceTrace(e) {
+    this.selectedVar = e.model.varbinding
+    this.dataname = e.currentTarget.parentElement.id
+    this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
+    this.shadowRoot.querySelector('#publishModal').open()
+  }
+  //go to grlc and query the remote url
+  //todo: get provencanceServer and endponintFuseki from config
+  _publishReady() {
+    var fileURI = this.provenanceServer + this.runid + '_' + this.dataname
+    var params = { exec: fileURI, endpoint: this.endpointFuseki };
+    this.$.getRemoteURL.params = params
+    this.$.getRemoteURL.generateRequest();
+  }
+
+  //When we get the information about the remote url, redirect
+  _redirectUpload() {
+    var url = window.location.href.replace('results/detail/', 'results/publish/')
+
+    url += '/' + this.selectedVar.component + '/' + this.selectedVar.variable + '/' + this.selectedVar.vartype + '/' + this.dataid;
+
+    if (this.endpointData["results"]["bindings"] == 0) {
+      window.location.replace(url);
+    }
+    else {
+      var value = this.endpointData["results"]["bindings"][0]["result"].value
+      url = url + "?remoteURL=" + value
+      window.location.replace(url);
+    }
+  }
+
+  //Run the method publish run of WINGS
+  registerDataset() {
+    this.set("loading", true);
+    var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
+    var run_id = this._getExportUrl(this.config.wings.internal_server, this.userid, this.routeData.domain, this.runid)
+    this.$.runpublishAjax.url = runurl;
+    this.$.runpublishAjax.method = "POST";
+    this.$.runpublishAjax.data = "run_id=" + encodeURIComponent(run_id)
+    this.$.runpublishAjax.raw = true;
+    this.$.runpublishAjax.fetch();
+  }
+
 }
 
 customElements.define(MintResultsDetail.is, MintResultsDetail);
