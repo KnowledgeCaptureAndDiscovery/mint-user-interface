@@ -209,8 +209,6 @@ class MintResultsDetail extends PolymerElement {
       <paper-button>Register Provenance Trace</paper-button>
     </div>
     
-     
-   
     <div class="outer">
       <loading-screen loading="[[loading]]"></loading-screen>
 
@@ -245,11 +243,11 @@ class MintResultsDetail extends PolymerElement {
                           ><iron-icon icon="file-download"></iron-icon></a>
                         <template is="dom-if" if="[[!_isEqual(iobinding.type, 'Inputs')]]">
                         <a value=[[_escape(binding.id)]] title="Publish" href="javascript:void(0)" icon="upload"  on-click="checkProvenanceTrace"><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
-                            <paper-dialog id="actions1">
+                            <paper-dialog id="publishModal">
                                 <p>Registering the dataset will automatically register the provenance trace. Are you sure?</p>
                             <div class="buttons">
-                            <paper-button on-click="registerDataset" autofocus ">Yes</paper-button></a>
-                            <paper-button dialog-dismiss>N0</paper-button>
+                            <paper-button on-click="registerDataset" dialog-confirm autofocus ">Yes</paper-button></a>
+                              <paper-button dialog-dismiss>No</paper-button>
                             </div>
                             </paper-dialog>
                       
@@ -268,9 +266,7 @@ class MintResultsDetail extends PolymerElement {
           </template>
         </page>
 
-        <page>
-</paper-dialog>
-        
+        <page>        
           <!-- Run Log -->
           <div class="scroller">
             <pre>[[_getRunLog(runDetail.execution)]]</pre>
@@ -334,7 +330,10 @@ class MintResultsDetail extends PolymerElement {
               observer: '_redirectUpload'
             },
             loading: Boolean,
-            runDetail: Object,
+            runDetail: {
+              type: Object,
+              observer: '_runDetailSet'
+            },
             runPublisher: {
               type: Object,
               observer: '_publishReady'
@@ -346,7 +345,8 @@ class MintResultsDetail extends PolymerElement {
             section: {
               type: Number,
               observer: '_setSection'
-            }          
+            },      
+            selectedVar: Object,
         }
     }
 
@@ -662,9 +662,10 @@ class MintResultsDetail extends PolymerElement {
     
     //open modal and get the daid
     checkProvenanceTrace(e){
+        this.selectedVar = e.model.varbinding
         this.dataname = e.currentTarget.parentElement.id
         this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
-        this.shadowRoot.querySelector('#actions1').open()
+        this.shadowRoot.querySelector('#publishModal').open()
     }
     //go to grlc and query the remote url
     //todo: get provencanceServer and endponintFuseki from config
@@ -678,6 +679,9 @@ class MintResultsDetail extends PolymerElement {
     //When we get the information about the remote url, redirect
     _redirectUpload(){
       var url = window.location.href.replace('results/detail/','results/publish/')
+
+      url += '/' + this.selectedVar.component + '/' + this.selectedVar.variable + '/' + this.selectedVar.vartype + '/' + this.dataid;
+
       if (this.endpointData["results"]["bindings"] == 0 ){
         window.location.replace(url);
       }
@@ -690,6 +694,7 @@ class MintResultsDetail extends PolymerElement {
 
     //Run the method publish run of WINGS
     registerDataset(){
+      this.set("loading", true);
       var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
       var run_id = this._getExportUrl(this.config.wings.internal_server, this.userid, this.routeData.domain, this.runid)
       this.$.runpublishAjax.url = runurl;
@@ -697,6 +702,7 @@ class MintResultsDetail extends PolymerElement {
       this.$.runpublishAjax.data = "run_id=" + encodeURIComponent(run_id)
       this.$.runpublishAjax.raw = true;
       this.$.runpublishAjax.fetch();
+      }
     }
 }
 
