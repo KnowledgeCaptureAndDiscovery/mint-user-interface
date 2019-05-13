@@ -4,6 +4,9 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/iron-ajax/iron-ajax.js';
+
 
 import './mint-icons.js';
 import './mint-ajax.js';
@@ -170,6 +173,8 @@ class MintResultsDetail extends PolymerElement {
           flex-basis: calc(100% - 5px);
           max-width: calc(100% - 5px);
         }
+        
+  
 
       }
 
@@ -182,6 +187,16 @@ class MintResultsDetail extends PolymerElement {
 
     <mint-ajax id="rundetailAjax" method="POST"
       result="{{runDetail}}"></mint-ajax>
+      
+    <mint-ajax id="runpublishAjax" method="POST"
+    result="{{runPublisher}}"></mint-ajax>
+
+    <iron-ajax 
+    id="getRemoteURL" 
+    url="[[getProvenanceQuery]]"
+    handle-as="json"
+    last-response="{{endpointData}}">
+    </iron-ajax>
 
     <mint-ajax auto result="{{seededTemplate}}"
       url="[[_getSeededTemplateURL(runDetail)]]"></mint-ajax>
@@ -191,7 +206,9 @@ class MintResultsDetail extends PolymerElement {
     <!-- Top toolbar -->
     <div class="toolbar">
       <paper-button>Model Execution : [[_localName(runDetail.execution.originalTemplateId)]]</paper-button>
+      <paper-button>Register Provenance Trace</paper-button>
     </div>
+    
     <div class="outer">
       <loading-screen loading="[[loading]]"></loading-screen>
 
@@ -213,10 +230,10 @@ class MintResultsDetail extends PolymerElement {
             <h3>[[iobinding.type]]</h3>
             <div class="varbindings">
               <template is="dom-repeat" items="[[iobinding.varbindings]]" as="varbinding">
-                <div class="variable">[[varbinding.variable]]</div>
-                <div class="binding">
+                <div class="variable" id=[[varbinding.variable]]>[[varbinding.variable]]</div>
+                <div class="binding" id=[[varbinding.variable]]>
                   <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
-                    <div class="bindingitem">
+                    <div class="bindingitem"  id=[[varbinding.variable]]>
                       <template is="dom-if" if="[[binding.value]]">
                         [[binding.value]]
                       </template>
@@ -225,9 +242,19 @@ class MintResultsDetail extends PolymerElement {
                           href="[[config.wings.server]]/users/[[userid]]/[[routeData.domain]]/data/fetch?data_id=[[_escape(binding.id)]]"
                           ><iron-icon icon="file-download"></iron-icon></a>
                         <template is="dom-if" if="[[!_isEqual(iobinding.type, 'Inputs')]]">
+                        <a value=[[_escape(binding.id)]] title="Publish" href="javascript:void(0)" icon="upload"  on-click="checkProvenanceTrace"><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                            <paper-dialog id="publishModal">
+                                <p>Registering the dataset will automatically register the provenance trace. Are you sure?</p>
+                            <div class="buttons">
+                            <paper-button on-click="registerDataset" dialog-confirm autofocus ">Yes</paper-button></a>
+                              <paper-button dialog-dismiss>No</paper-button>
+                            </div>
+                            </paper-dialog>
+                      
                           <a title="Publish"
                             href="/results/publish/[[routeData.domain]]/[[runid]]/[[varbinding.component]]/[[varbinding.variable]]/[[varbinding.vartype]]/[[_localName(binding.id)]]"
-                            ><iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
+                            &gt;
+                            <iron-icon class="upload" icon="cloud-upload"></iron-icon></a>
                         </template>
                         [[_localName(binding.id)]]
                       </template>
@@ -239,7 +266,7 @@ class MintResultsDetail extends PolymerElement {
           </template>
         </page>
 
-        <page>
+        <page>        
           <!-- Run Log -->
           <div class="scroller">
             <pre>[[_getRunLog(runDetail.execution)]]</pre>
@@ -276,18 +303,40 @@ class MintResultsDetail extends PolymerElement {
       userid: String,
       runid: String,
       route: Object,
+      dataid: String,
+      dataname: String,
       routeData: Object,
       failure: Boolean,
       seededTemplate: Object,
+      provenanceServer: {
+        type: String,
+        value: "http://www.opmw.org/export/resource/WorkflowExecutionArtifact/"
+      },
+      endpointFuseki: {
+        type: String,
+        value: "http://ontosoft.isi.edu:3030/provenance/query"
+      },
+      getProvenanceQuery: {
+        type: String,
+        value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+      },
       expandedTemplate: Object,
       hashedTemplate: {
         type: Object,
         computed: '_hashTemplate(seededTemplate)'
       },
+      endpointData: {
+        type: Object,
+        observer: '_redirectUpload'
+      },
       loading: Boolean,
       runDetail: {
         type: Object,
         observer: '_runDetailSet'
+      },
+      runPublisher: {
+        type: Object,
+        observer: '_publishReady'
       },
       visible: {
         type: Boolean,
@@ -296,19 +345,21 @@ class MintResultsDetail extends PolymerElement {
       section: {
         type: Number,
         observer: '_setSection'
-      }
+      },
+      selectedVar: Object,
     }
   }
 
   static get observers() {
     return [
       '_fetchResults(config, userid, routeData.domain, runid, visible)',
-      '_routePageChanged(routeData.runid)'
+      '_routePageChanged(routeData.runid)',
     ];
   }
 
+
   _getSeededTemplateURL(run) {
-    if(run && run.execution) {
+    if (run && run.execution) {
       var turl = run.execution.originalTemplateId;
       var surl = this.config.wings.server + "/users/" + this.userid +
         "/" + this.routeData.domain + "/workflows/getEditorJSON";
@@ -317,7 +368,7 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _getExpandedTemplateURL(run) {
-    if(run && run.execution) {
+    if (run && run.execution) {
       var turl = run.execution.expandedTemplateId;
       var surl = this.config.wings.server + "/users/" + this.userid +
         "/" + this.routeData.domain + "/workflows/getEditorJSON";
@@ -326,10 +377,10 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _setSection(sectionid) {
-    if(sectionid >= 0) {
+    if (sectionid >= 0) {
       var sections = this.$.sections.querySelectorAll("page");
       var wflow = sections[sectionid].querySelector("wings-workflow");
-      if(wflow)
+      if (wflow)
         wflow.set("visible", true);
     }
   }
@@ -341,9 +392,9 @@ class MintResultsDetail extends PolymerElement {
 
   _hashTemplate(tpl) {
     var producers = {};
-    for(var lid in tpl.template.Links) {
+    for (var lid in tpl.template.Links) {
       var link = tpl.template.Links[lid];
-      if(link.fromNode) {
+      if (link.fromNode) {
         var vname = this._localName(link.variable.id);
         var node = tpl.template.Nodes[link.fromNode.id];
         var producer_name = this._localName(node.componentVariable.binding.id);
@@ -352,9 +403,9 @@ class MintResultsDetail extends PolymerElement {
     }
 
     var types = {};
-    for(var i=0; i<tpl.constraints.length; i++) {
+    for (var i = 0; i < tpl.constraints.length; i++) {
       var cons = tpl.constraints[i];
-      if(cons.predicate.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+      if (cons.predicate.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
         types[this._localName(cons.subject.id)] = this._localName(cons.object.id);
       }
     }
@@ -368,7 +419,7 @@ class MintResultsDetail extends PolymerElement {
   _isEqual(a, b) { return a == b; }
 
   _getAllVariableBindings(variables, tpl) {
-    if(variables && tpl) {
+    if (variables && tpl) {
       return [
         {
           type: "Output Files",
@@ -386,29 +437,35 @@ class MintResultsDetail extends PolymerElement {
     }
   }
 
+
   _getVariableBindings(bindings, tpl) {
-    if(!bindings || !tpl)
+    if (!bindings || !tpl)
       return bindings;
 
     var bhash = {}
     var regex = /.+_(\d{4})/;
-    for(var i=0; i<bindings.length; i++) {
+    for (var i = 0; i < bindings.length; i++) {
       var binding = bindings[i];
       var varname = this._localName(binding.derivedFrom);
       var tvarname = this._localName(binding.id);
       var matches;
-      if(matches = regex.exec(tvarname)) {
-        if(!bhash[varname])
+      if (matches = regex.exec(tvarname)) {
+        if (!bhash[varname])
           bhash[varname] = [];
-        bhash[varname][parseInt(matches[1])-1] = binding.binding;
+        bhash[varname][parseInt(matches[1]) - 1] = binding.binding;
       }
       else {
         bhash[varname] = [binding.binding];
       }
     }
 
+    //varun:
+    //var nbindings = [];
     var ndetails = [];
-    for(var varname in bhash) {
+
+
+
+    for (var varname in bhash) {
       ndetails.push({
         variable: varname,
         vartype: tpl.types[varname],
@@ -417,47 +474,82 @@ class MintResultsDetail extends PolymerElement {
       })
     }
 
-    ndetails.sort(function(a, b) {
-      if(b.bindings.length != a.bindings.length)
+    ndetails.sort(function (a, b) {
+      if (b.bindings.length != a.bindings.length)
         return b.bindings.length - a.bindings.length;
       return b.bindings[0].id ? 1 : -1;
     });
     return ndetails;
   }
 
+  _getVariableProducer(tpl, varname) {
+    var onodeid = null;
+    for (var id in tpl) {
+      if (tpl[id]["hasVariable"] == "#" + varname) {
+        onodeid = tpl[id]["hasOriginNode"];
+      }
+    }
+    if (onodeid) {
+      var cvarid = tpl[onodeid]["hasComponent"];
+      if (cvarid) {
+        var cid = tpl[cvarid]["hasComponentBinding"];
+        return cid.replace(/^.+#/, '');
+      }
+    }
+    return null;
+  }
+
+  _getVariableType(tpl, varname) {
+    var varitem = tpl["#" + varname];
+    if (varitem) {
+      var type = varitem["@type"];
+      if (Array.isArray(type)) {
+        for (var i = 0; i < type.length; i++) {
+          if (!type[i].match(/(Data|Parameter)Variable/)) {
+            type = type[i];
+            break;
+          }
+        }
+      }
+      return type.replace(/^.+#/, '');
+    }
+    return null;
+  }
+
+
   _formatTime(ts) {
-    var date = new Date(ts*1000); //.toISOString().slice(0,19).replace('T', ' ');
+    var date = new Date(ts * 1000); //.toISOString().slice(0,19).replace('T', ' ');
     var seconds = Math.floor((new Date() - date) / 1000);
 
     var interval = Math.floor(seconds / 31536000);
 
     if (interval > 1) {
-        return interval + " years";
+      return interval + " years";
     }
     interval = Math.floor(seconds / 2592000);
     if (interval > 1) {
-        return interval + " months";
+      return interval + " months";
     }
     interval = Math.floor(seconds / 86400);
     if (interval > 1) {
-        return interval + " days";
+      return interval + " days";
     }
     interval = Math.floor(seconds / 3600);
     if (interval > 1) {
-        return interval + " hours";
+      return interval + " hours";
     }
     interval = Math.floor(seconds / 60);
     if (interval > 1) {
-        return interval + " minutes";
+      return interval + " minutes";
     }
     return Math.floor(seconds) + " seconds";
   }
 
   _getRunLog(exec) {
-    if(!exec)
+    if (!exec)
       return;
     var log = "";
-    exec.queue.steps.sort(function(a, b) {
+    exec.queue.steps.sort(function (a, b) {
       if (a.runtimeInfo.startTime != b.runtimeInfo.startTime) {
         return a.runtimeInfo.startTime > b.runtimeInfo.startTime ? 1 : -1;
       } else if (a.runtimeInfo.endTime == null)
@@ -491,22 +583,22 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _routePageChanged(page) {
-    if(page) {
+    if (page) {
       this.runid = page;
       scroll({ top: 0, behavior: 'silent' });
     }
   }
 
   _isSuccessful(status) {
-     return (status == 'SUCCESS');
+    return (status == 'SUCCESS');
   }
 
   _isFailed(status) {
-     return (status == 'FAILURE');
+    return (status == 'FAILURE');
   }
 
   _isRunning(status) {
-     return (status == 'RUNNING');
+    return (status == 'RUNNING');
   }
 
   _checkVisibility(visible) {
@@ -520,11 +612,10 @@ class MintResultsDetail extends PolymerElement {
 
   _fetchResults(config, userid, domain, runid, visible) {
     //this.runDetail = null;
-    if(config && userid && domain && runid && visible) {
-      this.set("loading", true);
+    if (config && userid && domain && runid && visible) {
       var runurl = this._getExportUrl(config.wings.internal_server, userid, domain, runid);
       this.$.rundetailAjax.data = "run_id=" + escape(runurl);
-      this.$.rundetailAjax.url= this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
+      this.$.rundetailAjax.url = this._getRequestUrl(config.wings.server, userid, domain) + "getRunDetails";
       this.$.rundetailAjax.fetch();
       this._setupReloadTimer();
     }
@@ -535,11 +626,11 @@ class MintResultsDetail extends PolymerElement {
 
   _setupReloadTimer() {
     var me = this;
-    window.setTimeout(function() {
-      if(me.userid && me.visible &&
-          (!me.runDetail ||
-            (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
-          )) {
+    window.setTimeout(function () {
+      if (me.userid && me.visible &&
+        (!me.runDetail ||
+          (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
+        )) {
         //console.log("Refreshing run details");
         me.$.rundetailAjax.refresh();
         me._setupReloadTimer();
@@ -548,7 +639,7 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _localName(url) {
-    if(url != null)
+    if (url != null)
       return url.replace(/^.*#/, '');
   }
 
@@ -561,13 +652,58 @@ class MintResultsDetail extends PolymerElement {
   }
 
   _getRequestUrl(server, userid, domain) {
-    return server + "/users/" + userid +  "/" + domain + "/executions/";
+    return server + "/users/" + userid + "/" + domain + "/executions/";
   }
 
   _getExportUrl(server, userid, domain, runid) {
-    return server + "/export/users/" + userid +  "/" + domain + "/executions/"
+    return server + "/export/users/" + userid + "/" + domain + "/executions/"
       + runid + ".owl#" + runid;
   }
+
+  //open modal and get the daid
+  checkProvenanceTrace(e) {
+    this.selectedVar = e.model.varbinding
+    this.dataname = e.currentTarget.parentElement.id
+    this.dataid = this._localName(decodeURIComponent(e.currentTarget.value))
+    this.shadowRoot.querySelector('#publishModal').open()
+  }
+  //go to grlc and query the remote url
+  //todo: get provencanceServer and endponintFuseki from config
+  _publishReady() {
+    var fileURI = this.provenanceServer + this.runid + '_' + this.dataname
+    var params = { exec: fileURI, endpoint: this.endpointFuseki };
+    this.$.getRemoteURL.params = params
+    this.$.getRemoteURL.generateRequest();
+  }
+
+  //When we get the information about the remote url, redirect
+  _redirectUpload() {
+    var url = window.location.href.replace('results/detail/', 'results/publish/')
+
+    url += '/' + this.selectedVar.component + '/' + this.selectedVar.variable + '/' + this.selectedVar.vartype + '/' + this.dataid;
+
+    if (this.endpointData["results"]["bindings"] == 0) {
+      window.location.replace(url);
+    }
+    else {
+      var value = this.endpointData["results"]["bindings"][0]["result"].value
+      url = url + "?remoteURL=" + value
+      window.location.replace(url);
+    }
+  }
+
+  //Run the method publish run of WINGS
+  registerDataset() {
+    this.set("loading", true);
+    var runurl = this._getRequestUrl(this.config.wings.server, this.userid, this.routeData.domain) + "publishRun";
+    var run_id = this._getExportUrl(this.config.wings.internal_server, this.userid, this.routeData.domain, this.runid)
+    this.$.runpublishAjax.url = runurl;
+    this.$.runpublishAjax.method = "POST";
+    this.$.runpublishAjax.data = "run_id=" + encodeURIComponent(run_id)
+    this.$.runpublishAjax.raw = true;
+    this.$.runpublishAjax.fetch();
+  }
+
 }
 
 customElements.define(MintResultsDetail.is, MintResultsDetail);
