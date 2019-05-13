@@ -314,11 +314,11 @@ class MintResultsDetail extends PolymerElement {
       },
       endpointFuseki: {
         type: String,
-        value: "http://ontosoft.isi.edu:3030/provenance/query"
+        value: "https://endpoint.mint.isi.edu/provenance/query"
       },
       getProvenanceQuery: {
         type: String,
-        value: "http://ontosoft.isi.edu:8001/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
+        value: "https://query.mint.isi.edu/api/mintproject/MINT-ProvenanceQueries/getPublishUri"
       },
       expandedTemplate: Object,
       hashedTemplate: {
